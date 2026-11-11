@@ -1,0 +1,5 @@
+- [Ask before widening scope](ask-before-widening-scope.md) — don't change lab behaviour beyond the request without asking
+- [Code viewer no spoilers](code-viewer-no-spoilers.md) — level-tag vuln blocks, strip inline payload comments, as we rework each vuln
+- [Level-aware hints](level-aware-hints.md) — hints per selected level, progressively guide building the payload
+- [Vuln rework checklist](vuln-rework-checklist.md) — the standard to apply/verify per vulnerability; full list in docs/VULN_REWORK_CHECKLIST.md
+- [Verification storage in DB](verification-storage-in-db.md) — verify status moving from file to a seeded DB table; batch plan in docs/VULN_LEVEL_PLAN.md

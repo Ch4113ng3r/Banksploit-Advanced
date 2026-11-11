@@ -1,0 +1,53 @@
+# Local environment — never commit real secrets
+.env
+
+# Dependencies / build artifacts
+/vendor/
+node_modules/
+
+# MySQL data (if ever bind-mounted)
+/data/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
+# Local teaching / instructor material — not for the public repo
+# (case must match exactly — GitHub's filesystem is case-sensitive)
+REPRODUCTION.html
+REPRODUCTION.md
+SessionContent-Flow.txt
+SpotTheVuln.html
+TEACHING_JOURNEY_AUTH.html
+TEACHING_JOURNEY_AUTH.md
+TeachingGuide.html
+XSS-Stored-Demo.txt
+ShiftLeftSecurity.html
+EthicalHackingLifecycle.html
+
+# Personal scratch notes & lab answer keys — never publish
+Flow.txt
+Info.txt
+
+# Local runtime state (secrets, PID files, logs)
+.local/
+
+# Editor / tooling local state
+.claude/
+
+# Offensive tooling & wordlists — not for the public repo
+tools/
+
+# Teaching slides — not for the public repo
+CyberSecurityCareers.html
+ImpactOfCodingDecisions.html
+InputValidation.html
+OutputEncoding.html
+LeastPrivilege.html
+SecureErrorHandling.html
+SecretsManagement.html
+LanguageAgnosticBestPractices.html
+best-practices.jpg

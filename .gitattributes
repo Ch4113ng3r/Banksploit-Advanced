@@ -1,0 +1,9 @@
+# Force LF in the repo; Git converts on checkout/commit
+* text=auto eol=lf
+
+# Explicitly mark binary files
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.pdf binary
