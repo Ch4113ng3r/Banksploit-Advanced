@@ -1,0 +1,190 @@
+{
+ "_meta": {
+  "description": "Participant-facing hints controlled by the instructor. Each vuln can have a hint with a title, description, and enabled flag. When enabled=true, participants see the hint banner on pages where the vuln is active.",
+  "managed_by": "Superadmin panel at /hints"
+ },
+ "global_enabled": true,
+ "hints": {
+  "auth.g1": {
+   "enabled": true,
+   "title": "SQL Injection \u2014 Login Bypass",
+   "description": "The Customer ID is concatenated into the login SQL query, so crafted input can change the query logic and bypass the password check. Goal: sign in as your own account without the password.",
+   "levels": [
+    {
+     "subtitle": "Level 0 \u00b7 classic injection",
+     "steps": [
+      "Your Customer ID goes straight into the SQL query. Type a single quote <code>&#39;</code> in it and submit \u2014 a database error confirms the input is injectable.",
+      "You do not need the password: comment out the rest of the query so only your Customer ID is checked. MySQL&#39;s line comment is <code>--</code> followed by a space.",
+      "Use your own Customer ID, then <code>&#39; -- </code> with a trailing space, and any password: <code>&lt;yourID&gt;&#39; -- </code>"
+     ]
+    },
+    {
+     "subtitle": "Level 1 \u00b7 comments blocked",
+     "steps": [
+      "The single quote still errors, so injection works \u2014 but comment tokens (<code>--</code>, <code>#</code>, <code>/*</code>) and <code>UNION</code> are now filtered out.",
+      "If you cannot comment the password check away, make the condition true for your row another way \u2014 a boolean <code>OR</code> is not blocked.",
+      "Close the string and OR in a always-true test; the query&#39;s own trailing quote balances yours: <code>&lt;yourID&gt;&#39; OR &#39;1&#39;=&#39;1</code>"
+     ]
+    },
+    {
+     "subtitle": "Level 2 \u00b7 blind + brackets",
+     "steps": [
+      "No error is shown now (blind). The query also wraps the ID check in parentheses, with the password check OUTSIDE the brackets.",
+      "A plain comment leaves an unbalanced <code>)</code> and silently fails; a bare <code>OR</code> cannot get past the password check outside the parentheses. You must close the bracket first.",
+      "Close the parenthesis, then comment out the rest: <code>&lt;yourID&gt;&#39;) -- </code> (trailing space)"
+     ]
+    }
+   ]
+  },
+  "auth.l10": {
+   "enabled": true,
+   "title": "Brute-Force Attack (OTP)",
+   "description": "When a system uses short numeric codes (like OTPs) without rate limiting or lockout, an attacker can systematically try every possible combination. With only 10,000 possibilities and no throttle, automation discovers the code in seconds.\r\nAfter SQLi login, use the brute-force script in the lab code panel to find the OTP. When successful, a flag modal automatically appears with your flag ready to copy."
+  },
+  "auth.l11": {
+   "enabled": true,
+   "title": "OTP in Response Body (2FA Leak)",
+   "description": "The 4-digit login OTP is exposed to the client instead of staying server-side, so you can recover it without the victim&#39;s phone. Look at the script /public/js/otp-validation.js.",
+   "levels": [
+    {
+     "subtitle": "Level 0 \u00b7 plaintext",
+     "steps": [
+      "The OTP is a second factor \u2014 it should only reach your phone. But the page may hand it to the browser. It is <b>not</b> in the HTML; look at the scripts the page loads.",
+      "Open DevTools \u2192 <b>Network</b> or <b>Sources</b> and inspect <code>/public/js/otp-validation.js</code> \u2014 it carries a per-session <code>SESSION_DATA</code> object.",
+      "The OTP is in plain text in the <code>_otp</code> field of <code>SESSION_DATA</code>, and the <b>flag is right beside it in plain text</b> in <code>_flag</code>. Read the OTP to log in and read the flag directly \u2014 at this level nothing is hidden."
+     ]
+    },
+    {
+     "subtitle": "Level 1 \u00b7 predictable from a seed",
+     "steps": [
+      "There is no <code>_otp</code> anymore \u2014 but <code>SESSION_DATA</code> leaks a <code>_seed</code> (the OTP token&#39;s id) and your <code>_uid</code> (user id). Why would the client need those?",
+      "The OTP is <b>derived</b> from those two values (same inputs \u2192 same OTP). In CTF the <code>_algo</code> field hints the formula.",
+      "OTP = <b>first 8 hex chars of <code>sha256(_seed + _uid)</code> read as an integer, last 4 digits</b> (i.e. <code>% 10000</code>). <b>Concatenate <code>_seed</code> and <code>_uid</code> as strings</b> (not numeric addition), SHA-256 it, take the first 8 hex chars, <code>parseInt(hex, 16) % 10000</code>, zero-pad to 4. (Full one-liner is in the vuln matrix.) Then <b>decrypt the flag</b>: it is sealed in <code>_flag_enc</code> (flag XOR sha256(OTP)) \u2014 unseal it with the OTP you recovered."
+     ]
+    },
+    {
+     "subtitle": "Level 2 \u00b7 secrets in response headers",
+     "steps": [
+      "The JS body has no OTP, no seed, no hash now \u2014 only breadcrumbs. Look where else a response can carry data: the <b>HTTP response headers</b> of <code>/public/js/otp-validation.js</code> (DevTools \u2192 Network \u2192 that request \u2192 Response Headers).",
+      "Two custom headers are set: <code>X-Otp-Check</code> (a <code>sha256</code> of the OTP) and <code>X-Flag-Enc</code> (the sealed flag). A hash is one-way\u2026 but the OTP is only 4 digits \u2014 10,000 possibilities.",
+      "Brute-force it: hash every code <code>0000</code>\u2013<code>9999</code> with SHA-256 and compare to <code>X-Otp-Check</code> until it matches. (Full console snippet is in the vuln matrix \u2014 read headers via <code>fetch(...).headers.get()</code>.) Then <b>decrypt the flag</b>: <code>flag = base64decode(X-Flag-Enc) xor sha256(otp)</code>."
+     ]
+    }
+   ]
+  },
+  "auth.l12": {
+   "enabled": true,
+   "title": "JWT Forgery (forge \u2192 access)",
+   "description": "The app trusts a JWT carried in the browser-readable access_token cookie (or Authorization: Bearer). Forge one with role:admin to escalate without the signing key.",
+   "levels": [
+    {
+     "subtitle": "Level 0 \u00b7 signature not verified",
+     "steps": [
+      "A JWT has three base64url parts: header.payload.signature. The payload holds your <code>role</code>. The token is in the <code>access_token</code> cookie \u2014 decode it.",
+      "At this level the server only checks that a signature segment is <b>present</b> \u2014 it never verifies the HMAC. So you can change the payload and leave the signature as-is.",
+      "Set the payload to <code>role:admin</code> / <code>sub:ADMIN001</code>, re-encode, keep <b>any</b> signature string, and write it back as the <code>access_token</code> cookie. (Skeleton in the vuln matrix.)"
+     ]
+    },
+    {
+     "subtitle": "Level 1 \u00b7 alg:none",
+     "steps": [
+      "Keeping the old signature no longer works \u2014 the HMAC is checked now. Look at the header's <code>alg</code> field instead.",
+      "If <code>alg</code> is <code>none</code>, the server treats the token as unsigned and skips signature verification entirely.",
+      "Header <code>{\"alg\":\"none\",\"typ\":\"JWT\"}</code>, admin payload, <b>empty</b> signature (trailing dot). (Skeleton in the vuln matrix.)"
+     ]
+    },
+    {
+     "subtitle": "Level 2 \u00b7 case-sensitive alg check",
+     "steps": [
+      "Plain <code>alg:none</code> is rejected now \u2014 but the reject check and the accept check don't agree on casing.",
+      "Only the exact lowercase <code>none</code> is blocked; a differently-cased value still reaches the unsigned-accept path.",
+      "Use <code>{\"alg\":\"None\"}</code> (or <code>NONE</code>) with an empty signature. (Skeleton in the vuln matrix.)"
+     ]
+    }
+   ]
+  },
+  "statements.l1": {
+   "enabled": true,
+   "title": "IDOR (Insecure Direct Object Reference)",
+   "description": "The server uses a client-supplied identifier to fetch records but does NOT verify that the requesting user owns that resource. Changing the identifier to another user's value exposes their data.\r\nModify the account_id parameter in the URL to access other users' statements. When you view an account that doesn't belong to you, a flag modal appears automatically."
+  },
+  "transfer.l1": {
+   "enabled": true,
+   "title": "IDOR (Insecure Direct Object Reference)",
+   "description": "Client-side restrictions (disabled fields, hidden inputs, readonly attributes) are cosmetic \u2014 they do NOT enforce security. The server must verify ownership on every request. Manipulate the 'from_account_number' field in the transfer form to transfer from another user's account.\r\nWhen you successfully transfer from an account you don't own, a flag modal appears automatically."
+  },
+  "statements.g2": {
+   "enabled": true,
+   "title": "SQL Injection (Data Extraction)",
+   "description": "The Statements search box folds your term straight into a WHERE clause (remarks LIKE '%...%'), so a crafted term becomes SQL and can read other tables. Your flag is a per-user value stored only in the ctf_flags table (columns flag + username, where username is your Customer ID); the query returns 7 columns.",
+   "levels": [
+    {
+     "subtitle": "Level 0 · raw term (in-band & error-based)",
+     "steps": [
+      "Use the <b>Search (remarks)</b> box on Statements. The term goes into <code>... remarks LIKE '%&lt;you&gt;%'</code>, so a single quote ends the string and the rest runs as SQL.",
+      "Confirm it is injectable: search <code>x' AND '1'='1</code> (rows) versus <code>x' AND '1'='2</code> (none). The query has <b>7</b> columns.",
+      "Dump in-band with UNION — put the flag in the <b>Remarks</b> column, because the <b>Date</b> column is truncated to 10 chars (it would show just <code>BANKSPLOIT</code>): <code>%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags-- </code>. Each row then shows a Customer ID (Date) and its flag (Remarks) — read the one matching <b>your</b> Customer ID.",
+      "Or error-based (raw SQL errors are shown at L0): <code>x' AND extractvalue(1,concat(0x7e,(SELECT flag FROM ctf_flags WHERE username='&lt;your id&gt;')))-- </code> — the flag appears inside the error message.",
+      "Submit your own flag in Flag Submission."
+     ]
+    },
+    {
+     "subtitle": "Level 1 · keyword blacklist (bypass the filter)",
+     "steps": [
+      "A filter now strips <code>union</code>, <code>select</code> and the comment tokens <code>--</code> <code>#</code> <code>/* */</code> from the term — in a <b>single</b> pass — and SQL errors are hidden, so a plain <code>' UNION SELECT ...</code> comes back empty and looks un-injectable.",
+      "The single pass is the flaw: <b>nest</b> the keyword so removing the inner word rebuilds it — <code>UNIunionON</code>, <code>SELselectECT</code> (empty inline comments <code>uni/**/on</code> work too).",
+      "Comments are stripped, so you cannot finish with <code>-- </code>; <b>balance the quote</b> instead by ending the payload with <code>' OR '%'='</code> (or <code>WHERE '%'='</code>).",
+      "Full dump: <code>%' UNIunionON SELselectECT username,flag,3,4,5,6,7 FROM ctf_flags WHERE '%'='</code> — Customer ID in the Date column, flag in Remarks, same as L0.",
+      "Submit your own flag."
+     ]
+    },
+    {
+     "subtitle": "Level 2 · UNION blocked (boolean-blind)",
+     "steps": [
+      "Now <code>union</code> is stripped <b>repeatedly</b> (nesting cannot rebuild it) and errors are hidden — no in-band channel and no error channel. But <code>AND</code>, sub-selects and quotes still reach the query, so you read the flag one character at a time.",
+      "The oracle is “do my own rows come back?”: <code>house%' AND 1=1-- </code> returns rows (true), <code>house%' AND 1=2-- </code> returns none (false).",
+      "Extract char by char: <code>house%' AND SUBSTRING((SELECT flag FROM ctf_flags WHERE username='&lt;your id&gt;'),1,1)='B'-- </code> — rows mean the 1st character is <code>B</code>. Walk positions 1…23 across the charset (the flag looks like <code>BANKSPLOIT{...}</code>).",
+      "Automate it in practice — e.g. sqlmap <code>--technique=B</code> on the <code>q</code> parameter, or a short script. The flag never appears on screen; you reconstruct it.",
+      "Submit the reconstructed flag."
+     ]
+    }
+   ]
+  },
+  "statements.g9": {
+   "enabled": true,
+   "title": "OS Command Injection",
+   "description": "When the application passes user-controlled input to a system shell command (via exec, system, passthru, etc.), shell metacharacters like semicolons or backticks can break out of the intended command and execute arbitrary OS commands on the server.\r\nThe flag is written to a file named flag_g9_*.txt"
+  },
+  "auth.l25": {
+   "enabled": true,
+   "title": "Session Puzzling (forgot-password takeover)",
+   "description": "The forgot-password journey tracks progress in session state that is not bound to the user it was earned for, so recovery progress for one account can be reused to take over another.",
+   "levels": [
+    {
+     "subtitle": "Level 0 \u00b7 auth key overloaded at step 1",
+     "steps": [
+      "Open <code>/forgot-password</code>. The first step only asks for a <b>Customer ID</b> \u2014 no password, OTP or security questions yet.",
+      "Step 1 only asks for a <b>Customer ID</b> \u2014 submit one that is not yours.",
+      "Entering the Customer ID already writes a full <b>authenticated</b> session for that user, before any OTP or questions. Just browse to <code>/dashboard</code> \u2014 you are them. Capture the flag from the modal (you are signed in as the victim)."
+     ]
+    },
+    {
+     "subtitle": "Level 1 \u00b7 recovery stage carries across users",
+     "steps": [
+      "The flow has four pages (Customer ID \u2192 OTP \u2192 questions \u2192 reset). Progress is stored in the session as <code>recovery_stage</code>, and the target account as <code>recovery_uid</code>.",
+      "Complete the whole flow for <b>your own</b> account (you know its OTP and answers) until you reach the <b>Set a new password</b> page \u2014 now <code>recovery_stage = 2</code>.",
+      "Open the first page <code>/forgot-password</code> in a <b>new tab</b> (same session) and submit a <b>victim's</b> Customer ID. It overwrites <code>recovery_uid</code> but leaves <code>recovery_stage</code> at 2.",
+      "Go to <code>/forgot-password/reset</code> \u2014 it now serves the <b>victim's</b> reset page with no OTP and no questions. Set their password to take over. The flag is keyed to your own account."
+     ]
+    },
+    {
+     "subtitle": "Level 2 \u00b7 stale verification state",
+     "steps": [
+      "Same shape as Level 1: reach the reset page legitimately with your own account, then swap in a victim's Customer ID on the step-1 page in another tab.",
+      "The earned recovery state is still not bound to the exact account that earned it, so the reset page opens for the swapped-in victim \u2014 drive it to <code>/forgot-password/reset</code> and set their password."
+     ]
+    }
+   ]
+  }
+ }
+}

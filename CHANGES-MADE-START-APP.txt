@@ -1,0 +1,188 @@
+================================================================================
+  BEFORE vs AFTER — start-app.ps1 Changes
+================================================================================
+
+FILE: start-app.ps1
+FUNCTION: Run-Migrations (lines 220-234 → 220-248)
+
+════════════════════════════════════════════════════════════════════════════
+BEFORE (Hardcoded - Only 1 migration):
+════════════════════════════════════════════════════════════════════════════
+
+function Run-Migrations {
+    Write-Info "Running database migrations..."
+
+    $migrationFile = Join-Path $SqlDir "migration-add-username-to-ctf-flags.sql"
+    if (Test-Path $migrationFile) {
+        Write-Info "  Running migration: migration-add-username-to-ctf-flags.sql..."
+        try {
+            $MysqlBin = "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe"
+            & cmd /c "`"$MysqlBin`" -u $DbUser -p$DbPass -h 127.0.0.1 --protocol=TCP $DbName < `"$migrationFile`"" 2>&1 | Where-Object { $_ -notmatch "Warning|Duplicate" }
+            Write-OK "Migrations applied"
+        } catch {
+            Write-Warn "Migration had issues (may have already been applied)"
+        }
+    }
+}
+
+PROBLEMS:
+  ❌ Only runs migration-add-username-to-ctf-flags.sql (hardcoded)
+  ❌ Skips migration-add-replacement-status.sql
+  ❌ Requires code modification to add new migrations
+  ❌ Not scalable for future migrations
+
+
+════════════════════════════════════════════════════════════════════════════
+AFTER (Auto-Discovery - All migrations):
+════════════════════════════════════════════════════════════════════════════
+
+function Run-Migrations {
+    Write-Info "Running database migrations..."
+
+    $MysqlBin = "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe"
+
+    # Find all migration files (migration-*.sql) and run them in order
+    $migrationFiles = Get-ChildItem -Path $SqlDir -Filter "migration-*.sql" | Sort-Object Name
+
+    if ($migrationFiles.Count -eq 0) {
+        Write-Warn "No migration files found in $SqlDir"
+        return
+    }
+
+    foreach ($file in $migrationFiles) {
+        Write-Info "  Running migration: $($file.Name)..."
+        try {
+            & cmd /c "`"$MysqlBin`" -u $DbUser -p$DbPass -h 127.0.0.1 --protocol=TCP $DbName < `"$($file.FullName)`"" 2>&1 | Where-Object { $_ -notmatch "Warning" }
+            if ($LASTEXITCODE -eq 0) {
+                Write-OK "  ✓ $($file.Name) applied"
+            } else {
+                Write-Warn "  [!] $($file.Name) - may already exist or had issues"
+            }
+        } catch {
+            Write-Warn "  [!] Migration $($file.Name) had issues: $_"
+        }
+    }
+
+    Write-OK "All migrations completed"
+}
+
+IMPROVEMENTS:
+  ✅ Auto-discovers all migration-*.sql files
+  ✅ Runs in alphabetical order
+  ✅ Handles replacement_status migration automatically
+  ✅ Handles username migration automatically
+  ✅ Future migrations added automatically (just drop file in sql/)
+  ✅ Better error handling and reporting
+  ✅ Scalable and future-proof
+
+
+════════════════════════════════════════════════════════════════════════════
+EXECUTION FLOW COMPARISON:
+════════════════════════════════════════════════════════════════════════════
+
+BEFORE:
+  .\start-app.ps1 setup
+    └── Setup-FirstTime
+        ├── Load-Schema (all *.sql files)
+        ├── Run-Migrations
+        │   └── Only runs: migration-add-username-to-ctf-flags.sql ❌
+        │       Missing: migration-add-replacement-status.sql ❌
+        ├── Initialize-Flags
+        └── Done (incomplete setup!)
+
+    Result: User replacement system doesn't work (missing column)
+
+
+AFTER:
+  .\start-app.ps1 setup
+    └── Setup-FirstTime
+        ├── Load-Schema (all *.sql files)
+        ├── Run-Migrations
+        │   ├── Discovers: migration-add-replacement-status.sql ✅
+        │   ├── Discovers: migration-add-username-to-ctf-flags.sql ✅
+        │   ├── Runs in order (alphabetically)
+        │   └── All migrations completed ✅
+        ├── Initialize-Flags
+        └── Done (complete setup!)
+
+    Result: Full application ready to use!
+
+
+════════════════════════════════════════════════════════════════════════════
+WHAT THIS FIXES:
+════════════════════════════════════════════════════════════════════════════
+
+Problem:                          Solution:
+─────────────────────────────────────────────────────────────────────────
+"setup doesn't add replacement    Auto-discovery finds and runs it
+_status column"
+
+"Need to manually run migration   Now automatic as part of setup
+
+"Adding new migrations requires   Just create migration-*.sql file,
+code changes"                     it auto-runs next setup
+
+"Only runs 1 migration"           Runs ALL migrations in order
+
+"Migrations hardcoded in code"    Discovered from sql/ directory
+
+
+════════════════════════════════════════════════════════════════════════════
+TESTING:
+════════════════════════════════════════════════════════════════════════════
+
+To verify it works:
+
+1. Drop database:
+   mysql -u root -p"root" -e "DROP DATABASE banksploit;"
+
+2. Run setup:
+   .\start-app.ps1 setup
+
+3. Watch output for both migrations:
+   [*] Running database migrations...
+     [*] Running migration: migration-add-replacement-status.sql...
+     [OK] ✓ migration-add-replacement-status.sql applied
+     [*] Running migration: migration-add-username-to-ctf-flags.sql...
+     [OK] ✓ migration-add-username-to-ctf-flags.sql applied
+   [OK] All migrations completed
+
+4. Verify database:
+   mysql -u banksploit -pbanksploit_pass banksploit -e \
+     "SHOW COLUMNS FROM users WHERE Field='replacement_status';"
+
+   Should return:
+   replacement_status | ENUM('available','replaced') | YES
+
+
+════════════════════════════════════════════════════════════════════════════
+SCALABILITY:
+════════════════════════════════════════════════════════════════════════════
+
+To add a NEW migration in the future:
+
+1. Create: sql/migration-add-something-new.sql
+2. Add SQL code to the file
+3. Run: .\start-app.ps1 setup
+4. Done! Auto-discovered and applied.
+
+No code changes needed!
+
+
+════════════════════════════════════════════════════════════════════════════
+SUMMARY OF CHANGE:
+════════════════════════════════════════════════════════════════════════════
+
+Lines changed:      14 → 27 (13 lines added)
+Function affected:  Run-Migrations
+File modified:      start-app.ps1
+Backward compatible: YES (same behavior for existing migrations)
+Future migrations:   NOW SUPPORTED (auto-discovered)
+
+Key change:
+  FROM: & Get-ChildItem hardcoded filenames
+  TO:   Get-ChildItem -Filter "migration-*.sql" | Sort-Object Name
+
+Result: .\start-app.ps1 setup now deploys COMPLETE application!
+
+================================================================================

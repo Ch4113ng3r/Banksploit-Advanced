@@ -1,0 +1,225 @@
+================================================================================
+COMPLETE LIST OF ALL FILES CHANGED
+================================================================================
+
+NAME OF ALL FILES CHANGED (6 TOTAL):
+
+1. src/templates/layout.php
+2. src/modules/admin/vault.php
+3. src/modules/admin/index.php
+4. src/modules/admin/audit.php
+5. src/modules/auth/ctf_vault.php
+6. src/index.php
+
+================================================================================
+DETAILED FILE INFORMATION
+================================================================================
+
+FILE 1: src/templates/layout.php
+  Type: MODIFIED
+  Location: Main template file
+  Changes:
+    - Line 45-48: Added $adminNav array with submenu items
+    - Line 119-127: Added admin submenu rendering logic
+  Lines Changed: +15 lines
+  Functionality: Navigation structure for admin pages
+
+FILE 2: src/modules/admin/vault.php
+  Type: NEW (CREATED)
+  Location: New admin page
+  Size: ~400 lines
+  Functionality: Displays captured JWT flag to users
+  Features:
+    - Vulnerability info card
+    - User access details
+    - Flag display with copy button
+    - Technical breakdown section
+    - Submission instructions
+    - Links to training lab
+
+FILE 3: src/modules/admin/index.php
+  Type: MODIFIED
+  Location: Admin dashboard page
+  Changes:
+    - Line 103: Changed 'active' key from 'admin' to 'admin-dashboard'
+  Lines Changed: 1 line
+  Functionality: Nav highlighting for admin dashboard
+
+FILE 4: src/modules/admin/audit.php
+  Type: MODIFIED
+  Location: Audit log page
+  Changes:
+    - Line 111: Changed 'active' key from 'admin' to 'admin-audit'
+  Lines Changed: 1 line
+  Functionality: Nav highlighting for audit log page
+
+FILE 5: src/modules/auth/ctf_vault.php
+  Type: MODIFIED
+  Location: API vault endpoint
+  Changes:
+    - Line 60-61: Added response headers for modal display
+      * header('X-CTF-Flag: ' . $flag);
+      * header('X-CTF-Vuln-Id: auth.l12');
+  Lines Changed: +2 lines
+  Functionality: Enables flag modal display
+
+FILE 6: src/index.php
+  Type: MODIFIED
+  Location: Router configuration
+  Changes:
+    - Line 162: Added new router entry
+      * $router->get('/admin/vault', 'modules/admin/vault.php');
+  Lines Changed: +1 line
+  Functionality: Routes /admin/vault URL to handler
+
+================================================================================
+SUMMARY STATISTICS
+================================================================================
+
+Total Files: 6
+  - New Files: 1
+  - Modified Files: 5
+  
+Total Lines: ~420
+  - Added: ~420 lines
+  - Modified: 3 lines
+  
+File Sizes:
+  - layout.php additions: ~500 chars
+  - vault.php: ~9.2 KB
+  - Other mods: ~100 chars total
+  
+Code Complexity:
+  - HTML/CSS: 70% (vault page)
+  - PHP: 20% (logic)
+  - JavaScript: 10% (copy button)
+
+================================================================================
+DEPLOYMENT PROCEDURE
+================================================================================
+
+1. Backup existing files:
+   cp src/templates/layout.php src/templates/layout.php.backup
+   cp src/modules/admin/index.php src/modules/admin/index.php.backup
+   cp src/modules/admin/audit.php src/modules/admin/audit.php.backup
+   cp src/modules/auth/ctf_vault.php src/modules/auth/ctf_vault.php.backup
+   cp src/index.php src/index.php.backup
+
+2. Deploy changes:
+   - Copy all 6 modified/new files to production
+   - Verify file permissions (644 for PHP files)
+
+3. Restart application:
+   - Stop: ./stop-app.ps1
+   - Start: ./start-app.ps1
+
+4. Verify deployment:
+   - Test forged JWT access
+   - Check admin tab visibility
+   - Verify vault page loads
+   - Test flag copy function
+   - Submit test flag
+
+5. Rollback (if needed):
+   - Restore from backup
+   - Delete src/modules/admin/vault.php (if new)
+   - Restart application
+
+================================================================================
+WHAT EACH FILE DOES
+================================================================================
+
+layout.php
+  - Main HTML template for all pages
+  - Controls sidebar navigation
+  - NEW: Shows admin submenu when viewing admin pages
+
+vault.php (NEW)
+  - Displays captured JWT flag
+  - Shows vulnerability details
+  - Provides copy button
+  - Beautiful UI with Tailwind CSS
+
+index.php (admin/index.php)
+  - Admin dashboard page
+  - Shows stats and user list
+  - Updated nav key for highlighting
+
+audit.php (admin/audit.php)
+  - Audit log viewer
+  - Searchable table
+  - Updated nav key for highlighting
+
+ctf_vault.php (auth/ctf_vault.php)
+  - API endpoint /api/v1/auth/vault
+  - Accepts Bearer JWT
+  - Returns flag in JSON
+  - NEW: Also sends response headers for modal
+
+index.php (router)
+  - Routes all URL requests
+  - NEW: Added /admin/vault route
+
+================================================================================
+TESTING VERIFICATION
+================================================================================
+
+Test Case 1: Admin Tab Visibility
+  Steps:
+    1. Forge JWT with role=admin
+    2. Load application
+    3. Check sidebar
+  Expected: Admin tab visible with submenu
+
+Test Case 2: Vault Page Access
+  Steps:
+    1. With forged JWT, click Admin → CTF Vault
+    2. Navigate to /admin/vault
+  Expected: Page loads, flag displayed
+
+Test Case 3: Flag Copy
+  Steps:
+    1. On vault page
+    2. Click "Copy Flag" button
+  Expected: Flag copied to clipboard
+
+Test Case 4: Flag Submission
+  Steps:
+    1. Copy flag
+    2. Go to /training
+    3. Submit flag
+  Expected: +300 points awarded
+
+Test Case 5: Access Control
+  Steps:
+    1. Login as regular user
+    2. Try to access /admin/vault
+  Expected: Redirected to /dashboard, blocked
+
+================================================================================
+SUPPORT REFERENCE
+================================================================================
+
+If Issues Occur:
+  1. Check PHP errors: tail -f /var/log/apache2/error.log
+  2. Check database: Test connection to MySQL
+  3. Check routes: Verify /admin/vault in index.php
+  4. Check permissions: chmod 644 for PHP files
+  5. Restart app: ./stop-app.ps1 && ./start-app.ps1
+
+Quick Diagnostics:
+  - Vault page not loading: Check admin_guard() enforcement
+  - Admin tab not showing: Check role in user data
+  - Flag not displaying: Check Flags::generate() function
+  - Copy button not working: Check JavaScript errors
+
+Rollback Steps:
+  1. Restore backup files
+  2. Delete src/modules/admin/vault.php
+  3. Restart application
+  4. Verify functionality
+
+================================================================================
+
+All files documented and ready for deployment.
+

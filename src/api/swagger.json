@@ -1,0 +1,112 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "BankSploit API",
+    "version": "1.0.0",
+    "description": "API for the BankSploit intentionally-vulnerable banking training app. Most endpoints branch on the configured vulnerability level (0 = fully vulnerable, 3 = secure). For training only."
+  },
+  "servers": [{ "url": "/", "description": "Current host" }],
+  "tags": [
+    { "name": "Auth" }, { "name": "Accounts" }, { "name": "Profile" },
+    { "name": "Transfer" }, { "name": "Beneficiaries" }, { "name": "Cards" },
+    { "name": "Loans" }, { "name": "Payments" }, { "name": "Admin" },
+    { "name": "Training" }, { "name": "Debug" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": { "type": "apiKey", "in": "cookie", "name": "PHPSESSID" },
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    },
+    "schemas": {
+      "Error": { "type": "object", "properties": { "ok": { "type": "boolean", "example": false }, "error": { "type": "string" } } },
+      "LoginRequest": { "type": "object", "required": ["customer_id", "password"], "properties": { "customer_id": { "type": "string", "example": "BS100234" }, "password": { "type": "string", "example": "password123" } } },
+      "OtpRequest": { "type": "object", "required": ["otp"], "properties": { "otp": { "type": "string", "example": "123456" } } },
+      "Account": { "type": "object", "properties": { "id": { "type": "integer" }, "account_number": { "type": "string" }, "account_type": { "type": "string", "enum": ["savings", "current", "fd"] }, "balance": { "type": "string" } } },
+      "TransferRequest": { "type": "object", "required": ["from_account_id", "beneficiary_id", "amount"], "properties": { "from_account_id": { "type": "integer", "example": 1 }, "beneficiary_id": { "type": "integer", "example": 1 }, "amount": { "type": "number", "example": 1000 }, "mode": { "type": "string", "enum": ["IMPS", "NEFT", "RTGS"] }, "remarks": { "type": "string" } } }
+    }
+  },
+  "security": [{ "sessionCookie": [] }, { "bearerAuth": [] }],
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": { "tags": ["Auth"], "summary": "Authenticate (step 1) and receive an OTP challenge", "security": [], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" } } } }, "responses": { "200": { "description": "OTP required (at vuln levels the OTP is leaked in the body)" }, "401": { "description": "Invalid credentials", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } } } }
+    },
+    "/api/v1/auth/verify-otp": {
+      "post": { "tags": ["Auth"], "summary": "Verify the login OTP and receive a JWT", "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OtpRequest" } } } }, "responses": { "200": { "description": "Authenticated; returns JWT + user" }, "401": { "description": "Invalid OTP" } } }
+    },
+    "/api/v1/auth/register": {
+      "post": { "tags": ["Auth"], "summary": "Register a new account (mass-assignment vuln at low levels)", "security": [], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" }, "email": { "type": "string" }, "phone": { "type": "string" }, "password": { "type": "string" }, "role": { "type": "string", "description": "Should not be client-settable" } } } } } }, "responses": { "201": { "description": "Created" }, "400": { "description": "Validation error" } } }
+    },
+    "/api/v1/auth/forgot-password": {
+      "post": { "tags": ["Auth"], "summary": "Request a password reset token", "security": [], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "email": { "type": "string" } } } } } }, "responses": { "200": { "description": "Reset requested (predictable token at low levels)" } } }
+    },
+    "/api/v1/auth/reset-password": {
+      "post": { "tags": ["Auth"], "summary": "Consume a reset token and set a new password", "security": [], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" }, "password": { "type": "string" } } } } } }, "responses": { "200": { "description": "Password updated" }, "400": { "description": "Invalid token" } } }
+    },
+    "/api/v1/accounts": {
+      "get": { "tags": ["Accounts"], "summary": "List accounts (IDOR: returns all accounts at low levels)", "responses": { "200": { "description": "Account list", "content": { "application/json": { "schema": { "type": "object", "properties": { "ok": { "type": "boolean" }, "accounts": { "type": "array", "items": { "$ref": "#/components/schemas/Account" } } } } } } } } }
+    },
+    "/api/v1/accounts/{id}": {
+      "get": { "tags": ["Accounts"], "summary": "Account detail (IDOR at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Account" }, "404": { "description": "Not found / access denied" } } }
+    },
+    "/api/v1/accounts/{id}/statement": {
+      "get": { "tags": ["Accounts"], "summary": "Account statement (SQLi in date/search filter at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }, { "name": "from_date", "in": "query", "schema": { "type": "string" } }, { "name": "to_date", "in": "query", "schema": { "type": "string" } }, { "name": "q", "in": "query", "schema": { "type": "string" } }], "responses": { "200": { "description": "Transactions" } } }
+    },
+    "/api/v1/accounts/{id}/export": {
+      "get": { "tags": ["Accounts"], "summary": "CSV export (path traversal via ?file= at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }, { "name": "file", "in": "query", "schema": { "type": "string" } }], "responses": { "200": { "description": "CSV" } } }
+    },
+    "/api/v1/accounts/{id}/export-pdf": {
+      "get": { "tags": ["Accounts"], "summary": "PDF export (command injection via ?filename= at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }, { "name": "filename", "in": "query", "schema": { "type": "string" }, "example": "stmt.pdf;id;" }], "responses": { "200": { "description": "Converter output" } } }
+    },
+    "/api/v1/profile": {
+      "get": { "tags": ["Profile"], "summary": "Get profile (IDOR via ?user_id at low levels)", "parameters": [{ "name": "user_id", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "Profile" } } },
+      "put": { "tags": ["Profile"], "summary": "Update profile (mass assignment at low levels)", "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" }, "email": { "type": "string" }, "phone": { "type": "string" }, "address": { "type": "string" }, "role": { "type": "string" } } } } } }, "responses": { "200": { "description": "Updated" } } }
+    },
+    "/api/v1/transfer/initiate": { "post": { "tags": ["Transfer"], "summary": "Begin a transfer (wizard step 1)", "requestBody": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TransferRequest" } } } }, "responses": { "200": { "description": "Initiated" } } } },
+    "/api/v1/transfer/confirm": { "post": { "tags": ["Transfer"], "summary": "Confirm the transfer (wizard step 2)", "responses": { "200": { "description": "Confirmed" } } } },
+    "/api/v1/transfer/verify-otp": { "post": { "tags": ["Transfer"], "summary": "Verify transfer OTP (wizard step 3)", "requestBody": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OtpRequest" } } } }, "responses": { "200": { "description": "Verified" } } } },
+    "/api/v1/transfer/execute": { "post": { "tags": ["Transfer"], "summary": "Execute the transfer (step skipping / IDOR / negative amount / race at low levels)", "requestBody": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TransferRequest" } } } }, "responses": { "200": { "description": "Executed" }, "400": { "description": "Error" } } } },
+    "/api/v1/transfer/{id}/receipt": { "get": { "tags": ["Transfer"], "summary": "Transfer receipt (IDOR at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Receipt" }, "404": { "description": "Not found" } } } },
+    "/api/v1/transfer/history": { "get": { "tags": ["Transfer"], "summary": "Transfer history (SQLi in ?q at low levels)", "parameters": [{ "name": "q", "in": "query", "schema": { "type": "string" } }], "responses": { "200": { "description": "History" } } } },
+    "/api/v1/beneficiaries": {
+      "get": { "tags": ["Beneficiaries"], "summary": "List beneficiaries", "responses": { "200": { "description": "List" } } },
+      "post": { "tags": ["Beneficiaries"], "summary": "Add beneficiary (cooling-period bypass at low levels)", "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" }, "account_number": { "type": "string" }, "ifsc_code": { "type": "string" }, "bank_name": { "type": "string" }, "cooling_period_until": { "type": "string" } } } } } }, "responses": { "201": { "description": "Created" } } }
+    },
+    "/api/v1/beneficiaries/{id}": {
+      "get": { "tags": ["Beneficiaries"], "summary": "Beneficiary detail (IDOR at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Beneficiary" } } },
+      "delete": { "tags": ["Beneficiaries"], "summary": "Delete beneficiary", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Deleted" } } }
+    },
+    "/api/v1/cards": { "get": { "tags": ["Cards"], "summary": "List cards (plaintext PAN+CVV at low levels)", "responses": { "200": { "description": "Cards" } } } },
+    "/api/v1/cards/{id}": { "get": { "tags": ["Cards"], "summary": "Card detail (IDOR + plaintext at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Card" } } } },
+    "/api/v1/cards/{id}/block": { "put": { "tags": ["Cards"], "summary": "Block/unblock card", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "blocked": { "type": "boolean" } } } } } }, "responses": { "200": { "description": "OK" } } } },
+    "/api/v1/cards/{id}/pin": { "put": { "tags": ["Cards"], "summary": "Change PIN (no old PIN required at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "old_pin": { "type": "string" }, "new_pin": { "type": "string" } } } } } }, "responses": { "200": { "description": "OK" } } } },
+    "/api/v1/cards/{id}/limit": { "put": { "tags": ["Cards"], "summary": "Set spending limit (mass assignment at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "spending_limit": { "type": "number" } } } } } }, "responses": { "200": { "description": "OK" } } } },
+    "/api/v1/loans/apply": { "post": { "tags": ["Loans"], "summary": "Apply for a loan (parameter tampering at low levels)", "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "loan_type": { "type": "string", "enum": ["personal", "home"] }, "amount": { "type": "number" }, "tenure_months": { "type": "integer" }, "interest_rate": { "type": "number" } } } } } }, "responses": { "201": { "description": "Applied" } } } },
+    "/api/v1/loans": { "get": { "tags": ["Loans"], "summary": "List loans", "responses": { "200": { "description": "Loans" } } } },
+    "/api/v1/loans/{id}": { "get": { "tags": ["Loans"], "summary": "Loan detail", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Loan" } } } },
+    "/api/v1/loans/{id}/documents": { "post": { "tags": ["Loans"], "summary": "Upload doc / import XML / fetch URL (webshell, XXE, SSRF at low levels)", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "xml": { "type": "string" }, "document_url": { "type": "string" } } } } } }, "responses": { "200": { "description": "Result" } } } },
+    "/api/v1/loans/emi-calculator": { "get": { "tags": ["Loans"], "summary": "EMI calculator", "parameters": [{ "name": "amount", "in": "query", "schema": { "type": "number" } }, { "name": "interest_rate", "in": "query", "schema": { "type": "number" } }, { "name": "tenure_months", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "EMI" } } } },
+    "/api/v1/payments/pay": { "post": { "tags": ["Payments"], "summary": "Pay a bill (stored XSS in biller_name at low levels)", "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "from_account_id": { "type": "integer" }, "biller_type": { "type": "string" }, "biller_name": { "type": "string" }, "amount": { "type": "number" } } } } } }, "responses": { "201": { "description": "Paid" } } } },
+    "/api/v1/payments/history": { "get": { "tags": ["Payments"], "summary": "Payment history", "responses": { "200": { "description": "History" } } } },
+    "/api/v1/admin/users": { "get": { "tags": ["Admin"], "summary": "List users (broken function-level authz at low levels)", "responses": { "200": { "description": "Users" }, "403": { "description": "Admin role required" } } } },
+    "/api/v1/admin/users/{id}/suspend": { "post": { "tags": ["Admin"], "summary": "Suspend/unsuspend user", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" } } } },
+    "/api/v1/admin/users/{id}/unlock": { "post": { "tags": ["Admin"], "summary": "Unlock user", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" } } } },
+    "/api/v1/admin/users/{id}/reset-password": { "post": { "tags": ["Admin"], "summary": "Reset a user's password", "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "Temp password" } } } },
+    "/api/v1/admin/audit-log": { "get": { "tags": ["Admin"], "summary": "Audit log (SQLi in filters at low levels)", "parameters": [{ "name": "action", "in": "query", "schema": { "type": "string" } }, { "name": "user", "in": "query", "schema": { "type": "string" } }], "responses": { "200": { "description": "Entries" } } } },
+    "/api/v1/admin/config": {
+      "get": { "tags": ["Admin"], "summary": "Get system config", "responses": { "200": { "description": "Config" } } },
+      "put": { "tags": ["Admin"], "summary": "Update system config", "responses": { "200": { "description": "Updated" } } }
+    },
+    "/api/v1/admin/vuln-config": { "put": { "tags": ["Admin"], "summary": "Set vulnerability levels", "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "module": { "type": "string" }, "vuln": { "type": "string" }, "level": { "type": "integer" } } } } } }, "responses": { "200": { "description": "Applied" } } } },
+    "/api/v1/training/hints": { "get": { "tags": ["Training"], "summary": "Get a progressive hint", "parameters": [{ "name": "vuln_id", "in": "query", "schema": { "type": "string" } }, { "name": "level", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "Hint" } } } },
+    "/api/v1/training/progress": {
+      "get": { "tags": ["Training"], "summary": "Get progress + skill radar", "responses": { "200": { "description": "Progress" } } },
+      "post": { "tags": ["Training"], "summary": "Update a vuln's status", "responses": { "200": { "description": "Updated" } } }
+    },
+    "/api/v1/training/submit-flag": { "post": { "tags": ["Training"], "summary": "Submit a CTF flag", "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "flag": { "type": "string" } } } } } }, "responses": { "200": { "description": "Result" } } } },
+    "/api/v1/training/set-level": { "post": { "tags": ["Training"], "summary": "Set difficulty level (all or specific vulns)", "security": [], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "level": { "type": "integer" }, "all": { "type": "boolean" }, "vulns": { "type": "array", "items": { "type": "string" } } } } } } }, "responses": { "200": { "description": "Applied" } } } },
+    "/api/v1/training/requests": { "get": { "tags": ["Training"], "summary": "Recent request log (inspector feed)", "responses": { "200": { "description": "Requests" } } } },
+    "/api/v1/debug/config": { "get": { "tags": ["Debug"], "summary": "Full app config incl. DB creds + JWT secret (low levels only; 404 when secure)", "security": [], "responses": { "200": { "description": "Config dump" }, "404": { "description": "Disabled (secure)" } } } },
+    "/api/v1/debug/phpinfo": { "get": { "tags": ["Debug"], "summary": "phpinfo() (low levels only)", "security": [], "responses": { "200": { "description": "phpinfo HTML" }, "404": { "description": "Disabled" } } } },
+    "/api/v1/debug/whoami": { "get": { "tags": ["Debug"], "summary": "Current user with all internal fields", "responses": { "200": { "description": "User" } } } }
+  }
+}

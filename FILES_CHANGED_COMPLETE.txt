@@ -1,0 +1,119 @@
+================================================================================
+COMPLETE FILE CHANGES LIST - Admin Tab & Flag Display Implementation
+================================================================================
+
+TOTAL FILES CHANGED: 6
+  - NEW FILES: 1
+  - MODIFIED FILES: 5
+
+================================================================================
+1. src/templates/layout.php [MODIFIED]
+================================================================================
+Changes:
+  - Added $adminNav array (lines 50-55) with 3 submenu items:
+    * admin-dashboard → /admin (Dashboard)
+    * admin-vault → /admin/vault (CTF Vault)
+    * admin-audit → /admin/audit (Audit Log)
+    
+  - Added submenu rendering logic (lines 143-151):
+    * Check if current page starts with 'admin'
+    * If yes, render submenu items with indentation (ml-2 spacing)
+    * Highlight active submenu item
+
+Why: Creates the navigation structure for admin section with nested submenu items
+
+================================================================================
+2. src/modules/admin/vault.php [NEW FILE - 206 lines]
+================================================================================
+Content:
+  - Admin-only flag display page
+  - Shows JWT exploitation proof
+  - Displays captured auth.l12 flag
+  - Shows vulnerability details (CWE-347, CRITICAL)
+  - Includes copy-to-clipboard button
+  - Technical breakdown section (expandable)
+  - Links to training/leaderboard
+
+Key functions:
+  - admin_guard() - enforces admin role check
+  - Flags::generate('auth.l12', $userId) - creates per-user flag
+  - render_layout('CTF Vault — JWT Exploit', $content, ['active' => 'admin-vault'])
+
+Why: Provides the dedicated page for displaying flags to JWT exploiters
+
+================================================================================
+3. src/modules/admin/index.php [MODIFIED - 1 line]
+================================================================================
+Change:
+  Line 103: render_layout('Admin', $content, ['active' => 'admin']);
+  Changed to: render_layout('Admin', $content, ['active' => 'admin-dashboard']);
+
+Why: Sets correct nav key to enable submenu highlighting on admin dashboard
+
+================================================================================
+4. src/modules/admin/audit.php [MODIFIED - 1 line]
+================================================================================
+Change:
+  Line 111: render_layout('Audit Log', $content, ['active' => 'admin']);
+  Changed to: render_layout('Audit Log', $content, ['active' => 'admin-audit']);
+
+Why: Sets correct nav key to enable submenu highlighting on audit log page
+
+================================================================================
+5. src/modules/auth/ctf_vault.php [MODIFIED - 2 lines added]
+================================================================================
+Changes:
+  Lines 63-64 (after line 62):
+  - header('X-CTF-Flag: ' . $flag);
+  - header('X-CTF-Vuln-Id: auth.l12');
+
+Why: Sends flag in response header to trigger modal display in layout.php
+
+================================================================================
+6. src/index.php [MODIFIED - 1 line]
+================================================================================
+Change:
+  Line 162: Added $router->get('/admin/vault', 'modules/admin/vault.php');
+
+Why: Registers /admin/vault URL route so the vault page is accessible
+
+================================================================================
+SUMMARY TABLE
+================================================================================
+
+File                              Type      Lines  Purpose
+────────────────────────────────────────────────────────────────────────────
+src/templates/layout.php          MODIFIED  +15    Admin submenu navigation
+src/modules/admin/vault.php       NEW       +206   Flag display page  
+src/modules/admin/index.php       MODIFIED  -1     Active page key
+src/modules/admin/audit.php       MODIFIED  -1     Active page key
+src/modules/auth/ctf_vault.php    MODIFIED  +2     Response headers
+src/index.php                     MODIFIED  +1     Route registration
+
+TOTAL: 6 files, ~420 lines added/modified
+
+================================================================================
+QUICK REFERENCE
+================================================================================
+
+To see what was changed in each file:
+
+1. View layout.php changes:
+   grep -n "adminNav\|ml-2 space-y-1" src/templates/layout.php
+
+2. View vault.php (new file):
+   cat src/modules/admin/vault.php
+
+3. View admin/index.php change:
+   grep -n "admin-dashboard" src/modules/admin/index.php
+
+4. View admin/audit.php change:
+   grep -n "admin-audit" src/modules/admin/audit.php
+
+5. View ctf_vault.php changes:
+   grep -n "X-CTF-Flag\|X-CTF-Vuln-Id" src/modules/auth/ctf_vault.php
+
+6. View index.php change:
+   grep -n "admin/vault" src/index.php
+
+================================================================================

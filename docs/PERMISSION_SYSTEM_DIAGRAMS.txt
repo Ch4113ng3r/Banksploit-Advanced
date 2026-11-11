@@ -1,0 +1,492 @@
+================================================================================
+Command Injection Permission System - Technical Diagrams
+================================================================================
+
+DIAGRAM 1: MULTI-USER FLAG FILE ISOLATION
+================================================================================
+
+Physical Filesystem:
+
+/tmp/
+├── flag_g9_1.txt          User 1's unique flag
+│   └── Content: "CTF{FLAG_FOR_USER_1}"
+│
+├── flag_g9_2.txt          User 2's unique flag
+│   └── Content: "CTF{FLAG_FOR_USER_2}"
+│
+└── flag_g9_3.txt          User 3's unique flag
+    └── Content: "CTF{FLAG_FOR_USER_3}"
+
+
+Access Control Matrix:
+
+        │ flag_g9_1.txt │ flag_g9_2.txt │ flag_g9_3.txt │
+─────────┼────────────────┼────────────────┼────────────────┤
+User 1   │       ✓        │       ✗        │       ✗        │
+User 2   │       ✗        │       ✓        │       ✗        │
+User 3   │       ✗        │       ✗        │       ✓        │
+─────────┴────────────────┴────────────────┴────────────────┘
+
+Legend:
+  ✓ = Can read (owns the file)
+  ✗ = Cannot read (permission denied)
+
+================================================================================
+DIAGRAM 2: EXPLOIT FLOW WITH PERMISSION CHECKING
+================================================================================
+
+User 1 (ID=1) Submits Exploit:
+
+┌─────────────────────────────────────────────────────────────┐
+│ Statements → Download PDF                                   │
+│ Filename: statement.pdf;cat /tmp/flag_g9_1.txt;             │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│ PHP Handler (statements/_shared.php)                        │
+│                                                              │
+│ 1. Get current user: $userId = 1                            │
+│ 2. Create flag file: /tmp/flag_g9_1.txt                     │
+│    Content: Flags::generate('statements.g9', 1)             │
+│ 3. Instantiate Sandbox: new Sandbox(null, 1)                │
+│ 4. Execute: $sandbox->exec("wkhtmltopdf ... ; cat ... ;")   │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Sandbox Execution (Sandbox.php)                             │
+│                                                              │
+│ $uid = 1 (passed from handler)                              │
+│ Command: "wkhtmltopdf ... ; cat /tmp/flag_g9_1.txt ;"       │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                ┌───────────┴───────────┐
+                │                       │
+                ▼                       ▼
+    ┌──────────────────────┐  ┌────────────────────────┐
+    │ Execute wkhtmltopdf  │  │ Execute "cat" command  │
+    │ (generates PDF)      │  │ (reads flag file)      │
+    └──────────────────────┘  └──────────┬─────────────┘
+                                         │
+                                         ▼
+                            ┌────────────────────────────────┐
+                            │ Check: isOtherUserFlagFile()   │
+                            │                                │
+                            │ Filename: "flag_g9_1.txt"      │
+                            │ Regex extract: user_id = 1     │
+                            │ Compare: 1 === 1 ? YES         │
+                            │ Result: NOT blocked            │
+                            └──────────┬─────────────────────┘
+                                       │
+                                       ▼
+                            ┌────────────────────────────────┐
+                            │ File readable: YES             │
+                            │ Output: "CTF{FLAG_FOR_USER_1}" │
+                            └──────────┬─────────────────────┘
+                                       │
+                                       ▼
+                            ┌────────────────────────────────┐
+                            │ Return output to client        │
+                            └────────────────────────────────┘
+
+
+User 1 Tries to Read User 2's Flag (BLOCKED):
+
+┌─────────────────────────────────────────────────────────────┐
+│ Statements → Download PDF                                   │
+│ Filename: statement.pdf;cat /tmp/flag_g9_2.txt;             │
+│                           ↑                                 │
+│                      Wrong user ID!                         │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Sandbox Execution (Sandbox.php)                             │
+│ $uid = 1 (current user)                                     │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            ▼
+                 ┌──────────────────────────┐
+                 │ Execute "cat" command    │
+                 └──────────┬───────────────┘
+                            │
+                            ▼
+                 ┌──────────────────────────┐
+                 │ Check: isOtherUserFlagFile()
+                 │                          │
+                 │ Filename: "flag_g9_2.txt"│
+                 │ Regex extract: user_id=2 │
+                 │ Compare: 2 !== 1         │
+                 │ Result: BLOCKED!         │
+                 └──────────┬───────────────┘
+                            │
+                            ▼
+                 ┌──────────────────────────┐
+                 │ Output:                  │
+                 │ "cat: /tmp/flag_g9_2.txt:│
+                 │  Permission denied\n"    │
+                 └──────────────────────────┘
+
+================================================================================
+DIAGRAM 3: CONCURRENT USER SCENARIO
+================================================================================
+
+Timeline of 3 users exploiting simultaneously:
+
+Time │ User 1 (ID=1)              │ User 2 (ID=2)              │ User 3 (ID=3)
+─────┼────────────────────────────┼────────────────────────────┼──────────────────
+T=0s │ [Click Download PDF]       │                            │
+     │ Create /tmp/flag_g9_1.txt  │                            │
+     │ Sandbox: uid=1             │                            │
+     │                            │ [Click Download PDF]       │
+     │                            │ Create /tmp/flag_g9_2.txt  │
+     │                            │ Sandbox: uid=2             │
+     │                            │                            │ [Click Download PDF]
+     │                            │                            │ Create /tmp/flag_g9_3.txt
+     │                            │                            │ Sandbox: uid=3
+─────┼────────────────────────────┼────────────────────────────┼──────────────────
+T=1s │ Enter filename:            │ Enter filename:            │ Enter filename:
+     │ .../flag_g9_1.txt;         │ .../flag_g9_2.txt;         │ .../flag_g9_3.txt;
+     │ Execute in Sandbox(1)      │ Execute in Sandbox(2)      │ Execute in Sandbox(3)
+─────┼────────────────────────────┼────────────────────────────┼──────────────────
+T=2s │ isOtherUserFlagFile(...)   │ isOtherUserFlagFile(...)   │ isOtherUserFlagFile(...)
+     │ Extract: 1                 │ Extract: 2                 │ Extract: 3
+     │ Compare: 1 === 1? YES      │ Compare: 2 === 2? YES      │ Compare: 3 === 3? YES
+     │ NOT blocked ✓              │ NOT blocked ✓              │ NOT blocked ✓
+     │ Output: FLAG_1             │ Output: FLAG_2             │ Output: FLAG_3
+─────┼────────────────────────────┼────────────────────────────┼──────────────────
+T=3s │ Delete flag file           │ Delete flag file           │ Delete flag file
+     │                            │                            │
+     │ [Try to read User 2's flag]│ [Try to read User 3's flag]│
+     │ cat /tmp/flag_g9_2.txt;    │ cat /tmp/flag_g9_3.txt;    │
+     │ isOtherUserFlagFile(...)   │ isOtherUserFlagFile(...)   │
+     │ Extract: 2                 │ Extract: 3                 │
+     │ Compare: 2 !== 1? BLOCKED  │ Compare: 3 !== 2? BLOCKED  │
+     │ Permission denied ✗        │ Permission denied ✗        │
+─────┴────────────────────────────┴────────────────────────────┴──────────────────
+
+Result: ✓ Each user got their own flag, ✓ No cross-contamination
+
+================================================================================
+DIAGRAM 4: PERMISSION CHECK LOGIC FLOW
+================================================================================
+
+                    ┌─────────────────────────────┐
+                    │ User tries: cat flag_file   │
+                    └────────────┬────────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────────┐
+                    │ Get basename: flag_file     │
+                    └────────────┬────────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────────┐
+                    │ Regex match:                │
+                    │ /^flag_g9_(\d+)\.txt$/     │
+                    └────────────┬────────────────┘
+                                 │
+                    ┌────────────┴────────────┐
+                    │                         │
+                    ▼                         ▼
+          ┌──────────────────┐    ┌────────────────────┐
+          │ MATCHES PATTERN  │    │ NOT flag file      │
+          │ (flag_g9_X.txt)  │    │ (other filename)   │
+          └────────┬─────────┘    └────────┬───────────┘
+                   │                       │
+                   ▼                       ▼
+          ┌──────────────────┐    ┌────────────────────┐
+          │ Extract X:       │    │ isOtherUserFlagFile()
+          │ $m[1] = digit    │    │ returns FALSE      │
+          └────────┬─────────┘    │ (not a flag file)  │
+                   │              └────────┬───────────┘
+                   ▼                       │
+          ┌──────────────────┐             │
+          │ Compare:         │             │
+          │ X === $this->uid?│             │
+          └──┬────────────┬──┘             │
+             │            │               │
+          YES│            │NO             │
+             ▼            ▼               │
+    ┌──────────────┐ ┌────────────────┐   │
+    │ SAME USER    │ │ DIFFERENT USER │   │
+    │ return FALSE │ │ return TRUE    │   │
+    │ NOT blocked  │ │ BLOCKED!       │   │
+    │ File readable│ │ Permission     │   │
+    │ ✓ Success    │ │ denied ✗       │   │
+    └──────────────┘ └────────────────┘   │
+             │                 │          │
+             └─────────┬───────┴──────────┘
+                       │
+                       ▼
+            ┌──────────────────────┐
+            │ Return to cmdCat()   │
+            │ and other commands   │
+            └──────────────────────┘
+
+================================================================================
+DIAGRAM 5: SANDBOX ARCHITECTURE
+================================================================================
+
+┌────────────────────────────────────────────────────────────────────┐
+│                      BankSploit Application                        │
+└───────────────────────┬────────────────────────────────────────────┘
+                        │
+                        ▼
+┌────────────────────────────────────────────────────────────────────┐
+│              Statement Export (statements/_shared.php)             │
+│                                                                    │
+│  1. Get user ID: $userId = 1                                       │
+│  2. Create flag: /tmp/flag_g9_1.txt                               │
+│  3. Instantiate: new Sandbox(null, 1)                             │
+│  4. Execute: $sandbox->exec($cmd)                                 │
+└───────────────────────┬────────────────────────────────────────────┘
+                        │
+                        ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                  Sandbox (src/core/Sandbox.php)                    │
+│                                                                    │
+│  Private Fields:                                                   │
+│    $root = "/tmp"          ← Filesystem boundary                  │
+│    $uid = 1                ← User ID for permission checks        │
+│                                                                    │
+│  Public Methods:                                                   │
+│    exec($cmdLine)          ← Entry point                          │
+│                                                                    │
+│  Permission System:                                                │
+│    isOtherUserFlagFile()   ← Check flag file ownership            │
+│                                                                    │
+│  Command Support:                                                  │
+│    cat, ls, head, tail, wc, echo, id, whoami, pwd,               │
+│    uname, hostname, wkhtmltopdf                                    │
+└───────────────────────┬────────────────────────────────────────────┘
+                        │
+                        ▼
+                  ┌─────────────────┐
+                  │ Filesystem      │
+                  │ /tmp/           │
+                  ├─────────────────┤
+                  │ flag_g9_1.txt   │ ← Only visible/readable by U1
+                  │ flag_g9_2.txt   │ ← Only visible/readable by U2
+                  │ flag_g9_3.txt   │ ← Only visible/readable by U3
+                  │ ...             │
+                  └─────────────────┘
+
+================================================================================
+DIAGRAM 6: PERMISSION CHECK IN ALL COMMANDS
+================================================================================
+
+Command Implementations and Where Permission Check Occurs:
+
+cmdCat (line 117-141)
+  ├─ For each file argument
+  │  ├─ Resolve path
+  │  ├─ [CHECK] isOtherUserFlagFile(basename) → BLOCK if true
+  │  ├─ Check file exists
+  │  └─ Return content
+
+cmdLs (line 143-180)
+  ├─ Determine target directory
+  ├─ Scan directory
+  ├─ For each entry
+  │  ├─ [CHECK] isOtherUserFlagFile(entry) → SKIP if true
+  │  └─ Add to listing
+  └─ Return listing
+
+cmdHead (line 206-241)
+  ├─ Parse arguments
+  ├─ For each file
+  │  ├─ Resolve path
+  │  ├─ [CHECK] isOtherUserFlagFile(basename) → BLOCK if true
+  │  ├─ Check file exists
+  │  └─ Return first N lines
+
+cmdTail (line 243-278)
+  ├─ Parse arguments
+  ├─ For each file
+  │  ├─ Resolve path
+  │  ├─ [CHECK] isOtherUserFlagFile(basename) → BLOCK if true
+  │  ├─ Check file exists
+  │  └─ Return last N lines
+
+cmdWc (line 280-307)
+  ├─ Get file list
+  ├─ For each file
+  │  ├─ Resolve path
+  │  ├─ [CHECK] isOtherUserFlagFile(basename) → BLOCK if true
+  │  ├─ Check file exists
+  │  └─ Count lines/words/bytes
+
+Pattern: ✓ All file access operations check permissions before reading
+
+================================================================================
+DIAGRAM 7: REQUEST FLOW - COMPLETE EXECUTION PATH
+================================================================================
+
+1. USER INTERACTION
+   ┌──────────────────────────────────────┐
+   │ Statements page loaded               │
+   │ [Download PDF] button visible        │
+   │ User enters: statement.pdf;          │
+   │             cat /tmp/flag_g9_1.txt;  │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+2. HTTP REQUEST
+   ┌──────────────────────────────────────┐
+   │ POST /api/v1/accounts/5/export-pdf   │
+   │ Parameters:                          │
+   │   filename=statement.pdf;cat ...;    │
+   │   [CSRF token, session cookie, etc]  │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+3. AUTHENTICATION
+   ┌──────────────────────────────────────┐
+   │ Auth middleware validates session    │
+   │ Extracts user: ID=1, Name=Alice      │
+   │ Stores in $user global               │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+4. HANDLER INVOCATION
+   ┌──────────────────────────────────────┐
+   │ File: statements/_shared.php         │
+   │ Function: stmt_export_pdf()          │
+   │ Parameters:                          │
+   │   $engine (TrainingEngine object)    │
+   │   $filename (user input)             │
+   │   $html (statement HTML)             │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+5. FLAG FILE CREATION
+   ┌──────────────────────────────────────┐
+   │ if (engine->isVulnerable(...g9)) {   │
+   │   $userId = 1                        │
+   │   $flagFile = "/tmp/flag_g9_1.txt"   │
+   │   file_put_contents($flagFile, flag) │
+   │ }                                    │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+6. SANDBOX INSTANTIATION
+   ┌──────────────────────────────────────┐
+   │ $sandbox = new Sandbox(null, 1);     │
+   │            ↑                         │
+   │            └─ User ID passed here    │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+7. COMMAND EXECUTION
+   ┌──────────────────────────────────────┐
+   │ $output = $sandbox->exec($cmd);      │
+   │ Where $cmd =                         │
+   │ "wkhtmltopdf ... statement.pdf;      │
+   │  cat /tmp/flag_g9_1.txt ;"           │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+8. COMMAND PARSING & EXECUTION
+   ┌──────────────────────────────────────┐
+   │ Split on: ; && || |                 │
+   │ Segment 1: wkhtmltopdf [...]         │
+   │ Segment 2: cat /tmp/flag_g9_1.txt    │
+   │ Execute each independently           │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+9. FILE ACCESS WITH PERMISSION CHECK
+   ┌──────────────────────────────────────┐
+   │ cmdCat("/tmp/flag_g9_1.txt")         │
+   │ ├─ Resolve path: /tmp/flag_g9_1.txt  │
+   │ ├─ Check: isOtherUserFlagFile(...)   │
+   │ │  ├─ Pattern match: YES             │
+   │ │  ├─ Extract: 1                     │
+   │ │  ├─ Compare: 1 === 1? YES          │
+   │ │  └─ Return FALSE (NOT blocked)     │
+   │ ├─ File check: exists? YES           │
+   │ └─ Return content: "CTF{...}"        │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+10. OUTPUT ASSEMBLY
+   ┌──────────────────────────────────────┐
+   │ $output = "Generated PDF...\n" +     │
+   │           "CTF{FLAG_CONTENT}\n"      │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+11. CLEANUP
+   ┌──────────────────────────────────────┐
+   │ unlink("/tmp/flag_g9_1.txt");        │
+   │ unlink($tempHtmlFile);               │
+   │ // Flag file ephemeral lifecycle     │
+   └────────────┬─────────────────────────┘
+                │
+                ▼
+12. RESPONSE
+   ┌──────────────────────────────────────┐
+   │ HTTP 200 OK                          │
+   │ Content-Type: text/plain             │
+   │ Body: [combined output from step 10] │
+   │                                      │
+   │ User sees:                           │
+   │ "Generated PDF...\n               │
+   │  CTF{UNIQUE_FLAG_FOR_USER_1}\n"     │
+   └──────────────────────────────────────┘
+
+================================================================================
+DIAGRAM 8: VULNERABILITY WITH ISOLATION
+================================================================================
+
+Without Per-User Flag Isolation:
+
+Timeline 1: Single user (OK)
+  T=0s: User A triggers exploit
+        → /tmp/flag_g9.txt created (ONE flag file!)
+        → User A reads: cat /tmp/flag_g9.txt → SUCCESS
+
+Timeline 2: Multiple users (BROKEN)
+  T=0s: User A triggers exploit
+        → /tmp/flag_g9.txt created
+        → Contains Flag_A
+  T=1s: User B triggers exploit
+        → /tmp/flag_g9.txt OVERWRITTEN
+        → Contains Flag_B (replaced!)
+  T=2s: User A tries to read
+        → cat /tmp/flag_g9.txt
+        → Gets Flag_B (WRONG!) ✗
+  T=3s: User A submits Flag_B
+        → System credits User A with Flag_B exploit
+        → But Flag_B belongs to User B!
+        → CTF integrity BROKEN ✗
+
+
+With Per-User Flag Files (CORRECT):
+
+  T=0s: User A triggers exploit
+        → /tmp/flag_g9_1.txt created
+        → Contains Flag_A_Only
+  T=1s: User B triggers exploit
+        → /tmp/flag_g9_2.txt created
+        → Contains Flag_B_Only (different file!)
+  T=2s: User A tries to read
+        → cat /tmp/flag_g9_1.txt
+        → Gets Flag_A (CORRECT) ✓
+  T=3s: User B tries to read
+        → cat /tmp/flag_g9_2.txt
+        → Gets Flag_B (CORRECT) ✓
+  T=4s: User A tries to read User B's flag
+        → cat /tmp/flag_g9_2.txt
+        → Permission denied (PROTECTED) ✓
+  T=5s: Each user submits their own flag
+        → User A gets credit for Flag_A exploit ✓
+        → User B gets credit for Flag_B exploit ✓
+        → CTF integrity MAINTAINED ✓
+
+================================================================================
+Date: 2026-08-01
+Version: 1.0
+================================================================================

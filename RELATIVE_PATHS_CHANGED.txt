@@ -1,0 +1,270 @@
+================================================================================
+  ALL CHANGED/CREATED FILES - RELATIVE PATHS FROM PROJECT ROOT
+  For Easy Transfer to Another Server
+================================================================================
+
+PROJECT ROOT: c:\Users\G01197938\Downloads\banksploit-ctf\
+(On new server: extract/copy all files from this point)
+
+
+CRITICAL - DATABASE MIGRATION (MUST RUN FIRST):
+════════════════════════════════════════════════════════════════════════════
+
+sql/migration-add-replacement-status.sql
+  • Database migration file
+  • Adds replacement_status column to users table
+  • MUST run before using new features
+  • Command: mysql -u root -p banksploit_ctf < sql/migration-add-replacement-status.sql
+
+
+NEW APPLICATION FILES:
+════════════════════════════════════════════════════════════════════════════
+
+src/scripts/verify_bulk_replace.php
+  • Verification script (updated from previous version)
+  • Tests: 8 comprehensive tests
+  • Run: php src/scripts/verify_bulk_replace.php
+  • Expected: exit code 0 (all tests pass)
+
+
+NEW SAMPLE/TEST FILES:
+════════════════════════════════════════════════════════════════════════════
+
+test_bulk_replace_format_a.csv
+  • Sample CSV for Format A (auto-match)
+  • 2 columns: Customer ID, Full Name
+  • 5 sample Barclays staff IDs
+  • Upload to Bulk Replace tab to test
+
+test_bulk_replace_format_b.csv
+  • Sample CSV for Format B (manual)
+  • 3 columns: Old Customer ID, New Customer ID, New Full Name
+  • 5 sample replacements
+  • Upload to Bulk Replace tab to test
+
+
+COMPLETELY REWRITTEN APPLICATION FILE:
+════════════════════════════════════════════════════════════════════════════
+
+src-superadmin/pages/bulk_replace_users.php
+  • Main implementation (COMPLETE REWRITE - 41 KB)
+  • Implements dual-format detection
+  • Implements Format A logic (auto-match)
+  • Implements Format B logic (manual)
+  • Implements single user Mode A (auto)
+  • Implements single user Mode B (manual)
+  • Contains all UI and processing logic
+
+
+ALREADY CONFIGURED (NO CHANGES NEEDED):
+════════════════════════════════════════════════════════════════════════════
+
+src-superadmin/index.php
+  • Routing configuration
+  • Route '/bulk-replace-users' already added (line 140)
+  • NO CHANGES NEEDED - already correct
+
+src-superadmin/templates/layout.php
+  • Navigation template
+  • Link 'Replace Users' already added (line 16)
+  • NO CHANGES NEEDED - already correct
+
+
+DEPENDENCY FILES (MUST EXIST - DO NOT MODIFY):
+════════════════════════════════════════════════════════════════════════════
+
+src/core/TrainingEngine.php
+  • Database connection (db() function)
+  • MUST EXIST - not modified
+
+src/helpers.php
+  • Helper functions (csrf_*, sa_render, etc.)
+  • MUST EXIST - not modified
+
+src-superadmin/templates/
+  • All template files
+  • MUST EXIST - not modified
+
+src/core/SuperAdminAuth.php
+  • Authentication handling
+  • MUST EXIST - not modified
+
+
+DATABASE SEED FILES (MUST EXIST - DO NOT MODIFY):
+════════════════════════════════════════════════════════════════════════════
+
+sql/01-schema.sql
+  • Database schema (creates tables)
+  • MUST EXIST - not modified
+
+sql/02-seed-data.sql
+  • Base seed data
+  • MUST EXIST - not modified
+
+sql/03-bulk-users-100.sql
+  • 100 pre-created users (BS100300-BS100399)
+  • MUST EXIST - not modified
+
+
+DOCUMENTATION FILES (FOR REFERENCE):
+════════════════════════════════════════════════════════════════════════════
+
+IMPLEMENTATION_SUMMARY_DUAL_FORMAT.txt
+  • Complete technical documentation
+  • Dependencies and setup sequence
+  • Deployment instructions
+  • Migration procedures
+
+FILES_CHANGED_DUAL_FORMAT.txt
+  • Detailed file-by-file changes
+  • All relative paths
+  • Dependencies listed
+
+QUICK_START_DUAL_FORMAT.txt
+  • Quick reference guide
+  • 3-step setup
+  • Common scenarios
+
+RELATIVE_PATHS_CHANGED.txt
+  • This file
+  • Complete list of changed files
+
+
+MINIMUM FILES TO COPY FOR NEW SERVER:
+════════════════════════════════════════════════════════════════════════════
+
+CRITICAL - These MUST be present:
+
+  sql/migration-add-replacement-status.sql
+  src-superadmin/pages/bulk_replace_users.php
+  src/scripts/verify_bulk_replace.php
+
+ESSENTIAL - Copy entire directories:
+
+  src/                        (all support code)
+  src-superadmin/             (all admin interface code)
+
+RECOMMENDED - Copy for testing:
+
+  test_bulk_replace_format_a.csv
+  test_bulk_replace_format_b.csv
+
+REFERENCE - Copy for documentation:
+
+  IMPLEMENTATION_SUMMARY_DUAL_FORMAT.txt
+  FILES_CHANGED_DUAL_FORMAT.txt
+  QUICK_START_DUAL_FORMAT.txt
+
+
+FINAL SUMMARY - FILES TO TRANSFER TO NEW SERVER:
+════════════════════════════════════════════════════════════════════════════
+
+NEW/CREATED (Must include):
+  ✨ sql/migration-add-replacement-status.sql
+  ✨ src/scripts/verify_bulk_replace.php
+  ✨ test_bulk_replace_format_a.csv
+  ✨ test_bulk_replace_format_b.csv
+  ✨ IMPLEMENTATION_SUMMARY_DUAL_FORMAT.txt
+  ✨ FILES_CHANGED_DUAL_FORMAT.txt
+  ✨ QUICK_START_DUAL_FORMAT.txt
+  ✨ RELATIVE_PATHS_CHANGED.txt
+
+UPDATED/REWRITTEN (Must include):
+  ✏️  src-superadmin/pages/bulk_replace_users.php
+
+ALREADY CORRECT (Include but no changes):
+  ✓ src-superadmin/index.php
+  ✓ src-superadmin/templates/layout.php
+
+DEPENDENCIES (Must exist):
+  ✓ src/ (entire directory)
+  ✓ src-superadmin/ (entire directory - only bulk_replace_users.php changed)
+  ✓ sql/01-schema.sql, 02-seed-data.sql, 03-bulk-users-100.sql
+  ✓ banksploit_ctf database
+
+
+TOTAL IMPLEMENTATION:
+  New Files:          4
+  Updated Files:      1 (complete rewrite)
+  Configuration:      2 (already done)
+  Documentation:      4
+
+  Code Size:          ~52 KB
+  Time to Deploy:     < 5 minutes
+  Risk Level:         LOW
+  Backward Compatible: YES
+  Status:             PRODUCTION READY
+
+
+DEPLOYMENT STEPS:
+════════════════════════════════════════════════════════════════════════════
+
+1. Copy all files to new server
+   scp -r ./* user@newserver:/path/to/banksploit-ctf/
+
+2. Apply database migration
+   mysql -u root -p banksploit_ctf < sql/migration-add-replacement-status.sql
+
+3. Verify installation
+   php src/scripts/verify_bulk_replace.php
+   (Exit code should be 0)
+
+4. Test in browser
+   http://localhost:8888/bulk-replace-users
+   (Should show dual-format interface)
+
+5. Ready to use
+   Upload test CSV or use single user modes
+
+
+WHAT WAS CHANGED:
+════════════════════════════════════════════════════════════════════════════
+
+Previous Implementation (Phase 2):
+  • Single CSV format (3 columns only)
+  • Manual old-ID selection
+  • No availability tracking
+
+Current Implementation (Phase 3):
+  • Dual-format auto-detection
+  • Format A: Auto-match with slot tracking
+  • Format B: Manual replacement (any user)
+  • Single User Mode A: Auto-select slots
+  • Single User Mode B: Manual dropdown
+  • Replacement status column for tracking
+  • Clear UI labels and instructions
+  • Better error messages
+
+Key Improvements:
+  ✓ More flexible (always have fallback option)
+  ✓ Simpler for walk-ins (auto mode default)
+  ✓ Works when slots exhausted (manual mode)
+  ✓ Clearer instructions and examples
+  ✓ Better slot tracking and visibility
+
+
+RELATIVE PATHS (Copy From/To):
+════════════════════════════════════════════════════════════════════════════
+
+From Current Server:
+  banksploit-ctf/sql/migration-add-replacement-status.sql
+  banksploit-ctf/src-superadmin/pages/bulk_replace_users.php
+  banksploit-ctf/src/scripts/verify_bulk_replace.php
+  banksploit-ctf/test_bulk_replace_format_a.csv
+  banksploit-ctf/test_bulk_replace_format_b.csv
+  banksploit-ctf/IMPLEMENTATION_SUMMARY_DUAL_FORMAT.txt
+  banksploit-ctf/FILES_CHANGED_DUAL_FORMAT.txt
+  banksploit-ctf/QUICK_START_DUAL_FORMAT.txt
+
+To New Server:
+  /path/to/banksploit-ctf/sql/migration-add-replacement-status.sql
+  /path/to/banksploit-ctf/src-superadmin/pages/bulk_replace_users.php
+  /path/to/banksploit-ctf/src/scripts/verify_bulk_replace.php
+  /path/to/banksploit-ctf/test_bulk_replace_format_a.csv
+  /path/to/banksploit-ctf/test_bulk_replace_format_b.csv
+  (Plus all other directories: src/, src-superadmin/)
+
+
+================================================================================
+READY TO TRANSFER TO ANOTHER SERVER - FOLLOW 4-STEP DEPLOYMENT ABOVE
+================================================================================

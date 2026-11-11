@@ -1,0 +1,289 @@
+===============================================================================
+DETAILED FILE CHANGES: Admin Tab & Flag Display for JWT Exploiters
+===============================================================================
+
+SUMMARY
+───────────────────────────────────────────────────────────────────────────────
+Total Files Changed: 6
+  - Modified: 5 files
+  - New: 1 file
+Total Lines Added/Changed: ~420 lines
+
+───────────────────────────────────────────────────────────────────────────────
+
+1. src/templates/layout.php
+───────────────────────────────────────────────────────────────────────────────
+Status: MODIFIED
+Lines Changed: +15 lines added
+Location: Lines 45-48, 119-127
+
+What Changed:
+  • Added $adminNav array with submenu definition (lines 45-48)
+    - admin-dashboard → /admin
+    - admin-vault → /admin/vault
+    - admin-audit → /admin/audit
+
+  • Added logic to display admin submenu when on admin pages (lines 119-127)
+    - Checks if $active starts with 'admin'
+    - Renders nested navigation items
+    - Only shows when $showAdmin is true
+
+Why:
+  - Creates submenu structure for admin pages
+  - Allows navigation between admin sections
+  - Highlights current active admin page
+
+───────────────────────────────────────────────────────────────────────────────
+
+2. src/modules/admin/vault.php
+───────────────────────────────────────────────────────────────────────────────
+Status: NEW FILE (CREATED)
+Lines: ~400
+Location: New file in src/modules/admin/
+
+What This Does:
+  • Admin-only page displaying JWT exploitation flag
+  • Shows vulnerability information (ID: auth.l12, CWE-347, CRITICAL)
+  • Displays user access method (Real Admin vs JWT Forging)
+  • Shows unique per-user flag (HMAC-generated)
+  • Includes one-click copy button
+  • Expandable technical details section
+  • Next steps for flag submission
+  • Links to Training Lab and Leaderboard
+
+Key Features:
+  - admin_guard() enforces admin role check
+  - Flags::generate('auth.l12', $userId) creates unique flag
+  - Beautiful UI with Tailwind CSS styling
+  - JavaScript copy function for clipboard
+  - Modal display via window.displayFlag()
+  - Mobile responsive layout
+  - Dark theme integrated
+
+───────────────────────────────────────────────────────────────────────────────
+
+3. src/modules/admin/index.php
+───────────────────────────────────────────────────────────────────────────────
+Status: MODIFIED
+Lines Changed: 1 line (line 103)
+Change Type: Key name update
+
+Before:
+  render_layout('Admin', $content, ['active' => 'admin']);
+
+After:
+  render_layout('Admin', $content, ['active' => 'admin-dashboard']);
+
+Why:
+  - Enables admin submenu highlighting
+  - Matches nav item key in layout.php
+  - Improves UX by showing active section
+
+───────────────────────────────────────────────────────────────────────────────
+
+4. src/modules/admin/audit.php
+───────────────────────────────────────────────────────────────────────────────
+Status: MODIFIED
+Lines Changed: 1 line (line 111)
+Change Type: Key name update
+
+Before:
+  render_layout('Audit Log', $content, ['active' => 'admin']);
+
+After:
+  render_layout('Audit Log', $content, ['active' => 'admin-audit']);
+
+Why:
+  - Enables admin submenu highlighting
+  - Matches nav item key in layout.php
+  - Improves UX by showing active section
+
+───────────────────────────────────────────────────────────────────────────────
+
+5. src/modules/auth/ctf_vault.php
+───────────────────────────────────────────────────────────────────────────────
+Status: MODIFIED
+Lines Changed: +2 lines (lines 60-61)
+
+Added:
+  header('X-CTF-Flag: ' . $flag);
+  header('X-CTF-Vuln-Id: auth.l12');
+
+Location: After line 59, before json_response()
+
+Why:
+  - Enables flag modal display in layout.php
+  - X-CTF-Flag header triggers modal with flag
+  - X-CTF-Vuln-Id header identifies vulnerability
+  - JavaScript in layout.php intercepts these headers
+
+───────────────────────────────────────────────────────────────────────────────
+
+6. src/index.php
+───────────────────────────────────────────────────────────────────────────────
+Status: MODIFIED
+Lines Changed: +1 line (line 162)
+
+Added:
+  $router->get('/admin/vault', 'modules/admin/vault.php');
+
+Location: After audit route, before API routes
+
+Why:
+  - Registers /admin/vault URL route
+  - Makes vault page accessible via HTTP GET
+  - Routes to the new admin/vault.php handler
+
+===============================================================================
+QUICK FILE REFERENCE TABLE
+===============================================================================
+
+File                              | Type     | Change | Purpose
+----------------------------------+----------+--------+-----------------------------
+src/templates/layout.php          | Modified | +15    | Navigation template
+src/modules/admin/vault.php       | NEW      | +400   | Flag display page
+src/modules/admin/index.php       | Modified | -1     | Active nav key
+src/modules/admin/audit.php       | Modified | -1     | Active nav key
+src/modules/auth/ctf_vault.php    | Modified | +2     | Response headers
+src/index.php                     | Modified | +1     | Router config
+
+Total: 6 files, ~420 lines added/modified
+
+===============================================================================
+USER EXPERIENCE FLOW
+===============================================================================
+
+1. User forges JWT token with role=admin
+   └─ Token has claims: {sub: "BS100001", role: "admin", alg: "none"}
+
+2. User loads any page with forged JWT
+   ├─ auth()->getCurrentUser() returns user with role=admin
+   ├─ layout.php checks: if (user['role'] === 'admin')
+   └─ Admin tab appears in sidebar [VISIBLE NOW]
+
+3. Admin tab includes submenu with:
+   ├─ Dashboard (/admin)
+   ├─ CTF Vault (/admin/vault) [NEW]
+   └─ Audit Log (/admin/audit)
+
+4. User clicks "CTF Vault"
+   ├─ Browser navigates to /admin/vault
+   ├─ admin_guard() verifies user.role === 'admin'
+   ├─ Flags::generate() creates unique flag
+   └─ Page displays flag with copy button
+
+5. User copies flag and submits at /training
+   ├─ Training lab validates flag
+   ├─ Points awarded: +300
+   └─ Leaderboard updated
+
+===============================================================================
+ARCHITECTURE: HOW ROLE IS PROPAGATED
+===============================================================================
+
+VULNERABLE FLOW (JWT alg:none):
+  Forged JWT: {role: "admin", alg: "none"}
+    ↓
+  auth()->getCurrentUser()
+    ↓
+  jwtUser() verifies JWT
+    ↓
+  verifyJWT() accepts alg:none at vuln level 0
+    ↓
+  Returns: claims with role="admin"
+    ↓
+  auth()->isAdmin() checks: role === "admin" ✓
+    ↓
+  layout.php: $showAdmin = true
+    ↓
+  Admin tab SHOWS [VULNERABILITY IN ACTION]
+
+SECURE FLOW (JWT HS256, level 3):
+  Forged token rejected by verifyJWT()
+    ↓
+  auth()->getCurrentUser() returns null
+    ↓
+  auth()->isAdmin() returns false
+    ↓
+  Admin tab hidden [SECURE]
+
+===============================================================================
+TESTING INSTRUCTIONS
+===============================================================================
+
+Prerequisite:
+  - Start app: ./start-app.ps1 (or your start script)
+  - Verify running on localhost:9443
+
+Test 1: Forge JWT and check admin tab
+  1. Run: python3 get_flag.py BS100001
+  2. Copy the generated token
+  3. In browser console, set:
+     localStorage.setItem('access_token', 'YOUR_TOKEN')
+  4. Refresh page at http://localhost:9443
+  5. VERIFY: Admin tab appears in sidebar
+
+Test 2: Access vault page directly
+  1. With forged JWT cookie/token set
+  2. Navigate to: http://localhost:9443/admin/vault
+  3. VERIFY: Page loads without redirect
+  4. VERIFY: Flag displayed (BANKSPLOIT{...})
+  5. VERIFY: Copy button works
+
+Test 3: Submit flag and get points
+  1. Copy flag from vault page
+  2. Go to: http://localhost:9443/training
+  3. Find "JWT alg:none (auth.l12)" vulnerability
+  4. Paste flag in submission box
+  5. Click Submit
+  6. VERIFY: Shows "+300 pts" confirmation
+  7. VERIFY: Leaderboard updated
+
+Test 4: Verify non-admins cannot access
+  1. Login as regular user (e.g., BS100001 with password)
+  2. Go to: http://localhost:9443/admin/vault
+  3. VERIFY: Redirected to /dashboard (403 access denied)
+  4. VERIFY: Admin tab NOT visible
+
+Test 5: Real admin still sees vault
+  1. Login as admin (BS000001)
+  2. Admin tab visible with submenu
+  3. Click "CTF Vault"
+  4. VERIFY: Flag displays (same as forged JWT)
+
+===============================================================================
+DEPLOYMENT CHECKLIST
+===============================================================================
+
+Pre-deployment:
+  [ ] All 6 files modified/created
+  [ ] No syntax errors in PHP files
+  [ ] Router config includes /admin/vault route
+  [ ] Admin vault.php file has proper permissions
+
+Post-deployment testing:
+  [ ] Forge JWT with role=admin
+  [ ] Admin tab visible
+  [ ] Admin submenu shows
+  [ ] /admin/vault page accessible
+  [ ] Flag displays correctly
+  [ ] Copy button works
+  [ ] Flag submission works
+  [ ] Leaderboard updates
+  [ ] Regular users blocked from /admin/vault
+
+Rollback plan:
+  If issues occur:
+  1. Restore backup of modified files
+  2. Delete src/modules/admin/vault.php
+  3. Revert src/index.php router entry
+  4. Restore src/templates/layout.php
+  5. Restart application
+
+===============================================================================
+
+All files ready for production deployment!
+Test vault access with your forged JWT token.
+
+Generated: 2026-08-08
+Status: Complete and verified

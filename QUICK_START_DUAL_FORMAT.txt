@@ -1,0 +1,278 @@
+================================================================================
+  QUICK START GUIDE — Dual Format User Replacement
+================================================================================
+
+⚡ 3-STEP SETUP
+════════════════════════════════════════════════════════════════════════════
+
+1️⃣  RUN MIGRATION
+   mysql -u root -p banksploit_ctf < sql/migration-add-replacement-status.sql
+
+2️⃣  VERIFY INSTALLATION
+   php src/scripts/verify_bulk_replace.php
+   (Should show: exit code 0 ✓)
+
+3️⃣  TEST IN BROWSER
+   http://localhost:8888/bulk-replace-users
+   (Should show: Two tabs + Mode selection)
+
+
+📋 WHAT'S AVAILABLE
+════════════════════════════════════════════════════════════════════════════
+
+BULK REPLACE TAB:
+  Format A (Auto-Match):
+    • 2-column CSV: Customer ID, Full Name
+    • System finds next available slot automatically
+    • Example: G01197938, Alice Johnson
+    • Use for: Walk-in staff, fastest option
+
+  Format B (Manual):
+    • 3-column CSV: Old ID, New ID, New Name
+    • You specify which user to replace
+    • Example: BS100300, STAFF001, Alice Johnson
+    • Use for: Reassignments, known users
+
+SINGLE REPLACE TAB:
+  Mode A (Auto-Match):
+    • Enter staff ID + name
+    • System auto-selects next slot
+    • Shows slots remaining
+    • Use for: Individual walk-ins
+
+  Mode B (Manual):
+    • Select user from dropdown
+    • Enter new ID + name
+    • Works even if slots exhausted
+    • Use for: Reassignments, flexibility
+
+
+🎯 QUICK DECISION TREE
+════════════════════════════════════════════════════════════════════════════
+
+Have CSV file with Barclays IDs?
+  YES → Use Format A (Auto-Match)
+        Upload 2-column CSV
+        System auto-assigns slots
+
+Have specific users to replace?
+  YES → Use Format B (Manual)
+        Upload 3-column CSV with old IDs
+        OR use Mode B for individual users
+
+Single person arriving?
+  YES → Use Mode A (Auto-Match)
+        Enter ID + name
+        Done (auto-selected slot)
+
+Want to replace specific user?
+  YES → Use Mode B (Manual)
+        Select from dropdown
+        Enter new ID + name
+        Done
+
+
+📊 FORMAT COMPARISON
+════════════════════════════════════════════════════════════════════════════
+
+FORMAT A (Auto-Match):
+  • Columns: 2 (Customer ID, Full Name)
+  • Format: Barclays only (G/B/H/E + 8 digits)
+  • Speed: Fastest
+  • Requires: Available slots
+  • Error: If all slots used → "Switch to Manual Mode"
+
+FORMAT B (Manual):
+  • Columns: 3 (Old ID, New ID, New Name)
+  • Format: Any customer_id
+  • Speed: Normal
+  • Requires: Nothing (no slots, always works)
+  • Error: If old ID not found
+
+
+✅ SAMPLE CSV FILES (Ready to Use)
+════════════════════════════════════════════════════════════════════════════
+
+Format A Example:
+  test_bulk_replace_format_a.csv
+  5 Barclays staff IDs ready to upload
+
+Format B Example:
+  test_bulk_replace_format_b.csv
+  5 pre-created users to swap
+
+
+🔍 VERIFICATION
+════════════════════════════════════════════════════════════════════════════
+
+After Setup:
+  ✓ Column exists
+  ✓ Pre-created users marked 'available'
+  ✓ Page accessible
+  ✓ All tests pass
+
+Check Command:
+  php src/scripts/verify_bulk_replace.php
+
+Expected: All tests PASS, exit code 0
+
+
+⚙️ CONFIGURATION (Already Done)
+════════════════════════════════════════════════════════════════════════════
+
+Routes:
+  ✓ src-superadmin/index.php (line 140)
+    '/bulk-replace-users' => 'bulk_replace_users.php'
+
+Navigation:
+  ✓ src-superadmin/templates/layout.php (line 16)
+    'Replace Users' link in sidebar (🔄)
+
+
+📁 FILES CHANGED
+════════════════════════════════════════════════════════════════════════════
+
+NEW:
+  • sql/migration-add-replacement-status.sql (database)
+  • src/scripts/verify_bulk_replace.php (tests)
+  • test_bulk_replace_format_a.csv (sample)
+  • test_bulk_replace_format_b.csv (sample)
+
+REWRITTEN:
+  • src-superadmin/pages/bulk_replace_users.php (main logic)
+
+ALREADY CONFIGURED:
+  • src-superadmin/index.php (no changes)
+  • src-superadmin/templates/layout.php (no changes)
+
+
+🚀 TYPICAL WORKFLOW
+════════════════════════════════════════════════════════════════════════════
+
+Pre-Session Setup:
+  1. Create 100 bulk users: /bulk-import
+  2. Prepare staff CSV with Barclays IDs
+  3. Upload via Format A (auto-match)
+  4. Verify all replaced: 100 successful, 0 failed
+
+During Session:
+  Single walk-in arrives:
+    → Mode A: Enter ID + name, click "Replace Next Slot"
+    → Done! (auto-selected which BS user replaced)
+
+Multiple staff need reassignment:
+  → Use Format B
+  → Upload CSV with old IDs (BS100350, etc.)
+  → New staff IDs (G01197938, etc.)
+  → Upload and done
+
+
+⚠️ COMMON SCENARIOS
+════════════════════════════════════════════════════════════════════════════
+
+"All slots are used, but staff arrived!"
+  → Use Mode B (Manual)
+  → Select existing user from dropdown
+  → Replace with new staff ID
+  → No "slots exhausted" error
+
+"I want to swap one specific user"
+  → Use Mode B (Manual)
+  → Select that user
+  → Enter new ID + name
+  → Done
+
+"I have 50 Barclays IDs to import"
+  → Use Format A (Auto-Match)
+  → Create CSV: Customer ID, Full Name
+  → Upload
+  → 50 replaced automatically
+
+"I need to change one user's name"
+  → Use Mode B (Manual)
+  → Select user
+  → Leave old ID blank
+  → Enter new name only
+  → Saves just the name
+
+
+❌ ERROR HANDLING
+════════════════════════════════════════════════════════════════════════════
+
+"Invalid Barclays ID format"
+  → Format must be: G/B/H/E + 8 digits
+  → Example: G01197938 (correct)
+  → Example: G017938 (wrong - only 6 digits)
+
+"All 100 pre-created slots are used"
+  → Switch to Mode B (Manual)
+  → Select user you want to replace
+  → Enter new ID + name
+
+"Customer ID already exists"
+  → That ID is already in database
+  → Use a different ID
+  → Or use Mode B to replace existing
+
+"Old Customer ID not found"
+  → User doesn't exist
+  → Check spelling
+  → Verify BS ID is BS100300-BS100399
+
+
+📞 SUPPORT
+════════════════════════════════════════════════════════════════════════════
+
+Verification Failed?
+  1. Run: php src/scripts/verify_bulk_replace.php
+  2. Check which test failed
+  3. Review IMPLEMENTATION_SUMMARY_DUAL_FORMAT.txt for details
+
+Feature Not Working?
+  1. Hard refresh browser (Ctrl+Shift+R)
+  2. Check error message (usually very specific)
+  3. Verify migration was applied
+  4. Run verification script again
+
+Need More Details?
+  Read: IMPLEMENTATION_SUMMARY_DUAL_FORMAT.txt
+  Full docs with all scenarios
+
+
+📍 RELATIVE FILE PATHS
+════════════════════════════════════════════════════════════════════════════
+
+Important Files:
+  • sql/migration-add-replacement-status.sql
+  • src-superadmin/pages/bulk_replace_users.php
+  • src/scripts/verify_bulk_replace.php
+  • test_bulk_replace_format_a.csv
+  • test_bulk_replace_format_b.csv
+
+Copy these to new server to move installation
+
+
+🎓 LEARNING PATH
+════════════════════════════════════════════════════════════════════════════
+
+New to the system?
+  1. Read this file (Quick Start)
+  2. Try Format A with sample CSV
+  3. Try Mode A (auto-match) manually
+  4. Read error messages carefully (they explain issues)
+
+Want full details?
+  → IMPLEMENTATION_SUMMARY_DUAL_FORMAT.txt
+
+Need technical info?
+  → FILES_CHANGED_DUAL_FORMAT.txt
+
+Need troubleshooting?
+  → Run verify script + check output
+
+Ready to deploy?
+  → Follow 3-Step Setup above
+
+================================================================================
+SUMMARY: Run migration, verify, access /bulk-replace-users, start using!
+================================================================================

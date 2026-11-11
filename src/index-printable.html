@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankSploit CTF - Vulnerability Hunting Lab (PDF Version)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #818cf8;
+            --secondary: #f472b6;
+            --accent: #34d399;
+            --success: #10b981;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --bg-dark: #0a0e1a;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --bg-light: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-subtle: rgba(129, 140, 248, 0.12);
+            --glass-border: rgba(148, 163, 184, 0.08);
+            --radius-md: 1rem;
+        }
+
+        html {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .printable-container {
+            max-width: 8.5in;
+            margin: 0 auto;
+            background: var(--bg-dark);
+        }
+
+        .slide {
+            page-break-after: always;
+            break-after: always;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.6));
+        }
+
+        .slide h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            margin-top: 1rem;
+            color: var(--text-primary);
+        }
+
+        .slide h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .slide h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .slide p {
+            color: var(--text-secondary);
+            line-height: 1.75;
+            margin-bottom: 1rem;
+        }
+
+        .slide ul, .slide ol {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .slide li {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .slide li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .slide li strong {
+            color: var(--text-primary);
+        }
+
+        .quote-box {
+            background: linear-gradient(135deg, rgba(129, 140, 248, 0.06), rgba(244, 114, 182, 0.06));
+            border-left: 3px solid var(--secondary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .quote-author {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-align: right;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.82rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            color: var(--accent);
+            line-height: 1.8;
+        }
+
+        .highlight {
+            background: rgba(129, 140, 248, 0.15);
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            color: var(--primary);
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88em;
+            border: 1px solid rgba(129, 140, 248, 0.2);
+        }
+
+        .vuln-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .vuln-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            break-inside: avoid;
+        }
+
+        .vuln-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .vuln-card h3 {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            margin-top: 0;
+        }
+
+        .vuln-card p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+        }
+
+        .difficulty {
+            display: inline-flex;
+            padding: 0.25rem 0.65rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .difficulty.easy {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .difficulty.medium {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--warning);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .difficulty.hard {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .feature-grid, .score-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .feature-item, .score-item {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+            break-inside: avoid;
+        }
+
+        .feature-item h3, .score-item h3 {
+            margin-top: 0 !important;
+            margin-bottom: 0.4rem;
+        }
+
+        .feature-item p, .score-item p {
+            margin-bottom: 0;
+            font-size: 0.88rem;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+            break-inside: avoid;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(244, 114, 182, 0.1));
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            font-size: 1rem;
+            margin-top: 0;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .info-box {
+            margin-bottom: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
+            border-left: 3px solid;
+            break-inside: avoid;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-box p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+        .hero-slide {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: auto;
+            padding: 2rem !important;
+        }
+
+        .hero-emoji {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.75rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            margin-top: 1.25rem;
+        }
+
+        .slide-number {
+            text-align: right;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+                color: black;
+            }
+
+            .printable-container {
+                max-width: 100%;
+                background: white;
+            }
+
+            .slide {
+                page-break-after: always;
+                break-after: always;
+                margin-bottom: 0;
+                padding: 1.5rem;
+                border: none;
+                border-radius: 0;
+                background: white;
+                color: black;
+            }
+
+            .slide h1 {
+                color: #1a202c;
+                -webkit-text-fill-color: unset;
+                background: unset;
+                -webkit-background-clip: unset;
+            }
+
+            .slide h2, .slide h3, .slide h4 {
+                color: #1a202c;
+            }
+
+            .slide p, .slide li {
+                color: #2d3748;
+            }
+
+            .quote-box {
+                background: #f7fafc;
+                border-left-color: #4299e1;
+                color: #2d3748;
+            }
+
+            .code-block {
+                background: #edf2f7;
+                border-color: #cbd5e0;
+                color: #2d3748;
+            }
+
+            .highlight {
+                background: #feebc8;
+                border-color: #fbd38d;
+                color: #744210;
+            }
+
+            .vuln-card, .feature-item, .score-item, .info-box {
+                background: #f7fafc;
+                border-color: #cbd5e0;
+                color: #2d3748;
+            }
+
+            .vuln-card p, .feature-item p, .score-item p {
+                color: #4a5568;
+            }
+
+            .difficulty {
+                background: #edf2f7;
+                color: #2d3748;
+                border-color: #cbd5e0;
+            }
+        }
+
+        @page {
+            size: 8.5in 11in;
+            margin: 0.5in;
+        }
+    </style>
+</head>
+<body>
+    <div class="printable-container">
+        <!-- Title Slide -->
+        <div class="slide hero-slide">
+            <div class="hero-emoji">🎯</div>
+            <h1>BankSploit CTF</h1>
+            <h2 style="font-size: 1.5rem; color: var(--text-secondary); margin: 0;">Vulnerability Hunting Lab</h2>
+            <p style="margin-top: 1.5rem; font-size: 1rem;">Discover Security Vulnerabilities Hidden in Code</p>
+            <div class="slide-number">Slide 1 / 23</div>
+        </div>
+
+        <!-- Session Objective -->
+        <div class="slide">
+            <h2>🌟 Session Objective</h2>
+            <p>Welcome to a hands-on security exploration session! In today's lab, you will:</p>
+            <div style="margin-top: 1.5rem;">
+                <div class="step">
+                    <div class="step-number">👨‍💻</div>
+                    <div class="step-content">
+                        <h3>For Software Builders</h3>
+                        <p>Understand how vulnerabilities creep into code, learn defensive coding practices, and build security into your architecture from day one.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">🔍</div>
+                    <div class="step-content">
+                        <h3>For QA Specialists</h3>
+                        <p>Learn to think like an attacker, discover edge cases in application logic, and identify security flaws before they reach production.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">🛡️</div>
+                    <div class="step-content">
+                        <h3>For Security Enthusiasts</h3>
+                        <p>Deep dive into real-world attack vectors, exploit intentionally vulnerable code, and understand the attacker's mindset.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">Slide 2 / 23</div>
+        </div>
+
+        <!-- What You'll Learn -->
+        <div class="slide">
+            <h2>✅ What You'll Learn</h2>
+            <ul>
+                <li>🔓 <strong>SQL Injection:</strong> How to manipulate database queries</li>
+                <li>⚙️ <strong>Command Injection:</strong> Breaking out of OS commands</li>
+                <li>🔑 <strong>JWT Attacks:</strong> Forging authentication tokens</li>
+                <li>📊 <strong>IDOR:</strong> Accessing other users' data</li>
+                <li>🚀 <strong>Brute Force:</strong> Systematically bypassing weak protections</li>
+                <li>💾 <strong>Sensitive Data Exposure:</strong> Finding secrets in code</li>
+                <li>🎮 <strong>Business Logic Bypass:</strong> Exploiting workflows</li>
+                <li>🧠 <strong>Security Mindset:</strong> How attackers think</li>
+            </ul>
+            <div class="quote-box">
+                "Security is not a feature, it's a mindset. Every line of code is a potential door—the question is: who has the keys?"
+                <div class="quote-author">— The Paranoid Developer</div>
+            </div>
+            <div class="slide-number">Slide 3 / 23</div>
+        </div>
+
+        <!-- Meet BankSploit -->
+        <div class="slide hero-slide">
+            <div class="hero-emoji">📱</div>
+            <h1>Meet BankSploit</h1>
+            <p>A Deliberately Vulnerable Banking Application</p>
+            <div class="slide-number">Slide 4 / 23</div>
+        </div>
+
+        <!-- What is BankSploit -->
+        <div class="slide">
+            <h2>🏦 What is BankSploit?</h2>
+            <p>BankSploit is an intentionally vulnerable web banking application built to teach security concepts through hands-on exploration. It mimics a real banking system with authentication, account management, money transfers, and transaction history—but with deliberate security flaws waiting to be discovered.</p>
+            <h2>🎭 Your Role</h2>
+            <p>You are a security researcher tasked with finding hidden vulnerabilities. Your mission:</p>
+            <div class="quote-box" style="border-left-color: var(--primary);">
+                <strong>Exploit 8 intentionally embedded vulnerabilities</strong> to retrieve flags and prove your findings.
+                <div class="quote-author">Mission Brief</div>
+            </div>
+            <div class="slide-number">Slide 5 / 23</div>
+        </div>
+
+        <!-- Key Features -->
+        <div class="slide">
+            <h2>🔐 Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">🔑</div>
+                    <h3>Authentication</h3>
+                    <p>Login with customer credentials, receive OTP codes, manage JWT sessions.</p>
+                </div>
+                <div class="feature-item">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">💰</div>
+                    <h3>Banking Operations</h3>
+                    <p>View accounts, check balances, transfer funds, review transactions.</p>
+                </div>
+                <div class="feature-item">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">🎯</div>
+                    <h3>Flag Submission</h3>
+                    <p>Submit captured flags to earn points and climb the leaderboard.</p>
+                </div>
+                <div class="feature-item">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">📊</div>
+                    <h3>Real-time Leaderboard</h3>
+                    <p>Track your progress and see how you compete with others.</p>
+                </div>
+            </div>
+            <div class="slide-number">Slide 6 / 23</div>
+        </div>
+
+        <!-- The 8 Vulnerabilities -->
+        <div class="slide">
+            <h2>🎯 The 8 Vulnerabilities</h2>
+            <p>Eight intentional vulnerabilities have been embedded throughout the application. Each exploitation yields a flag in the format: <span class="highlight">BANKSPLOIT{xxxxx}</span></p>
+            <div class="vuln-grid">
+                <div class="vuln-card">
+                    <div class="icon">🔓</div>
+                    <h3>SQL Injection (Auth)</h3>
+                    <p>Bypass login by manipulating SQL queries.</p>
+                    <div class="difficulty easy">Beginner</div>
+                </div>
+                <div class="vuln-card">
+                    <div class="icon">⚔️</div>
+                    <h3>OTP Brute Force</h3>
+                    <p>No rate limiting. Try all 10,000 combinations.</p>
+                    <div class="difficulty easy">Beginner</div>
+                </div>
+                <div class="vuln-card">
+                    <div class="icon">👁️</div>
+                    <h3>OTP Leak in Code</h3>
+                    <p>Debug OTP exposed in JavaScript source.</p>
+                    <div class="difficulty easy">Beginner</div>
+                </div>
+                <div class="vuln-card">
+                    <div class="icon">🔑</div>
+                    <h3>JWT Algorithm Confusion</h3>
+                    <p>Forge tokens with 'none' algorithm.</p>
+                    <div class="difficulty medium">Intermediate</div>
+                </div>
+                <div class="vuln-card">
+                    <div class="icon">📋</div>
+                    <h3>IDOR - Statements</h3>
+                    <p>Access other users' statements.</p>
+                    <div class="difficulty easy">Beginner</div>
+                </div>
+                <div class="vuln-card">
+                    <div class="icon">💸</div>
+                    <h3>IDOR - Transfers</h3>
+                    <p>Transfer from accounts you don't own.</p>
+                    <div class="difficulty medium">Intermediate</div>
+                </div>
+                <div class="vuln-card">
+                    <div class="icon">🗄️</div>
+                    <h3>SQL Injection (Extraction)</h3>
+                    <p>UNION SELECT to extract database data.</p>
+                    <div class="difficulty hard">Advanced</div>
+                </div>
+                <div class="vuln-card">
+                    <div class="icon">💻</div>
+                    <h3>OS Command Injection</h3>
+                    <p>Execute arbitrary OS commands.</p>
+                    <div class="difficulty hard">Advanced</div>
+                </div>
+            </div>
+            <div class="slide-number">Slide 7 / 23</div>
+        </div>
+
+        <!-- SQL Injection -->
+        <div class="slide">
+            <h2>🔓 SQL Injection (SQLi)</h2>
+            <p><strong>What it is:</strong> SQL injection occurs when user input is directly concatenated into SQL queries without sanitization. An attacker can inject SQL code to manipulate query logic, bypass authentication, or extract arbitrary data from the database.</p>
+            <h3>The Vulnerability</h3>
+            <div class="code-block">
+// Vulnerable Code<br>
+$query = "SELECT * FROM users WHERE customer_id = '" . $_POST['id'] . "' AND password = '" . $_POST['pass'] . "'";
+            </div>
+            <h3>🎯 Part 1: Authentication Bypass</h3>
+            <p>The simplest SQLi attack comments out the password check, allowing login without knowing credentials.</p>
+            <ul>
+                <li>Inject a single quote <span class="highlight">'</span> to break out of the string</li>
+                <li>Use SQL comment syntax <span class="highlight">#</span> to comment out the rest</li>
+                <li>Result: The password check is effectively removed ✅</li>
+            </ul>
+            <div class="slide-number">Slide 8 / 23</div>
+        </div>
+
+        <!-- SQLi - UNION SELECT -->
+        <div class="slide">
+            <h2>🔓 SQLi Part 2: Data Extraction (UNION SELECT)</h2>
+            <p>Beyond bypass, SQLi can extract any data from the database. This requires understanding the query structure.</p>
+            <h3>Step 1: Determine Column Count</h3>
+            <p>Use <span class="highlight">ORDER BY</span> to find how many columns the original query returns:</p>
+            <ul>
+                <li>Try <span class="highlight">ORDER BY 1 #</span> → no error = 1+ columns</li>
+                <li>Try <span class="highlight">ORDER BY 2 #</span> → no error = 2+ columns</li>
+                <li>Keep increasing until you get an error</li>
+            </ul>
+            <h3>Step 2: Extract Data With UNION SELECT</h3>
+            <ul>
+                <li>Construct a UNION SELECT with the same number of columns</li>
+                <li><strong>Example:</strong> <span class="highlight">UNION SELECT 1, 2, 3 #</span></li>
+                <li>Numbers that appear in output = visible columns you can use</li>
+            </ul>
+            <div class="slide-number">Slide 9 / 23</div>
+        </div>
+
+        <!-- Command Injection -->
+        <div class="slide">
+            <h2>💻 OS Command Injection</h2>
+            <p><strong>What it is:</strong> When applications pass user input to system shell commands, metacharacters can break out of the intended command and execute arbitrary OS code.</p>
+            <h3>Attack Flow</h3>
+            <div class="code-block">
+// Vulnerable Code<br>
+exec("ping " . $_GET['host']);  // What could go wrong?
+            </div>
+            <h3>Exploitation</h3>
+            <ul>
+                <li>Enter a legitimate value to confirm the endpoint works</li>
+                <li>Use shell metacharacters like <span class="highlight">;</span> or <span class="highlight">|</span> to chain commands</li>
+                <li>Example: <span class="highlight">8.8.8.8 ; ls /tmp</span> executes both the ping AND lists directory contents</li>
+                <li>The flag is written to a file you can then read</li>
+            </ul>
+            <div class="slide-number">Slide 10 / 23</div>
+        </div>
+
+        <!-- JWT -->
+        <div class="slide">
+            <h2>🔑 JWT Algorithm Confusion</h2>
+            <p><strong>What it is:</strong> JSON Web Tokens (JWT) are cryptographically signed claims. If a server accepts the 'none' algorithm, an attacker can forge tokens with arbitrary claims.</p>
+            <h3>How JWT Works</h3>
+            <ul>
+                <li>JWT = three parts: <strong>Header.Payload.Signature</strong></li>
+                <li>Server signs the token with a secret to verify authenticity</li>
+                <li>The 'none' algorithm is meant for debugging — it signs nothing</li>
+            </ul>
+            <h3>The Attack</h3>
+            <p>Use <strong>jwt.io</strong> to:</p>
+            <ul>
+                <li>Decode an existing token to see its structure</li>
+                <li>Change the algorithm to 'none' in the header</li>
+                <li>Modify claims (like role: 'superadmin')</li>
+                <li>Clear the signature (leave it blank)</li>
+                <li>Use the forged token in the application</li>
+            </ul>
+            <div class="slide-number">Slide 11 / 23</div>
+        </div>
+
+        <!-- IDOR -->
+        <div class="slide">
+            <h2>📊 IDOR (Insecure Direct Object Reference)</h2>
+            <p><strong>What it is:</strong> When applications use client-supplied identifiers to fetch records without verifying ownership. Changing the identifier exposes other users' data.</p>
+            <h3>Two Flavors in This Lab</h3>
+            <ul>
+                <li><strong>Statements IDOR:</strong> Manipulate the URL parameters on the statements page to view other users' transaction history</li>
+                <li><strong>Transfer IDOR:</strong> Modify the source account details in the transfer request to move money from accounts you don't own</li>
+            </ul>
+            <h3>The Security Lesson</h3>
+            <p>Client-side restrictions (disabled form fields, hidden inputs) are <strong>cosmetic only</strong>. The server must verify ownership on <strong>every single request</strong>. Never trust the client.</p>
+            <div class="slide-number">Slide 12 / 23</div>
+        </div>
+
+        <!-- Brute Force & Data Exposure -->
+        <div class="slide">
+            <h2>🚀 Brute Force & Sensitive Data Exposure</h2>
+            <p><strong>Brute Force:</strong> When systems use short numeric codes (like 4-digit OTPs) without rate limiting, an attacker can try all 10,000 combinations in seconds.</p>
+            <p><strong>Sensitive Data Exposure:</strong> Developers sometimes leave debug information in production code—OTP values in JavaScript, API keys in network responses, secrets in HTML comments.</p>
+            <div class="quote-box">
+                "Debug mode must never ship to production. Every console.log could be a security breach."
+                <div class="quote-author">— Code Review Expert</div>
+            </div>
+            <div class="slide-number">Slide 13 / 23</div>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="slide hero-slide">
+            <div class="hero-emoji">🚀</div>
+            <h1>Getting Started</h1>
+            <p>Your Step-by-Step Guide to the Lab</p>
+            <div class="slide-number">Slide 14 / 23</div>
+        </div>
+
+        <!-- Steps -->
+        <div class="slide">
+            <h2>📋 What You Need to Do</h2>
+            <div class="step">
+                <div class="step-number">1️⃣</div>
+                <div class="step-content">
+                    <h3>Access the Application</h3>
+                    <p>Open the BankSploit application in your browser. You'll see a login page.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2️⃣</div>
+                <div class="step-content">
+                    <h3>Start Hunting Vulnerabilities</h3>
+                    <p>Begin with SQL Injection on the Login Page. Try to bypass authentication without knowing valid credentials.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3️⃣</div>
+                <div class="step-content">
+                    <h3>Capture the Flag</h3>
+                    <p>When you successfully exploit a vulnerability, a modal will appear with your flag. Copy it immediately!</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">4️⃣</div>
+                <div class="step-content">
+                    <h3>Submit Your Flag</h3>
+                    <p>Navigate to "Submit Flag" in the app. Paste the flag (format: <span class="highlight">BANKSPLOIT{xxxxx}</span>).</p>
+                </div>
+            </div>
+            <div class="slide-number">Slide 15 / 23</div>
+        </div>
+
+        <!-- Pro Tips -->
+        <div class="slide">
+            <h2>💡 Pro Tips for Success</h2>
+            <div class="info-box" style="border-left-color: var(--warning);">
+                <strong>🌐 Browser-Only Challenge</strong>
+                <p>This CTF is designed to be exploited using only a web browser. No additional tools needed.</p>
+            </div>
+            <ul>
+                <li><strong>Copilot is OK:</strong> Use AI assistants to understand concepts, but aim to understand the exploit yourself.</li>
+                <li><strong>Read Error Messages:</strong> Database errors, stack traces, and API responses are your friends.</li>
+                <li><strong>Document Your Process:</strong> Note which vulnerability you exploited and how.</li>
+                <li><strong>Time Management:</strong> Prioritize easier vulnerabilities first for quick points.</li>
+                <li><strong>Ask for Hints:</strong> If stuck, hints will be released after a few minutes.</li>
+            </ul>
+            <div class="slide-number">Slide 16 / 23</div>
+        </div>
+
+        <!-- Recommended Sequence -->
+        <div class="slide">
+            <h2>🎯 Recommended Attack Sequence</h2>
+            <p>While all vulnerabilities are available simultaneously, this order is recommended based on difficulty:</p>
+            <ul>
+                <li><strong>1. SQL Injection (Login)</strong> — Start here. It's the gateway to everything else.</li>
+                <li><strong>2. OTP Leak</strong> — Easiest flag once logged in. Look in browser source code.</li>
+                <li><strong>3. OTP Brute Force</strong> — Methodically test all OTP values.</li>
+                <li><strong>4. IDOR (Statements)</strong> — URL manipulation is a core security skill.</li>
+                <li><strong>5. IDOR (Transfers)</strong> — Requires understanding form tampering.</li>
+                <li><strong>6. JWT Algorithm Confusion</strong> — Use jwt.io to understand and forge tokens.</li>
+                <li><strong>7. SQL Injection (Extraction)</strong> — UNION SELECT to extract database data.</li>
+                <li><strong>8. OS Command Injection</strong> — Most complex. Shell metacharacters.</li>
+            </ul>
+            <div class="slide-number">Slide 17 / 23</div>
+        </div>
+
+        <!-- Important Notes -->
+        <div class="slide">
+            <h2>⚠️ Important Notes</h2>
+            <ul>
+                <li><strong>Ethical Boundaries:</strong> These exploits are authorized against this intentionally vulnerable app ONLY. Never test on systems you don't own without permission.</li>
+                <li><strong>Collaboration:</strong> Discussing tactics and sharing strategies with teammates is encouraged. Security is a team sport.</li>
+                <li><strong>Persistence:</strong> Not every exploit will work on the first try. Adjust, refine, iterate.</li>
+                <li><strong>Learn the Why:</strong> Understanding <em>why</em> something works is more valuable than just finding the flag.</li>
+            </ul>
+            <div class="quote-box">
+                "The attacker's advantage is that they only need to find one way in. Defenders must find and patch them all. Be relentless."
+                <div class="quote-author">— Offensive Security Trainer</div>
+            </div>
+            <div class="slide-number">Slide 18 / 23</div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="slide">
+            <h2>📈 The Leaderboard</h2>
+            <p>The leaderboard updates in real-time as you submit flags:</p>
+            <div class="score-grid">
+                <div class="score-item">
+                    <h3>Primary Score</h3>
+                    <p>Total points from all flags you've submitted.</p>
+                </div>
+                <div class="score-item">
+                    <h3>Speed Bonus</h3>
+                    <p>Being among the first to capture each flag earns bonus points.</p>
+                </div>
+            </div>
+            <h3>How Hints Work</h3>
+            <div class="info-box" style="border-left-color: var(--primary);">
+                <strong>💬 Hint Side Panel</strong>
+                <p>When the instructor enables a hint, a floating panel appears with strategic guidance.</p>
+            </div>
+            <div class="info-box" style="border-left-color: var(--warning);">
+                <strong>⏰ Instructor-Controlled</strong>
+                <p>Hints are released by the instructor as the session progresses. If stuck, check back!</p>
+            </div>
+            <div class="slide-number">Slide 19 / 23</div>
+        </div>
+
+        <!-- End -->
+        <div class="slide hero-slide">
+            <div class="hero-emoji">🚀</div>
+            <h1>Ready to Begin?</h1>
+            <p>Capture all 8 flags. Climb the leaderboard. Own the server.</p>
+            <p style="margin-top: 2rem; font-size: 0.85rem; opacity: 0.7;">© 2024 BankSploit CTF Lab. Intentionally Vulnerable for Educational Purposes.</p>
+            <div class="slide-number">Slide 20 / 23</div>
+        </div>
+
+    </div>
+
+    <script>
+        // Print button (shows in browser, hidden in PDF)
+        window.addEventListener('load', () => {
+            if (confirm('Open print dialog now? (Ctrl+P to print manually)')) {
+                window.print();
+            }
+        });
+    </script>
+</body>
+</html>

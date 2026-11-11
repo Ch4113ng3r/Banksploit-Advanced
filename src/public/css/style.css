@@ -1,0 +1,78 @@
+/*
+ * BankSploit banking UI theme.
+ *
+ * The app primarily styles via Tailwind (CDN) utility classes; this file holds
+ * the shared theme tokens, a few component classes, and print styles. Served at
+ * /public/css/style.css.
+ */
+
+:root {
+    --bs-bg:        #0b1020;
+    --bs-surface:   #131a30;
+    --bs-surface-2: #0f1526;
+    --bs-border:    #233056;
+    --bs-text:      #e6e6e6;
+    --bs-muted:     #9aa5c4;
+    --bs-primary:   #7aa2f7;
+    --bs-primary-2: #93b4f9;
+    --bs-success:   #9ece6a;
+    --bs-danger:    #f7768e;
+    --bs-warning:   #e0af68;
+    --bs-radius:    14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    background: var(--bs-bg);
+    color: var(--bs-text);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bs-border); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #2d3b66; }
+
+/* Reusable component classes (optional; Tailwind covers most of the UI) */
+.bs-card {
+    background: var(--bs-surface);
+    border: 1px solid var(--bs-border);
+    border-radius: var(--bs-radius);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+}
+.bs-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--bs-primary); color: #0b1020; font-weight: 600;
+    border: 0; border-radius: 10px; padding: .6rem 1rem; cursor: pointer;
+    transition: background .15s ease;
+}
+.bs-btn:hover { background: var(--bs-primary-2); }
+.bs-input {
+    width: 100%; padding: .6rem .7rem; border-radius: 10px;
+    background: var(--bs-surface-2); color: var(--bs-text);
+    border: 1px solid var(--bs-border);
+}
+.bs-input:focus { outline: none; border-color: var(--bs-primary); }
+
+.bs-badge { font-size: .72rem; padding: .15rem .5rem; border-radius: 999px; font-weight: 600; }
+.bs-badge--vuln   { background: rgba(247,118,142,.16); color: var(--bs-danger); }
+.bs-badge--secure { background: rgba(158,206,106,.16); color: var(--bs-success); }
+
+/* Money figures */
+.bs-amount-credit { color: var(--bs-success); }
+.bs-amount-debit  { color: var(--bs-danger); }
+
+/* Lab hint bar */
+.bs-lab-bar {
+    border: 1px solid var(--bs-warning);
+    background: rgba(224,175,104,.12);
+    color: #f0d9a8; border-radius: 10px; padding: .9rem 1rem;
+}
+
+@media print {
+    .bs-no-print, aside, header, footer { display: none !important; }
+    body { background: #fff; color: #000; }
+}

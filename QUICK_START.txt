@@ -1,0 +1,131 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    BANKSPLOIT CTF - QUICK START GUIDE
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ SETUP COMPLETE - All systems ready to use!
+
+───────────────────────────────────────────────────────────────────────────────
+🚀 START THE APPLICATION (3 simple steps)
+───────────────────────────────────────────────────────────────────────────────
+
+1. Open PowerShell
+
+2. Navigate to the project:
+   cd C:\Users\G01197938\Downloads\banksploit-ctf
+
+3. Start the servers:
+   .\start-app.ps1 start
+
+───────────────────────────────────────────────────────────────────────────────
+🌐 ACCESS THE CTF
+───────────────────────────────────────────────────────────────────────────────
+
+CTF Application (User):
+  http://localhost:9443
+
+Admin Dashboard (Instructor):
+  http://localhost:8888
+  Username: instructor
+  Password: instructor@123
+
+───────────────────────────────────────────────────────────────────────────────
+📋 SYSTEM INFORMATION
+───────────────────────────────────────────────────────────────────────────────
+
+PHP:
+  Version: 8.2.32 (NTS, x86)
+  Location: C:\Users\G01197938\Downloads\php-8.2.32-nts-Win32-vs16-x86
+  Status: ✅ Configured and ready
+
+MySQL:
+  Version: 8.4.10
+  Service: MySQL84 (Windows Service)
+  Database: banksploit
+  User: banksploit / banksploit_pass
+  Status: ✅ Running
+
+Database:
+  Tables: 18 loaded
+  Status: ✅ Ready
+
+───────────────────────────────────────────────────────────────────────────────
+⌨️ USEFUL COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+Check Status:
+  .\start-app.ps1 status
+
+Stop Servers:
+  .\start-app.ps1 stop
+
+Reset Database:
+  .\setup.ps1
+
+───────────────────────────────────────────────────────────────────────────────
+🔧 CONFIGURATION FILES
+───────────────────────────────────────────────────────────────────────────────
+
+.env                        - Environment configuration
+setup.ps1                   - Database setup script
+start-app.ps1               - Server startup/control script
+src/index.php               - Main application entry point
+src-superadmin/             - Admin dashboard code
+
+───────────────────────────────────────────────────────────────────────────────
+📚 DOCUMENTATION
+───────────────────────────────────────────────────────────────────────────────
+
+README_SETUP.md             - Complete setup guide (read this!)
+SETUP_COMPLETE.md           - Detailed setup information
+CREDENTIALS.md              - Test user accounts
+CTF_DESIGN_DECISIONS.md     - Architecture and design
+CTF_WALKTHROUGH.html        - Challenge walkthrough
+VULN_MATRIX.html            - Vulnerability matrix
+
+───────────────────────────────────────────────────────────────────────────────
+💡 FIRST TIME SETUP
+───────────────────────────────────────────────────────────────────────────────
+
+If you're starting fresh:
+
+1. Start the servers:
+   .\start-app.ps1 start
+
+2. Open browser and visit:
+   http://localhost:9443
+
+3. Create an account or use test credentials from CREDENTIALS.md
+
+4. Start solving challenges!
+
+───────────────────────────────────────────────────────────────────────────────
+🆘 TROUBLESHOOTING
+───────────────────────────────────────────────────────────────────────────────
+
+Port Already in Use:
+  netstat -ano | findstr "9443"
+
+MySQL Not Running:
+  Get-Service MySQL84 | Start-Service
+
+PHP Not Working:
+  php -v
+
+Check All Services:
+  .\start-app.ps1 status
+
+For detailed help, see: README_SETUP.md
+
+───────────────────────────────────────────────────────────────────────────────
+🎯 YOU'RE READY TO GO!
+───────────────────────────────────────────────────────────────────────────────
+
+Run this command now:
+  .\start-app.ps1 start
+
+Then visit:
+  http://localhost:9443
+
+Happy hacking! 🔐
+
+═══════════════════════════════════════════════════════════════════════════════

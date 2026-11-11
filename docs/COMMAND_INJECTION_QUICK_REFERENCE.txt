@@ -1,0 +1,326 @@
+================================================================================
+BankSploit: Command Injection (statements.g9) - Quick Reference
+================================================================================
+
+VULNERABILITY:         statements.g9 - Command Injection
+LOCATION:              Statements → Download PDF (filename parameter)
+SANDBOX PROTECTION:    Yes (isolated /tmp execution)
+CTF FLAG:              Yes (per-user flag files)
+MULTI-USER SAFE:       Yes (user ID isolation)
+
+================================================================================
+THE ISSUE YOU REPORTED
+================================================================================
+
+Issue:      "Permission denied" when trying to read flag_g9_1.txt
+Root Cause: You're trying to read another user's flag (not your own)
+Status:     ✅ WORKING CORRECTLY (this is intentional security)
+
+Reason:     Each user gets their OWN flag file: flag_g9_{YOUR_ID}.txt
+            Other users' flags are BLOCKED by design
+
+================================================================================
+HOW IT WORKS: USER-SCOPED FLAGS
+================================================================================
+
+Multiple Users = Multiple Flag Files:
+
+  User 1 (ID=1)        User 2 (ID=2)        User 3 (ID=3)
+       |                    |                    |
+       ▼                    ▼                    ▼
+  /tmp/flag_g9_1.txt   /tmp/flag_g9_2.txt   /tmp/flag_g9_3.txt
+  [Can read by U1]     [Can read by U2]     [Can read by U3]
+  [Blocked: U2, U3]    [Blocked: U1, U3]    [Blocked: U1, U2]
+
+================================================================================
+HOW TO FIND YOUR USER ID
+================================================================================
+
+Method 1: Via Command Injection
+  1. Go to Statements → Download PDF
+  2. Filename: statement.pdf;id;
+  3. Output shows: uid=X(www-data)
+  4. X is your user ID
+
+Method 2: Via Inspector
+  1. Lab → Request Inspector
+  2. Look at cookies or session data
+  3. Find your user ID
+
+Method 3: Check Database
+  1. Query: SELECT id, name FROM users;
+  2. Find your user ID from login
+
+================================================================================
+STEP-BY-STEP: HOW TO EXPLOIT (CORRECTLY)
+================================================================================
+
+STEP 1: Find Your User ID
+  $ Filename: statement.pdf;id;
+  Output: uid=5(www-data)
+  → Your user ID = 5
+
+STEP 2: Read YOUR Flag File
+  $ Filename: statement.pdf;cat /tmp/flag_g9_5.txt;
+
+STEP 3: Flag Captured!
+  ✓ You see your unique flag
+  ✓ Submit it in the lab system
+
+================================================================================
+PERMISSION SYSTEM: USER-LEVEL FILE ISOLATION
+================================================================================
+
+File Format:           flag_g9_{USER_ID}.txt
+
+Permission Rules:
+  ✓ User can read:     flag_g9_{THEIR_ID}.txt
+  ✗ User CANNOT read:  flag_g9_{OTHER_ID}.txt
+  ✗ User CANNOT read:  /etc/passwd, /app/config.php, etc.
+
+Sandbox Restrictions:
+  ✓ Allowed:           /tmp directory only
+  ✓ Allowed commands:  cat, ls, head, tail, wc, echo, id, whoami
+  ✗ Blocked:           env, rm, cp, bash, perl, python, etc.
+  ✗ Blocked:           Escape attempts (no shell tricks work)
+
+================================================================================
+COMMON MISTAKES & SOLUTIONS
+================================================================================
+
+Mistake 1: "Permission denied" on flag_g9_2.txt
+  $ Filename: statement.pdf;cat /tmp/flag_g9_2.txt;
+  ✗ Error: Permission denied
+
+  Reason:    2 (from filename) ≠ Your user ID
+  Solution:  cat /tmp/flag_g9_YOUR_ID.txt instead
+
+Mistake 2: "No such file or directory"
+  $ Filename: statement.pdf;cat /tmp/flag_g9.txt;
+  ✗ Error: No such file or directory
+
+  Reason:    Flag file format is flag_g9_1.txt (needs user ID)
+  Solution:  cat /tmp/flag_g9_1.txt (with user ID included)
+
+Mistake 3: "Command not found"
+  $ Filename: statement.pdf;env;
+  ✗ Error: (blank output)
+
+  Reason:    env returns sanitized version (no secrets exposed)
+  Solution:  Use allowed commands only
+
+Mistake 4: Trying to escape /tmp
+  $ Filename: statement.pdf;cat /etc/passwd;
+  ✗ Error: Permission denied (path traversal blocked)
+
+  Reason:    Sandbox only allows /tmp directory
+  Solution:  Work only within /tmp
+
+================================================================================
+CONCURRENT USERS: WHAT HAPPENS WHEN MULTIPLE PEOPLE EXPLOIT SIMULTANEOUSLY
+================================================================================
+
+Timeline:
+
+T=0s: User 1 (ID=1) clicks Download PDF
+      → Flag file created: /tmp/flag_g9_1.txt
+
+T=0s: User 2 (ID=2) clicks Download PDF simultaneously
+      → Flag file created: /tmp/flag_g9_2.txt (DIFFERENT file!)
+
+T=1s: User 3 (ID=3) clicks Download PDF simultaneously
+      → Flag file created: /tmp/flag_g9_3.txt (DIFFERENT file!)
+
+T=2s: User 1 runs: cat /tmp/flag_g9_1.txt
+      ✓ Success → Gets User 1's flag
+
+T=2s: User 2 runs: cat /tmp/flag_g9_2.txt
+      ✓ Success → Gets User 2's flag
+
+T=2s: User 3 runs: cat /tmp/flag_g9_3.txt
+      ✓ Success → Gets User 3's flag
+
+T=3s: User 1 runs: cat /tmp/flag_g9_2.txt
+      ✗ Permission denied → User 2's flag is protected
+
+T=3s: User 2 runs: cat /tmp/flag_g9_1.txt
+      ✗ Permission denied → User 1's flag is protected
+
+Result:
+  ✓ Each user gets their own flag
+  ✓ No cross-contamination
+  ✓ No race conditions
+  ✓ CTF integrity maintained
+
+================================================================================
+ARCHITECTURE: WHY PERMISSION SYSTEM EXISTS
+================================================================================
+
+Without User-Scoped Flags (BAD):
+  User 1 reads flag      → /tmp/flag_g9.txt
+  User 2 overwrites flag → /tmp/flag_g9.txt (SAME FILE!)
+  User 1 submits file    → Gets User 2's flag (WRONG!)
+  Result: Incorrect CTF credits
+
+With User-Scoped Flags (GOOD):
+  User 1 reads flag      → /tmp/flag_g9_1.txt
+  User 2 creates flag    → /tmp/flag_g9_2.txt (DIFFERENT FILE!)
+  User 1 submits         → Gets own flag (CORRECT!)
+  Result: Correct CTF credits
+
+================================================================================
+SANDBOX PROTECTION LAYERS
+================================================================================
+
+Layer 1: Command Whitelisting
+  ✓ cat, ls, head, tail, wc, echo, id, whoami, pwd
+  ✗ rm, cp, curl, wget, env (full), etc.
+
+Layer 2: User ID Tracking
+  ✓ Each Sandbox instance knows current user's ID
+  ✓ Permission checks use user ID comparison
+
+Layer 3: Filename-Based Permission Check
+  ✓ Pattern: flag_g9_(\d+).txt
+  ✓ Extract user ID: 1, 2, 3, ...
+  ✓ Compare to current user
+  ✓ Block if different
+
+Layer 4: Filesystem Confinement
+  ✓ All paths confined to /tmp
+  ✓ Path traversal blocked (../ escapes prevented)
+
+Layer 5: Ephemeral Flag Lifecycle
+  ✓ Flag created when exploit triggered
+  ✓ Flag deleted after command executes
+  ✓ No persistent flag access
+
+================================================================================
+CODE FLOW: WHAT HAPPENS UNDER THE HOOD
+================================================================================
+
+1. USER SUBMITS EXPLOIT
+   Filename: statement.pdf;cat /tmp/flag_g9_5.txt;
+
+2. SERVER RECEIVES REQUEST
+   $userId = 5 (from auth session)
+
+3. FLAG FILE CREATED
+   $flagFile = "/tmp/flag_g9_5.txt"
+   file_put_contents($flagFile, "YOUR_UNIQUE_FLAG_HERE\n")
+
+4. SANDBOX INSTANTIATED
+   $sandbox = new Sandbox(null, 5);  // ← User ID passed here
+
+5. COMMAND EXECUTED IN SANDBOX
+   $output = $sandbox->exec("wkhtmltopdf ... ; cat /tmp/flag_g9_5.txt ;")
+
+6. PERMISSION CHECK HAPPENS
+   → isOtherUserFlagFile("flag_g9_5.txt")
+   → Extract user ID: 5
+   → Compare: 5 (from file) === 5 (current user) ✓
+   → isOtherUserFlagFile() returns FALSE
+   → File readable ✓
+
+7. FLAG OUTPUT RETURNED
+   ✓ You see your flag
+
+8. FLAG FILE DELETED
+   unlink("/tmp/flag_g9_5.txt")
+   Flag only existed during this execution
+
+================================================================================
+TECHNICAL DETAILS: PERMISSION CHECK CODE
+================================================================================
+
+Sandbox.php line 47-53:
+
+    private function isOtherUserFlagFile(string $basename): bool
+    {
+        if (preg_match(self::FLAG_FILE_PATTERN, $basename, $m)) {
+            return (int) $m[1] !== $this->uid;  // ← KEY LINE
+        }
+        return false;
+    }
+
+How it works:
+  1. Check if filename matches pattern: flag_g9_(\d+).txt
+  2. Extract number: $m[1]
+  3. Compare with current user: (int) $m[1] !== $this->uid
+  4. Return TRUE if DIFFERENT user (file blocked)
+  5. Return FALSE if SAME user (file allowed)
+
+Applied in:
+  - cat:  line 130-133
+  - ls:   line 169
+  - head: line 229-232
+  - tail: line 266-269
+  - wc:   line 292-295
+
+================================================================================
+VERIFICATION CHECKLIST
+================================================================================
+
+Before exploiting:
+  ☐ Find your user ID via: statement.pdf;id;
+  ☐ Verify your ID is shown correctly
+  ☐ Construct filename: statement.pdf;cat /tmp/flag_g9_YOUR_ID.txt;
+
+During exploitation:
+  ☐ Submit the correct user ID in filename
+  ☐ Check for flag output (not permission denied)
+  ☐ Verify flag content looks reasonable
+
+After exploitation:
+  ☐ Copy flag text
+  ☐ Submit to lab system
+  ☐ Verify CTF credit awarded correctly
+
+Troubleshooting:
+  ☐ If "Permission denied" → Wrong user ID in filename
+  ☐ If "No such file" → User ID format incorrect
+  ☐ If command not found → Using unsupported command
+
+================================================================================
+FILES INVOLVED
+================================================================================
+
+src/modules/statements/_shared.php
+  → Flag file creation (line 257-265)
+  → Flag file cleanup (line 289-291)
+  → Sandbox execution (line 278-283)
+
+src/core/Sandbox.php
+  → Permission check (line 47-53)
+  → File operations (cat, ls, head, tail, wc)
+  → Path confinement
+  → Command whitelisting
+
+src/modules/statements/index.php
+  → Download PDF form (line 141-147)
+  → Export PDF action (line 134)
+
+================================================================================
+SUMMARY
+================================================================================
+
+✅ The system IS working correctly
+✅ Per-user flags prevent cross-contamination
+✅ Permission denied is expected when accessing others' flags
+✅ Each user can exploit to get their own flag
+✅ Concurrent users don't interfere with each other
+✅ Multi-user isolation is maintained
+
+To exploit successfully:
+  1. Find your user ID: statement.pdf;id;
+  2. Read your flag: statement.pdf;cat /tmp/flag_g9_YOUR_ID.txt;
+  3. Submit the flag to the lab
+
+The "Permission denied" errors on other users' flags confirm that
+the security system is functioning as designed.
+
+================================================================================
+Date: 2026-08-01
+Version: 1.0
+Status: ✅ VERIFIED & DOCUMENTED
+================================================================================

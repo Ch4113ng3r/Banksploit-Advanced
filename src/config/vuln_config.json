@@ -1,0 +1,933 @@
+{
+    "_meta": {
+        "name": "BankSploit CTF vulnerability configuration",
+        "description": "Per-vulnerability training levels. level 0 = fully vulnerable, 1 = weak mitigation, 2 = partial fix, 3 = secure. isVulnerable() is true while level < 3. ctf_active marks whether a vulnerability is included in the current CTF event (managed on the CTF Vulnerabilities page).",
+        "levels": [
+            "fully vulnerable (default)",
+            "naive/blacklist mitigation, still bypassable",
+            "partial fix",
+            "secure"
+        ],
+        "counts": {
+            "generic": 12,
+            "logical": 25,
+            "total": 37
+        },
+        "id_scheme": "Keys within each module are the spec IDs lowercased (g1..g12, l1..l24). G = generic web vuln, L = banking logical vuln.",
+        "scoring": "points[level] = score for capturing the flag at that level. Higher level = more mitigation bypassed = more points. Level 3 is secure (no flag, 0 points). Direction chosen 2026-11-05: reward skill."
+    },
+    "modules": {
+        "auth": {
+            "g1": {
+                "id": "G1",
+                "title": "SQL injection (login bypass)",
+                "type": "generic",
+                "module": "auth",
+                "level": 0,
+                "owasp_category": "A03:2021",
+                "cwe_id": "CWE-89",
+                "description": "Login query concatenates customer_id/password and compares the insecure password_md5 column. Also governs md5-vs-bcrypt: at level 3 the query is parameterized and uses password_verify() against password_hash.",
+                "attack_scenario": "Login as any user with ' OR 1=1 -- in customer_id. At level 1 a basic blacklist blocks OR but not UNION.",
+                "hints": [
+                    "The login form sends your input straight into a query. What happens if your Customer ID contains a single quote?",
+                    "Comment out the password check. MySQL's -- comment needs a trailing space; the query is one line.",
+                    "Try Customer ID: ADMIN001' --  (trailing space), any password. At level 1, OR is filtered — pivot to a UNION SELECT."
+                ],
+                "category": "Injection",
+                "flag": "BANKSPLOIT{auth_g1_pwned}",
+                "ctf_active": true,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "l10": {
+                "id": "L10",
+                "title": "OTP brute-force",
+                "type": "logical",
+                "module": "auth",
+                "level": 3,
+                "owasp_category": "A07:2021",
+                "cwe_id": "CWE-307",
+                "description": "4-digit OTP (login/transfer) valid for 24h with no rate limiting and no lockout. Secondary module: transfer.",
+                "attack_scenario": "Only 10,000 combinations and the code stays valid for 24h — at ~500 req/s any OTP falls in seconds.",
+                "hints": [
+                    "The OTP is only 4 digits. Is anything stopping you from trying again?",
+                    "Check for rate limiting / lockout after failed OTP attempts — there is none at level 0.",
+                    "Script 0000–9999 against the verify endpoint; no counter increments failed_attempts for OTP."
+                ],
+                "category": "Auth",
+                "flag": "BANKSPLOIT{auth_l10_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "l11": {
+                "id": "L11",
+                "title": "OTP in response body",
+                "type": "logical",
+                "module": "auth",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-200",
+                "description": "The /auth/login JSON response includes the generated OTP 'for dev convenience' and it was never removed.",
+                "attack_scenario": "Read the OTP straight from the login API response — no SMS access needed.",
+                "hints": [
+                    "You don't have the victim's phone. Do you even need it?",
+                    "Inspect the full JSON returned by the login call.",
+                    "The otp field is present in the response body at level 0; use it directly."
+                ],
+                "category": "Info Disclosure",
+                "flag": "BANKSPLOIT{auth_l11_pwned}",
+                "ctf_active": true,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            },
+            "l12": {
+                "id": "L12",
+                "title": "JWT alg:none",
+                "type": "logical",
+                "module": "auth",
+                "level": 3,
+                "owasp_category": "A02:2021",
+                "cwe_id": "CWE-347",
+                "description": "Login issues a JWT. At level 0 the verifier accepts alg=none (unsigned), allowing forgery without the secret. At level 3 only HS256 with the server secret is accepted.",
+                "attack_scenario": "Forge a token with header {\"alg\":\"none\"} and arbitrary claims to bypass authentication.",
+                "hints": [
+                    "Decode the JWT (base64url). Look at the header's alg field.",
+                    "What if you set alg to none and drop the signature?",
+                    "Re-encode header {\"alg\":\"none\",\"typ\":\"JWT\"} with a forged payload and empty signature; the server trusts it at level 0."
+                ],
+                "category": "Auth",
+                "flag": "BANKSPLOIT{auth_l12_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            },
+            "l13": {
+                "id": "L13",
+                "title": "Predictable reset tokens",
+                "type": "logical",
+                "module": "auth",
+                "level": 3,
+                "owasp_category": "A07:2021",
+                "cwe_id": "CWE-340",
+                "description": "Password reset tokens are sequential integers or base64(user_id + timestamp), not random.",
+                "attack_scenario": "Guess another user's reset token and take over the account.",
+                "hints": [
+                    "Request a reset and look closely at the token — is it random?",
+                    "Try decoding it; is it base64 of predictable values?",
+                    "Increment/derive the token for another user_id and submit it to the reset endpoint."
+                ],
+                "category": "Auth",
+                "flag": "BANKSPLOIT{auth_l13_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "l16": {
+                "id": "L16",
+                "title": "Account enumeration",
+                "type": "logical",
+                "module": "auth",
+                "level": 3,
+                "owasp_category": "A07:2021",
+                "cwe_id": "CWE-203",
+                "description": "Distinct messages: 'Customer ID not found' vs 'Incorrect password'; register/forgot-password leak existence too.",
+                "attack_scenario": "Enumerate valid Customer IDs / emails from differing responses.",
+                "hints": [
+                    "Compare the error for a bad Customer ID vs a good ID with a bad password.",
+                    "Different messages = an oracle for which accounts exist.",
+                    "At level 3 the message is identical regardless of which part was wrong."
+                ],
+                "category": "Auth",
+                "flag": "BANKSPLOIT{auth_l16_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            },
+            "l14": {
+                "id": "L14",
+                "title": "Session fixation",
+                "type": "logical",
+                "module": "auth",
+                "level": 3,
+                "owasp_category": "A07:2021",
+                "cwe_id": "CWE-384",
+                "description": "The session id is not regenerated on login at level 0, so a pre-set session id remains valid after authentication.",
+                "attack_scenario": "Fix a victim's session id before they log in, then reuse it to ride their authenticated session.",
+                "hints": [
+                    "Does the session cookie change value after you log in?",
+                    "Set a known session id, log in, and check if it still works.",
+                    "Level 3 calls session_regenerate_id() on login."
+                ],
+                "category": "Auth",
+                "flag": "BANKSPLOIT{auth_l14_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            },
+            "l17": {
+                "id": "L17",
+                "title": "PII embedded in JWT",
+                "type": "logical",
+                "module": "auth",
+                "level": 3,
+                "owasp_category": "A02:2021",
+                "cwe_id": "CWE-359",
+                "description": "At vuln levels the JWT payload carries PAN, masked Aadhaar and account balance in plaintext (base64url, not encrypted).",
+                "attack_scenario": "Decode the JWT payload to read the user's PAN/Aadhaar/balance without any further access.",
+                "hints": [
+                    "A JWT payload is only base64url-encoded, not encrypted.",
+                    "Decode the middle segment of your token.",
+                    "Level 3 keeps sensitive fields out of the token."
+                ],
+                "category": "Info Disclosure",
+                "flag": "BANKSPLOIT{auth_l17_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "l25": {
+                "id": "L25",
+                "title": "Session puzzling",
+                "type": "logical",
+                "module": "auth",
+                "level": 1,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-841",
+                "description": "The password-reset flow overloads the same session key used for authentication, so completing step 1 can grant an authenticated session (email-only account takeover).",
+                "attack_scenario": "Drive the reset flow so the shared session key authenticates you without the password step.",
+                "hints": [
+                    "The reset flow and login write the same session key.",
+                    "What state does step 1 of the reset leave in your session?",
+                    "Level 3 uses a separate, namespaced key for the reset flow."
+                ],
+                "category": "Auth",
+                "flag": "BANKSPLOIT{auth_l25_pwned}",
+                "ctf_active": true,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            }
+        },
+        "statements": {
+            "g2": {
+                "id": "G2",
+                "title": "SQL injection (data extraction)",
+                "type": "generic",
+                "module": "statements",
+                "level": 0,
+                "owasp_category": "A03:2021",
+                "cwe_id": "CWE-89",
+                "description": "The Statements SEARCH box only (remarks filter) concatenates input; the date range is always bound. Graduated via g2_term(): L0 raw -> in-band UNION or error-based extraction (raw SQL error shown); L1 leaky single-pass blacklist strips union/select and comment tokens with errors hidden (bypass by nesting keywords and balancing the quote); L2 strips UNION repeatedly with errors hidden, so only boolean-blind extraction remains; L3 parameterized (g2_is_secure()). The target is each user's per-user flag in the ctf_flags table (columns flag + username).",
+                "attack_scenario": "L0: %' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags-- (7 columns; flag goes in the Remarks cell because the Date cell is truncated to 10 chars), or error-based via extractvalue(). L1: nest keywords (UNIunionON SELselectECT) and end with ' OR '%'='. L2: boolean-blind, e.g. house%' AND SUBSTRING((SELECT flag FROM ctf_flags WHERE username='<you>'),1,1)='B'-- , one character at a time.",
+                "hints": [
+                    "Only the search (remarks) box is injectable — it is spliced into remarks LIKE '%...%'. The query returns 7 columns; the flag lives in ctf_flags (flag + username).",
+                    "L0: UNION SELECT username,flag,... FROM ctf_flags — flag shows in the Remarks cell (the Date cell is truncated to 10 chars); or extractvalue() error-based. L1: the filter strips union/select + comments in one pass — nest them (UNIunionON) and balance the quote since comments are gone.",
+                    "L2: UNION is stripped repeatedly and errors are hidden, so go boolean-blind — use your rows appearing/vanishing as the oracle and read the flag one character at a time (SUBSTRING + AND)."
+                ],
+                "category": "Injection",
+                "flag": "BANKSPLOIT{statements_g2_pwned}",
+                "ctf_active": true,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            },
+            "g4": {
+                "id": "G4",
+                "title": "Reflected XSS",
+                "type": "generic",
+                "module": "statements",
+                "level": 3,
+                "owasp_category": "A03:2021",
+                "cwe_id": "CWE-79",
+                "description": "The statement search reflects the q parameter into the page without encoding.",
+                "attack_scenario": "?q=<script>alert(1)</script> executes in the victim's browser.",
+                "hints": [
+                    "Your search term is echoed back on the results page.",
+                    "Is it HTML-encoded? Try injecting a tag.",
+                    "?q=<script>alert(document.cookie)</script>; level 3 uses htmlspecialchars()."
+                ],
+                "category": "Injection",
+                "flag": "BANKSPLOIT{statements_g4_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            },
+            "g9": {
+                "id": "G9",
+                "title": "Command injection",
+                "type": "generic",
+                "module": "statements",
+                "level": 3,
+                "owasp_category": "A03:2021",
+                "cwe_id": "CWE-78",
+                "description": "PDF statement generation shells out via exec() with a user-influenced filename/account name.",
+                "attack_scenario": "Account name ;id; injects an OS command into the exec() call.",
+                "hints": [
+                    "PDF generation runs an external command. What feeds its arguments?",
+                    "Shell metacharacters in your name/filename may break out.",
+                    "Inject ;id; or $(...) ; level 3 uses escapeshellarg() or avoids the shell entirely."
+                ],
+                "category": "Injection",
+                "flag": "BANKSPLOIT{statements_g9_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            },
+            "l1": {
+                "id": "SL1",
+                "title": "IDOR — View Other Accounts' Statements",
+                "type": "logical",
+                "module": "statements",
+                "level": 3,
+                "owasp_category": "A01:2021",
+                "cwe_id": "CWE-639",
+                "description": "The account_number parameter in the statements URL is resolved without ownership check. Changing it to another user's account number exposes their transactions.",
+                "attack_scenario": "Discover other account numbers from the beneficiaries page, then change ?account= in the Statements URL to view their transactions.",
+                "hints": [
+                    "Look at the URL when viewing your statements. What identifies the account?",
+                    "Where else in the app can you see other account numbers?",
+                    "Level 3 verifies the account belongs to the logged-in user before loading transactions."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{statements_l1_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "g8": {
+                "id": "G8",
+                "title": "Path traversal (CSV export)",
+                "type": "generic",
+                "module": "statements",
+                "level": 3,
+                "owasp_category": "A01:2021",
+                "cwe_id": "CWE-22",
+                "description": "The CSV export ?file= parameter is concatenated into a path with no sanitisation, so ../ sequences read arbitrary files.",
+                "attack_scenario": "Set ?file=../../../../etc/passwd (or any path) on the export endpoint to stream arbitrary files.",
+                "hints": [
+                    "The export lets you name a file. Where is that path rooted?",
+                    "Try climbing out of the export directory with ../",
+                    "Level 3 uses basename() and confines the path to the export dir with a .csv suffix."
+                ],
+                "category": "Path Traversal",
+                "flag": "BANKSPLOIT{statements_g8_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            }
+        },
+        "transfer": {
+            "l1": {
+                "id": "L1",
+                "title": "IDOR — Transfer from Other Account",
+                "type": "logical",
+                "module": "transfer",
+                "level": 3,
+                "owasp_category": "A01:2021",
+                "cwe_id": "CWE-639",
+                "description": "The from_account_id in the transfer form is greyed out (disabled) but the server does not verify ownership. Editing the DOM to change the value allows transferring from any account.",
+                "attack_scenario": "Use DevTools to un-disable or modify the From account field, set it to another user's account ID, and complete the transfer.",
+                "hints": [
+                    "The 'From account' field is disabled in the UI. But is the server enforcing that?",
+                    "Inspect the form element. Can you change the hidden value or remove the disabled attribute?",
+                    "Level 3 verifies the account's user_id matches the session user before executing."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{transfer_l1_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            },
+            "g5": {
+                "id": "G5",
+                "title": "Cross-site request forgery (CSRF)",
+                "type": "generic",
+                "module": "transfer",
+                "level": 3,
+                "owasp_category": "A01:2021",
+                "cwe_id": "CWE-352",
+                "description": "State-changing transfer requests do not validate a CSRF token at vuln levels, so a forged cross-site form can move money. Governed together with the wizard (transfer.l9) via the core CSRF class.",
+                "attack_scenario": "Host a page that auto-submits a transfer form to the victim's session; no token is checked.",
+                "hints": [
+                    "Does the transfer form carry an unpredictable token the server checks?",
+                    "Build an external form that POSTs a transfer.",
+                    "Level 3 validates a per-session CSRF token on every state change."
+                ],
+                "category": "CSRF",
+                "flag": "BANKSPLOIT{transfer_g5_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            },
+            "l2": {
+                "id": "L2",
+                "title": "IDOR — transfer receipt",
+                "type": "logical",
+                "module": "transfer",
+                "level": 3,
+                "owasp_category": "A01:2021",
+                "cwe_id": "CWE-639",
+                "description": "The transfer receipt endpoint returns any receipt by id with no ownership check.",
+                "attack_scenario": "Increment or change the receipt id in the URL to read other users' transfer receipts.",
+                "hints": [
+                    "Receipts are addressed by id. Is that id tied to you?",
+                    "Change the receipt id in the request.",
+                    "Level 3 verifies the receipt belongs to the logged-in user."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{transfer_l2_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            },
+            "l6": {
+                "id": "L6",
+                "title": "Negative-amount transfer",
+                "type": "logical",
+                "module": "transfer",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-840",
+                "description": "The transfer amount is not checked for amount > 0, so a negative amount reverses the flow and credits the attacker.",
+                "attack_scenario": "Submit a transfer with a negative amount to pull money from the destination into your account.",
+                "hints": [
+                    "What happens if the amount is less than zero?",
+                    "The server trusts the sign of the amount.",
+                    "Level 3 rejects non-positive amounts."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{transfer_l6_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "l7": {
+                "id": "L7",
+                "title": "Race condition / double-spend",
+                "type": "logical",
+                "module": "transfer",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-362",
+                "description": "Balance read-check-write is not atomic and takes no row lock, so concurrent transfers can overdraw the account.",
+                "attack_scenario": "Fire many identical transfers in parallel to spend the same balance more than once.",
+                "hints": [
+                    "The balance is read, checked, then written — not in one step.",
+                    "Send concurrent requests before the first one commits.",
+                    "Level 3 uses an atomic update / row lock."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{transfer_l7_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            },
+            "l9": {
+                "id": "L9",
+                "title": "Wizard step-skipping / OTP skip",
+                "type": "logical",
+                "module": "transfer",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-841",
+                "description": "The transfer /execute stage runs with no check that earlier wizard stages completed, and an absent otp field skips OTP verification.",
+                "attack_scenario": "POST directly to the execute stage, omitting the OTP step, to complete a transfer without verification.",
+                "hints": [
+                    "The transfer is a multi-step wizard. Must the steps run in order?",
+                    "Call the final stage directly.",
+                    "Level 3 enforces the state machine and a mandatory OTP."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{transfer_l9_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "l20": {
+                "id": "L20",
+                "title": "Rounding / salami",
+                "type": "logical",
+                "module": "transfer",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-682",
+                "description": "Interest accrual uses lossy floating-point math, so fractional remainders can be skimmed over many operations.",
+                "attack_scenario": "Exploit floating-point rounding in interest to accumulate fractions of currency.",
+                "hints": [
+                    "How is interest calculated — integer paise or floating point?",
+                    "Rounding leaves tiny remainders each time.",
+                    "Level 3 uses integer/decimal math."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{transfer_l20_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            },
+            "l21": {
+                "id": "L21",
+                "title": "Daily-limit bypass",
+                "type": "logical",
+                "module": "transfer",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-840",
+                "description": "Only the per-transaction amount is checked against the daily limit, so splitting a large transfer into several bypasses it.",
+                "attack_scenario": "Split an over-limit transfer into multiple under-limit transfers in the same day.",
+                "hints": [
+                    "The limit is checked per transaction, not per day.",
+                    "Make several smaller transfers.",
+                    "Level 3 tracks the cumulative daily total."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{transfer_l21_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "l23": {
+                "id": "L23",
+                "title": "Self-transfer cashback abuse",
+                "type": "logical",
+                "module": "transfer",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-840",
+                "description": "Self-transfers (destination owned by the sender) still earn the 1% cashback, so money moved between own accounts mints rewards.",
+                "attack_scenario": "Repeatedly transfer between your own accounts to farm cashback.",
+                "hints": [
+                    "Who is the destination allowed to be?",
+                    "Does cashback apply when you pay yourself?",
+                    "Level 3 excludes self-transfers from cashback."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{transfer_l23_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            }
+        },
+        "beneficiary": {
+            "g3": {
+                "id": "G3",
+                "title": "Stored XSS (beneficiary name)",
+                "type": "generic",
+                "module": "beneficiary",
+                "level": 0,
+                "owasp_category": "A03:2021",
+                "cwe_id": "CWE-79",
+                "description": "The biller/beneficiary name is stored raw and later rendered unescaped, so stored HTML/JS executes for anyone who views it.",
+                "attack_scenario": "Save a beneficiary whose name contains a <script> payload; it runs when the list renders.",
+                "hints": [
+                    "The beneficiary name is shown back on later pages.",
+                    "Is it encoded when stored or displayed?",
+                    "Level 3 escapes the name on output with htmlspecialchars()."
+                ],
+                "category": "Injection",
+                "flag": "BANKSPLOIT{beneficiary_g3_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "l3": {
+                "id": "L3",
+                "title": "IDOR — beneficiary id",
+                "type": "logical",
+                "module": "beneficiary",
+                "level": 3,
+                "owasp_category": "A01:2021",
+                "cwe_id": "CWE-639",
+                "description": "Beneficiary fetch/delete acts on any id with no ownership check.",
+                "attack_scenario": "Change the beneficiary id to view or delete another user's payees.",
+                "hints": [
+                    "Beneficiaries are addressed by id. Is the id scoped to you?",
+                    "Change the id in the request.",
+                    "Level 3 checks the beneficiary belongs to the current user."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{beneficiary_l3_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            },
+            "l8": {
+                "id": "L8",
+                "title": "Cooling-period bypass",
+                "type": "logical",
+                "module": "beneficiary",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-840",
+                "description": "The new-beneficiary cooling period is enforced using a client-supplied timestamp, so the client can backdate it.",
+                "attack_scenario": "Set the client timestamp into the past to send to a freshly added beneficiary immediately.",
+                "hints": [
+                    "Who decides when the beneficiary was added?",
+                    "The cooling check trusts a value you send.",
+                    "Level 3 uses the server time stored at creation."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{beneficiary_l8_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            }
+        },
+        "loans": {
+            "g6": {
+                "id": "G6",
+                "title": "Server-side request forgery (SSRF)",
+                "type": "generic",
+                "module": "loans",
+                "level": 3,
+                "owasp_category": "A10:2021",
+                "cwe_id": "CWE-918",
+                "description": "The loan document-URL fetch retrieves any client-supplied URL with no allow-list, reaching internal hosts and cloud metadata.",
+                "attack_scenario": "Supply a document URL pointing at an internal service or 169.254.169.254 metadata endpoint.",
+                "hints": [
+                    "The server fetches a URL you provide.",
+                    "Point it at an internal/link-local address.",
+                    "Level 3 allows only https hosts on an allow-list and blocks private ranges."
+                ],
+                "category": "SSRF",
+                "flag": "BANKSPLOIT{loans_g6_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            },
+            "g7": {
+                "id": "G7",
+                "title": "Unrestricted file upload",
+                "type": "generic",
+                "module": "loans",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-434",
+                "description": "KYC document upload performs no server-side validation at level 0, so any extension (e.g. .php) is written to the web-served uploads directory — a webshell.",
+                "attack_scenario": "Upload a .php file and browse to it under /uploads to get code execution.",
+                "hints": [
+                    "What file types does the upload actually accept?",
+                    "Try a .php file instead of an image.",
+                    "Level 3 validates extension + MIME and stores outside the web root."
+                ],
+                "category": "Upload",
+                "flag": "BANKSPLOIT{loans_g7_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            },
+            "g10": {
+                "id": "G10",
+                "title": "XML external entity (XXE)",
+                "type": "generic",
+                "module": "loans",
+                "level": 3,
+                "owasp_category": "A05:2021",
+                "cwe_id": "CWE-611",
+                "description": "The loan XML import enables external entities (LIBXML_NOENT | LIBXML_DTDLOAD), so a crafted DOCTYPE reads local files.",
+                "attack_scenario": "Import XML with an external entity referencing file:///etc/passwd to exfiltrate file contents.",
+                "hints": [
+                    "The XML import resolves entities.",
+                    "Declare a DOCTYPE with an external SYSTEM entity.",
+                    "Level 3 disables entity loading and network access in the parser."
+                ],
+                "category": "XXE",
+                "flag": "BANKSPLOIT{loans_g10_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            },
+            "l22": {
+                "id": "L22",
+                "title": "Loan parameter tampering",
+                "type": "logical",
+                "module": "loans",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-472",
+                "description": "Loan application parameters (amount, rate, tenure) are trusted from the request without server-side bounds, so the applicant sets favourable terms.",
+                "attack_scenario": "Tamper the interest rate or amount in the loan application request.",
+                "hints": [
+                    "Which loan terms come from the form vs the server?",
+                    "Change the rate or amount in the request.",
+                    "Level 3 derives and validates terms server-side."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{loans_l22_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            }
+        },
+        "cards": {
+            "l24": {
+                "id": "L24",
+                "title": "Card data in plaintext",
+                "type": "logical",
+                "module": "cards",
+                "level": 3,
+                "owasp_category": "A02:2021",
+                "cwe_id": "CWE-311",
+                "description": "The cards API returns full PAN and CVV in plaintext with no ownership check. This one dial also governs block/unblock IDOR (CWE-639), a broken PIN change that does not require the old PIN (CWE-620), and spending-limit mass assignment (CWE-915).",
+                "attack_scenario": "Call the cards API for any card id to read PAN/CVV, block cards you do not own, or change limits/PIN.",
+                "hints": [
+                    "What does the card detail API return, and for whose cards?",
+                    "Try another card id.",
+                    "Level 3 encrypts/masks card data and checks ownership on every card action."
+                ],
+                "category": "Info Disclosure",
+                "flag": "BANKSPLOIT{cards_l24_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            }
+        },
+        "profile": {
+            "l5": {
+                "id": "L5",
+                "title": "Mass assignment + IDOR",
+                "type": "logical",
+                "module": "profile",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-915",
+                "description": "Profile update writes request fields verbatim, so role and is_locked are bindable, and the target user_id/id is taken from the request (IDOR).",
+                "attack_scenario": "Add role=admin (or a different user_id) to the profile update to escalate or edit another user.",
+                "hints": [
+                    "Which fields does the profile update accept?",
+                    "Try sending role or is_locked, or another user_id.",
+                    "Level 3 whitelists editable fields and scopes the update to the session user."
+                ],
+                "category": "Logic",
+                "flag": "BANKSPLOIT{profile_l5_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            }
+        },
+        "admin": {
+            "l4": {
+                "id": "L4",
+                "title": "Broken function-level authorization",
+                "type": "logical",
+                "module": "admin",
+                "level": 3,
+                "owasp_category": "A01:2021",
+                "cwe_id": "CWE-285",
+                "description": "Admin surfaces are gated by login only at vuln levels; level 1 trusts a spoofable client signal (X-Admin header / is_admin cookie). Real role checks happen only at level 3.",
+                "attack_scenario": "Access admin endpoints as a normal user, or send X-Admin: true / is_admin=true at level 1.",
+                "hints": [
+                    "Are admin pages checking your role, or just that you are logged in?",
+                    "Look for a client-controlled admin signal.",
+                    "Level 3 enforces a genuine server-side role check on every admin surface."
+                ],
+                "category": "Access Control",
+                "flag": "BANKSPLOIT{admin_l4_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            }
+        },
+        "accounts": {
+            "l19": {
+                "id": "L19",
+                "title": "Hidden API fields",
+                "type": "logical",
+                "module": "accounts",
+                "level": 3,
+                "owasp_category": "A04:2021",
+                "cwe_id": "CWE-213",
+                "description": "Account/user API responses include internal-only columns (role, password_md5, last_login_ip, …) that should never be exposed.",
+                "attack_scenario": "Read internal fields straight from the account/whoami API response.",
+                "hints": [
+                    "Look at every field the account API returns.",
+                    "Some columns are internal-only.",
+                    "Level 3 returns an explicit whitelist of safe fields."
+                ],
+                "category": "Info Disclosure",
+                "flag": "BANKSPLOIT{accounts_l19_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            }
+        },
+        "core": {
+            "l18": {
+                "id": "L18",
+                "title": "Information disclosure",
+                "type": "logical",
+                "module": "core",
+                "level": 3,
+                "owasp_category": "A05:2021",
+                "cwe_id": "CWE-209",
+                "description": "Verbose errors leak messages/stack traces, and forgotten debug endpoints (/api/v1/debug/config, /phpinfo, /whoami) dump DB credentials, the JWT secret and full environment.",
+                "attack_scenario": "Hit the debug endpoints or trigger an error to read secrets and internals.",
+                "hints": [
+                    "Uncaught errors may print more than they should.",
+                    "Look for leftover /debug endpoints.",
+                    "Level 3 shows generic errors and removes the debug routes."
+                ],
+                "category": "Info Disclosure",
+                "flag": "BANKSPLOIT{core_l18_pwned}",
+                "ctf_active": false,
+                "points": [
+                    100,
+                    150,
+                    200
+                ]
+            }
+        },
+        "sessions": {
+            "g12": {
+                "id": "G12",
+                "title": "Insecure deserialization",
+                "type": "generic",
+                "module": "sessions",
+                "level": 3,
+                "owasp_category": "A08:2021",
+                "cwe_id": "CWE-502",
+                "description": "The bs_prefs cookie is base64(PHP serialize(...)) and unserialize() runs on it, enabling PHP object injection via a gadget (PrefLogger writes attacker content to an attacker path on destruct).",
+                "attack_scenario": "Craft a serialized PrefLogger object in the bs_prefs cookie to write a file (e.g. a webshell).",
+                "hints": [
+                    "How are your preferences stored in the cookie?",
+                    "unserialize() on attacker input can instantiate objects.",
+                    "Level 3 uses JSON only, which cannot instantiate objects."
+                ],
+                "category": "Deserialization",
+                "flag": "BANKSPLOIT{sessions_g12_pwned}",
+                "ctf_active": false,
+                "points": [
+                    300,
+                    350,
+                    400
+                ]
+            }
+        },
+        "templates": {
+            "g11": {
+                "id": "G11",
+                "title": "Local file inclusion",
+                "type": "generic",
+                "module": "templates",
+                "level": 3,
+                "owasp_category": "A03:2021",
+                "cwe_id": "CWE-98",
+                "description": "The help-page ?page parameter is concatenated into include() with no validation; wrappers and traversal read or execute arbitrary content.",
+                "attack_scenario": "?page=../../config/database or php://filter/convert.base64-encode/resource=... to read source.",
+                "hints": [
+                    "The help viewer includes a file named by ?page.",
+                    "Try traversal or a php:// filter wrapper.",
+                    "Level 1 strips ../ (bypass with ....//); level 3 uses a strict whitelist with no dynamic include."
+                ],
+                "category": "LFI",
+                "flag": "BANKSPLOIT{templates_g11_pwned}",
+                "ctf_active": false,
+                "points": [
+                    200,
+                    250,
+                    300
+                ]
+            }
+        }
+    }
+}

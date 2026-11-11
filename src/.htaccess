@@ -1,0 +1,22 @@
+RewriteEngine On
+
+# Pass the Authorization header through to PHP (mod_php often strips it) so
+# `Authorization: Bearer <jwt>` reaches the app — used by the JWT auth path (auth.l12).
+RewriteCond %{HTTP:Authorization} .
+RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Route otp-validation.js through PHP (auth.l11 — dynamic OTP injection)
+RewriteRule ^public/js/otp-validation\.js$ index.php [QSA,L]
+
+# Never serve config or source files directly. Routes such as /training/code
+# aren't files, so they continue to the front controller below.
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(config|core|modules|scripts|templates|training)/ - [NC,F]
+
+# Serve existing files and directories directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Route everything else through the front controller
+RewriteRule ^ index.php [QSA,L]

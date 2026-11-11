@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BankSploit &middot; Statements</title>
+    <!-- Tailwind is self-hosted (vendored) so the app renders identically in any
+         browser / proxy (e.g. Burp's embedded browser) and fully offline. -->
+    <script src="/public/vendor/tailwind.js"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } } };
+    </script>
+    <style>
+        body { background: #0b1020; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-thumb { background: #233056; border-radius: 6px; }
+    </style>
+    <style id="bs-theme-light">
+html.theme-light body { background: #eef2f7 !important; }
+html.theme-light [class*="bg-slate-9"] { background-color: #ffffff !important; }
+html.theme-light [class*="bg-slate-8"] { background-color: #e7edf3 !important; }
+html.theme-light [class*="ring-slate"] { --tw-ring-color: #cbd5e1 !important; }
+html.theme-light [class*="border-slate"] { border-color: #cbd5e1 !important; }
+html.theme-light [class*="text-slate-1"],
+html.theme-light [class*="text-slate-2"],
+html.theme-light [class*="text-slate-3"] { color: #1e293b !important; }
+html.theme-light [class*="text-slate-4"] { color: #475569 !important; }
+html.theme-light [class*="text-slate-5"],
+html.theme-light [class*="text-slate-6"] { color: #64748b !important; }
+html.theme-light [class*="text-white"] { color: #0f172a !important; }
+html.theme-light [class*="divide-slate"] > * { border-color: #e2e8f0 !important; }
+html.theme-light [class*="text-indigo-"]  { color: #4338ca !important; }
+html.theme-light [class*="text-violet-"],
+html.theme-light [class*="text-purple-"]  { color: #6d28d9 !important; }
+html.theme-light [class*="text-fuchsia-"] { color: #a21caf !important; }
+html.theme-light [class*="text-blue-"]     { color: #1d4ed8 !important; }
+html.theme-light [class*="text-sky-"]      { color: #0369a1 !important; }
+html.theme-light [class*="text-cyan-"]     { color: #0e7490 !important; }
+html.theme-light [class*="text-teal-"]     { color: #0f766e !important; }
+html.theme-light [class*="text-emerald-"]  { color: #047857 !important; }
+html.theme-light [class*="text-green-"]    { color: #15803d !important; }
+html.theme-light [class*="text-lime-"]     { color: #4d7c0f !important; }
+html.theme-light [class*="text-yellow-"]   { color: #854d0e !important; }
+html.theme-light [class*="text-amber-"]    { color: #b45309 !important; }
+html.theme-light [class*="text-orange-"]   { color: #c2410c !important; }
+html.theme-light [class*="text-red-"]      { color: #b91c1c !important; }
+html.theme-light [class*="text-rose-"]     { color: #be123c !important; }
+html.theme-light [class*="text-pink-"]     { color: #be185d !important; }
+</style>
+<script>
+(function(){try{if(localStorage.getItem('bs_theme')==='light')document.documentElement.classL

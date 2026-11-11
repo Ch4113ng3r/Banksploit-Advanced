@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BankSploit &middot; Login</title>
+    <!-- Tailwind is self-hosted (vendored) so the app renders identically in any
+         browser / proxy (e.g. Burp's embedded browser) and fully offline. -->
+    <script src="/public/vendor/tailwind.js"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } } };
+    </script>
+    <style>
+        body { background: #0b1020; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-thumb { background: #233056; border-radius: 6px; }
+    </style>
+    <style id="bs-theme-light">
+html.theme-light body { background: #eef2f7 !important; }
+html.theme-light [class*="bg-slate-9"] { background-color: #ffffff !important; }
+html.theme-light [class*="bg-slate-8"] { background-color: #e7edf3 !important; }
+html.theme-light [class*="ring-slate"] { --tw-ring-color: #cbd5e1 !important; }
+html.theme-light [class*="border-slate"] { border-color: #cbd5e1 !important; }
+html.theme-light [class*="text-slate-1"],
+html.theme-light [class*="text-slate-2"],
+html.theme-light [class*="text-slate-3"] { color: #1e293b !important; }
+html.theme-light [class*="text-slate-4"] { color: #475569 !important; }
+html.theme-light [class*="text-slate-5"],
+html.theme-light [class*="text-slate-6"] { color: #64748b !important; }
+html.theme-light [class*="text-white"] { color: #0f172a !important; }
+html.theme-light [class*="divide-slate"] > * { border-color: #e2e8f0 !important; }
+html.theme-light [class*="text-indigo-"]  { color: #4338ca !important; }
+html.theme-light [class*="text-violet-"],
+html.theme-light [class*="text-purple-"]  { color: #6d28d9 !important; }
+html.theme-light [class*="text-fuchsia-"] { color: #a21caf !important; }
+html.theme-light [class*="text-blue-"]     { color: #1d4ed8 !important; }
+html.theme-light [class*="text-sky-"]      { color: #0369a1 !important; }
+html.theme-light [class*="text-cyan-"]     { color: #0e7490 !important; }
+html.theme-light [class*="text-teal-"]     { color: #0f766e !important; }
+html.theme-light [class*="text-emerald-"]  { color: #047857 !important; }
+html.theme-light [class*="text-green-"]    { color: #15803d !important; }
+html.theme-light [class*="text-lime-"]     { color: #4d7c0f !important; }
+html.theme-light [class*="text-yellow-"]   { color: #854d0e !important; }
+html.theme-light [class*="text-amber-"]    { color: #b45309 !important; }
+html.theme-light [class*="text-orange-"]   { color: #c2410c !important; }
+html.theme-light [class*="text-red-"]      { color: #b91c1c !important; }
+html.theme-light [class*="text-rose-"]     { color: #be123c !important; }
+html.theme-light [class*="text-pink-"]     { color: #be185d !important; }
+</style>
+<script>
+(function(){try{if(localStorage.getItem('bs_theme')==='light')document.documentElement.classList.add('theme-light');}catch(e){}})();
+if(!window.bsToggleTheme){window.bsToggleTheme=function(){
+  var on=document.documentElement.classList.toggle('theme-light');
+  try{localStorage.setItem('bs_theme',on?'light':'dark');}catch(e){}
+  document.querySelectorAll('[data-theme-btn]').forEach(function(b){b.textContent=on?'Light':'Dark';});
+};}
+document.addEventListener('DOMContentLoaded',function(){
+  var on=document.documentElement.classList.contains('theme-light');
+  document.querySelectorAll('[data-theme-btn]').forEach(function(b){b.textContent=on?'Light':'Dark';});
+});
+</script></head>
+<body class="h-full text-slate-200 antialiased">
+    <!-- ===================== AUTH SHELL (pre-login) ===================== -->
+    <!-- [BankSploit lab] Unauthenticated session viewer (watch session puzzling, auth.l25): http://10.141.199.78:9443/debug/session -->
+
+    <div class="min-h-full flex flex-col items-center justify-center px-4 py-10">
+        <div class="flex items-center gap-2 mb-4">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 flex items-center justify-center font-black text-slate-900">B</div>
+            <span class="text-xl font-bold tracking-tight">BankSploit</span>
+            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ring-1 bg-red-500/15 text-red-300 ring-red-500/30">Vuln Mode</span>
+        </div>
+        <!-- Lab controls available pre-login too, so an instructor can hide the
+             hints/OTP and set difficulty on the auth pages. -->
+        <div class="mb-6 flex items-center gap-2 flex-wrap"><button type="button" data-theme-btn onclick="bsToggleTheme()" title="Switch light / dark theme" class="text-xs px-2.5 py-1 rounded-full ring-1 font-semibold bg-slate-700/40 text-slate-300 ring-slate-600/40 hover:bg-slate-600/60">Dark</button></div>
+        <div class="w-full max-w-md bg-slate-900/70 ring-1 ring-slate-800 rounded-2xl shadow-2xl p-8">
+            <h2 class="text-xl font-bold text-white mb-6">Sign in to BankSploit</h2>        <div class="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 text-red-300 px-3 py-2 text-sm">Customer ID not found.</div>
+        <form method="post" action="http://10.141.199.78:9443/login">
+            
+            <label class="block text-xs font-medium text-slate-400 mb-1">Customer ID</label>
+            <input name="customer_id" autocomplete="off" autofocus
+                   class="w-full rounded-lg bg-slate-950 ring-1 ring-slate-700 focus:ring-indigo-500 px-3 py-2 text-slate-100"
+                   placeholder="Enter your Customer ID">
+            <label class="block text-xs font-medium text-slate-400 mb-1 mt-4">Password</label>
+            <input name="password" type="password" autocomplete="off"
+                   class="w-full rounded-lg bg-slate-950 ring-1 ring-slate-700 focus:ring-indigo-500 px-3 py-2 text-slate-100"
+                   placeholder="••••••••">
+            <button class="mt-5 w-full rounded-lg bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-semibold py-2.5 transition">Sign In</button>
+        </form>
+        <div class="mt-4 flex justify-center text-xs text-slate-500">
+            <a class="hover:text-slate-300" href="http://10.141.199.78:9443/forgot-password">Forgot password?</a>
+        </div><script>if(!window.labToggleHints){window.labToggleHints=function(btn){var b=btn.closest("[data-lab-banner]").querySelector(".lab-hint-body");var h=b.classList.toggle("hidden");btn.innerHTML=h?"Reveal &darr;":"Hide";};}if(!window.labSetPageLevel){window.labSetPageLevel=function(btn,lv){var vulns=btn.closest("[data-lab-level]").getAttribute("data-vulns").split(",").filter(Boolean);fetch("http://10.141.199.78:9443/api/v1/training/set-level",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({level:lv,vulns:vulns})}).then(function(){location.reload();});};}</script><div class="fixed top-4 right-4 w-80 max-h-[90vh] overflow-y-auto z-40 rounded-xl border border-sky-400/40 bg-slate-900/95 backdrop-blur-sm p-4 shadow-lg" id="ctf-hints-side">
+    <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+            <span class="text-lg">💡</span>
+            <span class="text-sm font-bold text-sky-300">Hint</span>
+        </div>
+        <button onclick="document.getElementById('ctf-hints-side').classList.toggle('hidden')" class="text-xs text-slate-500 hover:text-slate-300 px-1.5 py-0.5 rounded hover:bg-slate-800">✕</button>
+    </div>
+    <div class="mb-1"><span class="text-sm font-semibold text-sky-200">SQL Injection (SQLi)</span></div><p class="text-xs text-sky-300/80 leading-relaxed">The application builds database queries by concatenating user input directly into SQL strings. If input is not sanitized, an attacker can manipulate the query logic, bypassing authentication checks entirely without knowing valid credentials.
+Use your username with bypass string (e.g., BS100234&#039;#) to login without valid credentials. When exploited, a flag modal will automatically appear with the flag ready to copy.</p>
+</div>        </div>
+        <p class="mt-6 text-xs text-slate-400">&#9888; Intentionally vulnerable application &mdash; local security training only.</p>
+    </div>
+
+<script>
+// CTF Flag Modal System - Shows modal with selectable text and copy button
+(function() {
+    let shownFlags = new Set();
+
+    function showFlagModal(flag, vulnId = null) {
+        if (flag && !shownFlags.has(flag)) {
+            shownFlags.add(flag);
+
+            // Try to copy to clipboard immediately
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = flag;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                textarea.style.pointerEvents = 'none';
+                document.body.appendChild(textarea);
+                textarea.select();
+                textarea.setSelectionRange(0, flag.length);
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            } catch (e) {
+                // Silent fail - copy will work via button click
+            }
+
+            // Detect current theme (light/dark)
+            const isLight = document.documentElement.classList.contains('theme-light');
+
+            // Theme-aware colors
+            const darkTheme = {
+                overlay: 'rgba(0,0,0,0.85)',
+                bg: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                border: 'rgba(59, 130, 246, 0.2)',
+                title: '#f97316',
+                subtitle: '#64748b',
+                boxBg: 'rgba(30, 41, 59, 0.8)',
+                boxBorder: 'rgba(59, 130, 246, 0.1)',
+                text: '#0ea5e9',
+                btnBg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                btnBgHover: 'linear-gradient(135deg, #60a5fa 0%, #2563eb 100%)',
+                btnShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+                btnShadowHover: '0 6px 20px rgba(59, 130, 246, 0.4)',
+                btnClose: 'rgba(71, 85, 105, 0.4)',
+                btnCloseBorder: 'rgba(100, 116, 139, 0.3)',
+                btnCloseText: '#cbd5e1',
+                btnCloseHover: 'rgba(100, 116, 139, 0.6)'
+            };
+
+            const lightTheme = {
+                overlay: 'rgba(0,0,0,0.5)',
+                bg: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                border: 'rgba(51, 65, 85, 0.2)',
+                title: '#ea580c',
+                subtitle: '#475569',
+                boxBg: 'rgba(226, 232, 240, 0.8)',
+                boxBorder: 'rgba(15, 23, 42, 0.1)',
+                text: '#0369a1',
+                btnBg: 'linear-gradient(135deg, #0284c7 0%, #0c4a6e 100%)',
+                btnBgHover: 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)',
+                btnShadow: '0 4px 15px rgba(2, 132, 199, 0.3)',
+                btnShadowHover: '0 6px 20px rgba(2, 132, 199, 0.4)',
+                btnClose: 'rgba(203, 213, 225, 0.4)',
+                btnCloseBorder: 'rgba(100, 116, 139, 0.3)',
+                btnCloseText: '#1e293b',
+                btnCloseHover: 'rgba(203, 213, 225, 0.6)'
+            };
+
+            const theme = isLight ? lightTheme : darkTheme;
+
+            // Create modal HTML
+            const modal = document.createElement('div');
+            modal.id = 'ctf-flag-modal';
+            const vulnSubtitle = vulnId ? `<div style="font-size: 11px; color: ${theme.subtitle}; margin-bottom: 4px; font-family: 'Monaco', monospace; font-weight: 500;">${escapeHtml(vulnId)}</div>` : '';
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: ${theme.overlay}; display: flex; align-items: center; justify-content: center; z-index: 9999; animation: fadeIn 0.2s ease-in;">
+                    <div style="background: ${theme.bg}; border-radius: 16px; padding: 32px; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 60px rgba(59, 130, 246, 0.2); border: 1px solid ${theme.border}; animation: slideIn 0.3s ease-out;">
+                        <div style="font-size: 28px; margin-bottom: 8px; font-weight: 700; color: ${theme.title};">🚩 FLAG CAPTURED!</div>
+                        ${vulnSubtitle}
+                        <div style="font-size: 12px; color: ${theme.subtitle}; margin-bottom: 16px;">Vulnerability Exploited Successfully</div>
+                        <div style="background: ${theme.boxBg}; padding: 16px; border-radius: 10px; margin-bottom: 20px; font-family: 'Monaco', 'Courier New', monospace; word-break: break-all; user-select: all; color: ${theme.text}; font-size: 13px; line-height: 1.6; border: 1px solid ${theme.boxBorder}; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);">` + escapeHtml(flag) + `</div>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="ctf-copy-btn" style="flex: 1; padding: 11px 16px; background: ${theme.btnBg}; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; box-shadow: ${theme.btnShadow};">📋 Copy Flag</button>
+                            <button id="ctf-close-btn" style="flex: 1; padding: 11px 16px; background: ${theme.btnClose}; color: ${theme.btnCloseText}; border: 1px solid ${theme.btnCloseBorder}; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s;">Close</button>
+                        </div>
+                    </div>
+                    <style>
+                        @keyframes fadeIn {
+                            from { opacity: 0; }
+                            to { opacity: 1; }
+                        }
+                        @keyframes slideIn {
+                            from { transform: scale(0.95) translateY(-20px); opacity: 0; }
+                            to { transform: scale(1) translateY(0); opacity: 1; }
+                        }
+                        #ctf-copy-btn:hover {
+                            background: ${theme.btnBgHover};
+                            box-shadow: ${theme.btnShadowHover};
+                            transform: translateY(-2px);
+                        }
+                        #ctf-close-btn:hover {
+                            background: ${theme.btnCloseHover};
+                            border-color: rgba(148, 163, 184, 0.5);
+                        }
+                    </style>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Copy button handler - use synchronous execCommand
+            document.getElementById('ctf-copy-btn').addEventListener('click', function() {
+                try {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = flag;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    textarea.style.pointerEvents = 'none';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    textarea.setSelectionRange(0, flag.length);
+                    const success = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+
+                    const btn = this;
+                    if (success) {
+                        btn.textContent = '✅ Copied!';
+                        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                        btn.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.4)';
+                        setTimeout(() => {
+                            btn.textContent = '📋 Copy Flag';
+                            btn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+                            btn.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.3)';
+                        }, 2000);
+                    } else {
+                        btn.textContent = '❌ Failed';
+                        setTimeout(() => { btn.textContent = '📋 Copy Flag'; }, 2000);
+                    }
+                } catch (e) {
+                    const btn = this;
+                    btn.textContent = '❌ Error';
+                    setTimeout(() => { btn.textContent = '📋 Copy Flag'; }, 2000);
+                }
+            });
+
+            // Close button handler
+            document.getElementById('ctf-close-btn').addEventListener('click', function() {
+                modal.remove();
+            });
+        }
+    }
+
+    function escapeHtml(text) {
+        const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // Global function for page-embedded flag display (optional vulnId parameter)
+    window.displayFlag = function(flag, vulnId = null) {
+        showFlagModal(flag, vulnId);
+    };
+
+    // Intercept fetch responses
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+        return originalFetch.apply(this, args).then(response => {
+            const flag = response.headers.get('X-CTF-Flag');
+            if (flag) showFlagModal(flag);
+            return response;
+        });
+    };
+})();
+</script>
+</body>
+</html>

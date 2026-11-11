@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>BankSploit — Security Awareness for Technology Leadership</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b1120;--bg2:#131a30;--bg3:#1a2340;--card:rgba(25,35,65,.55);
+  --t1:#f0f4ff;--t2:#94a3b8;--t3:#64748b;
+  --indigo:#6366f1;--sky:#38bdf8;--red:#ef4444;--green:#22c55e;--amber:#eab308;--rose:#f43f5e;
+  --mono:'SF Mono','Cascadia Code','Fira Code','Consolas',monospace;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t1);font-family:var(--sans)}
+#progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--indigo),var(--sky));z-index:99;transition:width .35s ease}
+#counter{position:fixed;bottom:1.2rem;right:2rem;font-size:.8rem;color:var(--t3);z-index:99;font-variant-numeric:tabular-nums}
+#fs-hint{position:fixed;bottom:1.2rem;left:2rem;font-size:.75rem;color:var(--t3);z-index:99;opacity:1;transition:opacity 1s}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:5vh 8vw;opacity:0;transition:opacity .3s ease}
+.slide.active{display:flex;opacity:1}
+.slide-inner{max-width:1280px;width:100%;margin:0 auto}
+
+/* ─── Typography ─── */
+h1{font-size:clamp(2rem,4.5vw,3.5rem);font-weight:800;letter-spacing:-.02em;line-height:1.15}
+h2{font-size:clamp(1.5rem,3vw,2.4rem);font-weight:700;line-height:1.25}
+h3{font-size:clamp(1.1rem,2vw,1.6rem);font-weight:600;line-height:1.3}
+p,.desc{font-size:clamp(.95rem,1.5vw,1.15rem);line-height:1.7;color:var(--t2)}
+.big{font-size:clamp(1.3rem,2.5vw,2rem);line-height:1.5;color:var(--t1);font-weight:500}
+.huge{font-size:clamp(1.6rem,3.5vw,2.8rem);line-height:1.35;font-weight:700}
+.sub{font-size:clamp(.85rem,1.2vw,1rem);color:var(--t3);letter-spacing:.03em;text-transform:uppercase;font-weight:600}
+.gradient{background:linear-gradient(135deg,var(--indigo),var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ─── Badges ─── */
+.badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:700;padding:.3rem .8rem;border-radius:9999px;text-transform:uppercase;letter-spacing:.06em}
+.badge-red{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.badge-yellow{background:rgba(234,179,8,.15);color:#fde047;border:1px solid rgba(234,179,8,.3)}
+.badge-blue{background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3)}
+.badge-green{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3)}
+
+/* ─── Code ─── */
+pre{background:#080c18;border:1px solid #1e293b;border-radius:10px;padding:1.3rem 1.6rem;overflow-x:auto;font-size:clamp(.8rem,1.1vw,.95rem);line-height:1.7;font-family:var(--mono);color:#c0caf5}
+.kw{color:#bb9af7}.str{color:#9ece6a}.cm{color:#565f89;font-style:italic}.fn{color:#e0af68}.var{color:#7dcfff}.num{color:#ff9e64}
+.vuln-hl{background:rgba(239,68,68,.15);border-bottom:2px solid var(--red);padding:0 2px;border-radius:2px}
+.fix-hl{background:rgba(34,197,94,.15);border-bottom:2px solid var(--green);padding:0 2px;border-radius:2px}
+
+/* ─── Table ─── */
+table{width:100%;border-collapse:collapse;font-size:clamp(.8rem,1.1vw,.95rem)}
+th{text-align:left;padding:.7rem 1rem;color:var(--t3);font-weight:600;border-bottom:1px solid #1e293b;text-transform:uppercase;font-size:.75rem;letter-spacing:.04em}
+td{padding:.7rem 1rem;border-bottom:1px solid rgba(30,41,59,.5);color:var(--t2);vertical-align:top}
+tr:nth-child(even){background:rgba(15,23,42,.3)}
+
+/* ─── Cards / boxes ─── */
+.card{background:var(--card);border:1px solid #1e293b;border-radius:12px;padding:1.5rem 2rem}
+.accent-left{border-left:4px solid var(--indigo)}
+.red-left{border-left:4px solid var(--red)}
+.green-left{border-left:4px solid var(--green)}
+.yellow-left{border-left:4px solid var(--amber)}
+
+/* ─── Grid / flex helpers ─── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem}
+.flex-col{display:flex;flex-direction:column;gap:1rem}
+.flex-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.gap2{gap:2rem}.gap3{gap:2.5rem}
+.mt1{margin-top:.75rem}.mt2{margin-top:1.5rem}.mt3{margin-top:2.5rem}
+.mb1{margin-bottom:.75rem}.mb2{margin-bottom:1.5rem}
+.center{text-align:center}
+.sep{border-top:1px solid #1e293b;margin:1.5rem 0}
+
+/* ─── Section slides ─── */
+.section-slide{justify-content:center;align-items:center;text-align:center}
+.section-slide .icon{font-size:3.5rem;margin-bottom:1rem}
+
+/* ─── Agenda pills ─── */
+.agenda-item{display:flex;align-items:center;gap:1rem;padding:.6rem 0}
+.agenda-num{width:2rem;height:2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0}
+
+/* ─── Quote ─── */
+.quote{position:relative;padding-left:1.5rem;border-left:3px solid var(--indigo)}
+.quote::before{content:'"';position:absolute;left:-0.5rem;top:-1rem;font-size:3rem;color:var(--indigo);opacity:.4}
+
+/* ─── Arrow ─── */
+.arrow{color:var(--indigo);font-weight:800;margin:0 .5rem}
+
+/* ─── Step numbers ─── */
+.step{display:flex;gap:1rem;align-items:flex-start;margin-bottom:.8rem}
+.step-num{width:1.8rem;height:1.8rem;border-radius:50%;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0;margin-top:.2rem}
+
+/* ─── Comparison ─── */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.vs>div:first-child{border-left:3px solid var(--red);padding-left:1rem}
+.vs>div:last-child{border-left:3px solid var(--green);padding-left:1rem}
+
+/* ─── Phase Tracker ─── */
+#phase-tracker{position:fixed;top:6px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:.35rem;z-index:98;padding:0 5vw}
+.phase-pill{font-size:.6rem;padding:.15rem .55rem;border-radius:9999px;color:var(--t3);background:transparent;border:1px solid transparent;transition:all .3s;white-space:nowrap;font-weight:600;letter-spacing:.03em;text-transform:uppercase;cursor:pointer}
+.phase-pill:hover{color:var(--t1);border-color:rgba(99,102,241,.25)}
+.phase-pill.active{color:var(--t1);border-color:rgba(99,102,241,.4);background:rgba(99,102,241,.15)}
+
+/* ─── Timer Widget ─── */
+#timer-widget{position:fixed;bottom:1rem;left:2rem;background:rgba(11,17,32,.94);border:1px solid rgba(99,102,241,.3);border-radius:10px;padding:.45rem .9rem;z-index:100;display:none;align-items:center;gap:.6rem;backdrop-filter:blur(8px);box-shadow:0 4px 15px rgba(0,0,0,.4)}
+#timer-widget.visible{display:flex}
+#timer-display{font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--t1);min-width:3.5rem;text-align:center}
+#timer-display.expired{color:var(--red);animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.timer-ctrl{background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);color:#a5b4fc;border-radius:6px;padding:.25rem .6rem;cursor:pointer;font-size:.75rem;font-weight:600;font-family:var(--sans);transition:background .2s}
+.timer-ctrl:hover{background:rgba(99,102,241,.3)}
+.timer-btn{background:linear-gradient(135deg,var(--indigo),var(--sky));color:#fff;border:none;border-radius:8px;padding:.5rem 1.2rem;cursor:pointer;font-size:.9rem;font-weight:700;letter-spacing:.02em;transition:opacity .2s}
+.timer-btn:hover{opacity:.85}
+
+/* ─── Print ─── */
+@media print{
+  .slide{display:flex!important;opacity:1!important;position:relative;page-break-after:always;height:100vh}
+  #progress,#counter,#fs-hint,#phase-tracker,#timer-widget{display:none}
+}
+
+.flow{display:flex;align-items:stretch;gap:.55rem;flex-wrap:wrap}.flow-step{flex:1;min-width:130px;background:var(--card);border:1px solid #1e293b;border-radius:10px;padding:1rem;text-align:center}.flow-arrow{display:flex;align-items:center;color:var(--indigo);font-weight:900;font-size:1.35rem}.source-note{margin-top:1rem;color:var(--t3);font-size:.68rem;line-height:1.35}.level-card{position:relative}.level-tag{position:absolute;top:.65rem;right:.7rem;font-size:.65rem;font-weight:800;text-transform:uppercase;padding:.2rem .5rem;border-radius:999px;background:rgba(99,102,241,.16);color:#c7d2fe}.decision{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}.decision .card{padding:1rem}
+</style>
+</head>
+<body>
+<div id="progress" style="width:0%"></div>
+<div id="phase-tracker"></div>
+<div id="counter"></div>
+<div id="fs-hint">Press F11 for fullscreen • Arrow keys to navigate</div>
+<div id="timer-widget">
+<span id="timer-display">00:00</span>
+<button class="timer-ctrl" id="timer-toggle-btn" onclick="timerToggle()">▶</button>
+<button class="timer-ctrl" onclick="timerReset()">↺</button>
+<button class="timer-ctrl" onclick="timerHide()" style="color:var(--t3)">✕</button>
+</div>
+<!-- ============================================================ -->
+<!-- PHASE 1: CONTEXT & APP WALKTHROUGH                           -->
+<!-- ============================================================ -->
+<!-- Slide 1 — Title -->
+<section class="slide" id="s1">
+<div class="slide-inner center" style="padding-top:5vh">
+<p class="sub mb2">Cyber Security Session for Technology Leadership</p>
+<h1 class="gradient" style="font-size:clamp(2.5rem,5.5vw,4.5rem)">BankSploit</h1>
+<h2 style="font-weight:400;color:var(--t2);margin-top:.5rem">Think Like an Attacker: The Cyber Leadership Lab</h2>
+<div class="sep" style="max-width:200px;margin:2.5rem auto"></div>
+<p style="color:var(--t3);font-size:.95rem">Duration: 2.5 Hours • Interactive • Guided + Independent Hands-On</p>
+<p style="color:var(--t3);font-size:.85rem;margin-top:.5rem">« Ankit Rai • India Lead of Penetration Testing Team • Oct 2026 »</p>
+</div>
+</section>
+<!-- Slide 2 — Objective -->
+<section class="slide" id="s2">
+<div class="slide-inner">
+<p class="sub mb1">Session Objective</p>
+<div class="quote mt2">
+<p class="big">Give technology leaders first-hand experience of how ordinary design assumptions become attack paths, then connect those moments to the leadership decisions that reduce business risk.</p>
+</div>
+<div class="mt3 center">
+<p style="color:var(--t3);font-size:1rem">Through a series of controlled demonstrations, you will experience how an attacker can move from a seemingly minor weakness to compromising customer data and application infrastructure. The objective is to show how attack paths are created across multiple control domains, reinforcing why AppSec, IAM, Cyber Operations, and Penetration Testing must operate as an integrated defence capability, particularly in an AI-enabled threat landscape.</p>
+</div>
+</div>
+</section>
+<!-- Slide 3 — Sound Familiar? -->
+<section class="slide" id="s3">
+<div class="slide-inner">
+<h2 class="mb2">Sound Familiar?</h2>
+<div class="grid3" style="gap:1rem">
+<div class="card red-left" style="padding:1rem 1.2rem">
+<p class="desc" style="font-size:.85rem"><em>"Can we lower the severity from High to Medium? It's blocking our release and it doesn't really seem high risk."</em></p>
+<p style="font-size:.78rem;color:var(--t3);margin-top:.4rem">Severity is based on exploitability and impact — not your sprint deadline. The vulnerability doesn't care about your release date.</p>
+</div>
+<div class="card red-left" style="padding:1rem 1.2rem">
+<p class="desc" style="font-size:.85rem"><em>"This is an internal API — no one outside can reach it. Why do you want a pen test for this?"</em></p>
+<p style="font-size:.78rem;color:var(--t3);margin-top:.4rem">Many serious incidents expand through internal lateral movement after the first foothold. “Internal” is a trust boundary to defend, not proof of safety.</p>
+</div>
+<div class="card red-left" style="padding:1rem 1.2rem">
+<p class="desc" style="font-size:.85rem"><em>"Only a few individuals in my team have access to this resource and they are trusted."</em></p>
+<p style="font-size:.78rem;color:var(--t3);margin-top:.4rem">Insider threat isn't about trust — it's about blast radius when credentials are compromised. An attacker with a stolen session IS your trusted employee.</p>
+</div>
+<div class="card red-left" style="padding:1rem 1.2rem">
+<p class="desc" style="font-size:.85rem"><em>"Our gateway has all checks in place. We don't need to fix the code — it's additional burden."</em></p>
+<p style="font-size:.78rem;color:var(--t3);margin-top:.4rem">A gateway is a seatbelt, not a replacement for brakes. What happens when someone bypasses it?</p>
+</div>
+<div class="card red-left" style="padding:1rem 1.2rem">
+<p class="desc" style="font-size:.85rem"><em>"We'll fix it in the next release. Let this one go to production."</em></p>
+<p style="font-size:.78rem;color:var(--t3);margin-top:.4rem">When is the next release? Is there an owner? A tracking ticket? "Next release" without a date is "never."</p>
+</div>
+<div class="card red-left" style="padding:1rem 1.2rem">
+<p class="desc" style="font-size:.85rem"><em>"We've been running this for 3 years and nobody has exploited it."</em></p>
+<p style="font-size:.78rem;color:var(--t3);margin-top:.4rem">That you know of. Absence of detection is not absence of exploitation. You're about to see a data breach that leaves no trace.</p>
+</div>
+<div class="card red-left" style="padding:1rem 1.2rem">
+<p class="desc" style="font-size:.85rem"><em>"Can you just whitelist this finding in the scanner so it stops blocking the pipeline?"</em></p>
+<p style="font-size:.78rem;color:var(--t3);margin-top:.4rem">Silencing the alarm doesn't put out the fire. If it's a false positive, document why. If it's real, suppressing it is accepting risk without the paperwork.</p>
+</div>
+<div class="card red-left" style="padding:1rem 1.2rem">
+<p class="desc" style="font-size:.85rem"><em>"The vendor said it's secure — they gave us a compliance certificate."</em></p>
+<p style="font-size:.78rem;color:var(--t3);margin-top:.4rem">A compliance certificate says the vendor met a checklist at a point in time. It says nothing about your integration, your configuration, or their next update.</p>
+</div>
+<div class="card red-left" style="padding:1rem 1.2rem">
+<p class="desc" style="font-size:.85rem"><em>"We're running our application over HTTPS — that means it's secure."</em></p>
+<p style="font-size:.78rem;color:var(--t3);margin-top:.4rem">HTTPS encrypts the transport. It doesn't validate your inputs, check your authorization logic, or stop SQL injection. A locked delivery truck doesn't guarantee what's inside is safe.</p>
+</div>
+</div>
+<p class="mt2 big center" style="font-size:clamp(1rem,1.8vw,1.3rem)">By the end of this session, you will have the evidence and the language to answer every one of these.</p>
+</div>
+</section>
+<!-- Slide 4 — Agenda -->
+<section class="slide" id="s4">
+<div class="slide-inner">
+<h2 class="mb2">Agenda</h2>
+<div class="flex-col" style="max-width:750px"><div class="agenda-item"><div class="agenda-num" style="background:var(--indigo);color:#fff">1</div><div><strong style="color:var(--t1)">Context, Threat Economy &amp; Scam Mechanics</strong> <span style="color:var(--t3)">— 20 min</span><br/><span style="color:var(--t2);font-size:.9rem">How attacks are funded, traded and industrialised</span></div></div><div class="agenda-item"><div class="agenda-num" style="background:var(--indigo);color:#fff">2</div><div><strong style="color:var(--t1)">Real Incidents: From Weakness to Business Impact</strong> <span style="color:var(--t3)">— 20 min</span><br/><span style="color:var(--t2);font-size:.9rem">Technical attack paths, insider risk and avoidable mistakes</span></div></div><div class="agenda-item"><div class="agenda-num" style="background:var(--indigo);color:#fff">3</div><div><strong style="color:var(--t1)">I Demonstrate, We Repeat</strong> <span style="color:var(--t3)">— 40 min</span><br/><span style="color:var(--t2);font-size:.9rem">Basic path shown live, then everyone reproduces it</span></div></div><div class="agenda-item"><div class="agenda-num" style="background:var(--indigo);color:#fff">4</div><div><strong style="color:var(--t1)">You Solve the Harder Variant</strong> <span style="color:var(--t3)">— 25 min</span><br/><span style="color:var(--t2);font-size:.9rem">Admin-controlled complexity increases after the guided round</span></div></div><div class="agenda-item"><div class="agenda-num" style="background:var(--indigo);color:#fff">5</div><div><strong style="color:var(--t1)">Mindset, AI &amp; Connected Defence</strong> <span style="color:var(--t3)">— 30 min</span><br/><span style="color:var(--t2);font-size:.9rem">What leaders should challenge, fund and measure</span></div></div><div class="agenda-item"><div class="agenda-num" style="background:var(--indigo);color:#fff">6</div><div><strong style="color:var(--t1)">Leadership Decisions &amp; Commitments</strong> <span style="color:var(--t3)">— 15 min</span><br/><span style="color:var(--t2);font-size:.9rem">Translate the lab into concrete questions and actions</span></div></div></div>
+</div>
+</section>
+<!-- Slide 5 — The Security Mindset: Two Perspectives -->
+<section class="slide" id="s5">
+<div class="slide-inner">
+<h3 class="mb1">The Security Mindset</h3>
+<div class="quote">
+<p class="desc" style="font-size:1.05rem">The difference between a secure application and a vulnerable one is rarely the technology. It's whether someone asked <em>"what could go wrong?"</em> before shipping.</p>
+</div>
+<table class="mt2" id="mindset-table">
+<thead><tr><th>What the Builder Assumes</th><th class="atk-col" style="opacity:0;transition:opacity .5s">What the Attacker Sees</th></tr></thead>
+<tbody>
+<tr><td><em>"The user will enter a Customer ID"</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>"What if I enter SQL code instead?"</em></td></tr>
+<tr><td><em>"This field is disabled — they can't change it"</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>"Disabled in the browser. What about the raw HTTP request?"</em></td></tr>
+<tr><td><em>"Only authenticated users reach this page"</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>"Authenticated, yes. But authorized for THIS data?"</em></td></tr>
+<tr><td><em>"We're using HTTPS and a gateway"</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>"The injection happens INSIDE the encrypted tunnel."</em></td></tr>
+<tr><td><em>"The admin panel URL isn't documented anywhere"</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>"I'll try /admin, /manage, /dashboard — found it in 5 seconds."</em></td></tr>
+<tr><td><em>"The old API version is deprecated, no one uses it"</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>"Deprecated doesn't mean disabled. It's still accepting requests."</em></td></tr>
+<tr><td><em>"We show helpful errors so users know what went wrong"</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>"That error told me it's MySQL 8 and the table is called 'users'."</em></td></tr>
+<tr><td><em>"The logic is in the mobile app, users can't see it"</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>"I decompiled the APK in 2 minutes. Every secret is in plain text."</em></td></tr>
+</tbody>
+</table>
+<div class="mt2 center">
+<p class="big" id="mindset-pre" style="font-size:clamp(1rem,1.6vw,1.2rem);color:var(--t2)">Sounds reasonable, right? These are the assumptions developers make every day.</p>
+<button class="timer-btn mt1" id="mindset-reveal-btn" onclick="revealAttacker()" style="margin-top:.8rem">🔴 Now see what the attacker sees</button>
+<p class="big" id="mindset-post" style="font-size:clamp(1rem,1.6vw,1.2rem);display:none">The builder thinks about what the system <strong>should</strong> do. The attacker thinks about what it <strong>could</strong> do.<br/>Security mindset is holding both perspectives simultaneously.</p>
+</div>
+</div>
+</section>
+<!-- Slide 6 — This Isn't Theoretical -->
+<section class="slide" id="s6">
+<div class="slide-inner">
+<h3 class="mb2">This Isn't Theoretical</h3>
+<p class="desc mb2">Every one of these breaches started with a reasonable-sounding assumption.</p>
+<table>
+<thead><tr><th style="width:18%">Incident</th><th style="width:30%">What They Assumed</th><th>What Actually Happened</th></tr></thead>
+<tbody>
+<tr><td><strong style="color:var(--t1)">Equifax 2017</strong><br/><span style="font-size:.75rem">147M records</span></td><td><em>"We'll patch it next cycle."</em></td><td style="color:var(--red)">Apache Struts vulnerability sat unpatched for 2 months. Attackers walked in through a known exploit with a public CVE.</td></tr>
+<tr><td><strong style="color:var(--t1)">Capital One 2019</strong><br/><span style="font-size:.75rem">100M records</span></td><td><em>"The WAF handles security."</em></td><td style="color:var(--red)">SSRF bypassed the WAF entirely. A misconfigured firewall rule gave access to S3 metadata. The WAF never saw the attack.</td></tr>
+<tr><td><strong style="color:var(--t1)">MOVEit 2023</strong><br/><span style="font-size:.75rem">2,700+ orgs</span></td><td><em>"It's a trusted vendor product."</em></td><td style="color:var(--red)">SQL injection in a file transfer tool used by thousands of enterprises. Vendor trust ≠ vendor security.</td></tr>
+<tr><td><strong style="color:var(--t1)">Log4Shell 2021</strong><br/><span style="font-size:.75rem">Global impact</span></td><td><em>"It's just a logging library."</em></td><td style="color:var(--red)">A single JNDI lookup in a log message gave attackers remote code execution on any server running Log4j.</td></tr>
+<tr><td><strong style="color:var(--t1)">Optus 2022</strong><br/><span style="font-size:.75rem">10M records</span></td><td><em>"The API isn't publicly documented."</em></td><td style="color:var(--red)">Unauthenticated API endpoint discovered and scraped. No auth, no rate limit. Security by obscurity lasted until someone looked.</td></tr>
+<tr><td><strong style="color:var(--t1)">Uber 2022</strong><br/><span style="font-size:.75rem">Full internal access</span></td><td><em>"We have MFA — we're protected."</em></td><td style="color:var(--red)">Attacker spammed MFA push notifications at 1 AM until the employee approved one. MFA isn't a wall — it's a door that can be knocked on.</td></tr>
+</tbody>
+</table>
+<p class="mt2 big center" style="font-size:clamp(1rem,1.6vw,1.2rem)">The attacker's job is to find the one assumption you didn't question.<br/>Today, we'll show you how to start questioning them.</p>
+</div>
+</section><section class="slide" id="s7"><div class="slide-inner"><p class="sub mb1">How the session works</p><h2>See it. Repeat it. Then solve the harder version.</h2><div class="grid3 mt3"><div class="card level-card green-left"><span class="level-tag">Level 1</span><h3>I demonstrate</h3><p class="desc mt1">I show the basic weakness, attacker question, evidence and business consequence.</p></div><div class="card level-card yellow-left"><span class="level-tag">Level 2</span><h3>We repeat together</h3><p class="desc mt1">You reproduce the same attack beside me, with prompts and guardrails.</p></div><div class="card level-card red-left"><span class="level-tag">Level 3</span><h3>You solve independently</h3><p class="desc mt1">I increase complexity from the admin panel. The vulnerability class stays familiar, but the obvious clue or shortcut is removed.</p></div></div><p class="big center mt3">The goal is not to turn leaders into penetration testers. It is to build confidence in recognising attack paths and asking sharper questions.</p></div></section><section class="slide" id="s8"><div class="slide-inner"><p class="sub mb1">The threat economy</p><h2>An exploit is not the whole attack. It is one product in a supply chain.</h2><div class="flow mt3"><div class="flow-step"><strong>Access broker</strong><p class="desc mt1">Obtains or sells initial access</p></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Exploit / tooling</strong><p class="desc mt1">Turns a weakness into capability</p></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Operator</strong><p class="desc mt1">Moves, persists and steals</p></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Monetisation</strong><p class="desc mt1">Fraud, extortion or resale</p></div></div><div class="card accent-left mt3"><p class="desc"><strong style="color:var(--t1)">Leadership lens:</strong> reducing demand for emergency response means disrupting the chain early: secure engineering, identity controls, segmentation, detection and rehearsed recovery.</p></div><p class="source-note">Use at a high level. Do not show live criminal-market listings, purchasing paths or operational instructions.</p></div></section><section class="slide" id="s9"><div class="slide-inner"><p class="sub mb1">Scams with a technical backbone</p><h2>The message is social. The outcome is engineered.</h2><div class="grid3 mt2"><div class="card"><h3>Session theft</h3><p class="desc mt1">A convincing lure leads to token or cookie capture, turning a human mistake into authenticated access.</p></div><div class="card"><h3>OAuth consent abuse</h3><p class="desc mt1">The victim approves permissions that allow an attacker-controlled application to access data without stealing the password.</p></div><div class="card"><h3>Support-channel takeover</h3><p class="desc mt1">The attacker manipulates identity recovery or help-desk processes, then uses legitimate controls against the organisation.</p></div></div><p class="big center mt3">The best question is not “would our people spot the scam?” It is “what stops one successful interaction becoming a material incident?”</p></div></section><section class="slide" id="s10"><div class="slide-inner"><p class="sub mb1">Technical incident anatomy</p><h2>MOVEit: one product weakness, many downstream victims</h2><div class="flow mt2"><div class="flow-step"><strong>Internet-facing file-transfer service</strong></div><div class="flow-arrow">→</div><div class="flow-step"><strong>SQL injection exploited</strong></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Unauthorised access and data theft</strong></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Extortion and third-party impact</strong></div></div><div class="grid2 mt3"><div class="card red-left"><h3>What made it dangerous</h3><p class="desc mt1">A trusted, widely deployed product concentrated risk across connected organisations.</p></div><div class="card green-left"><h3>Leadership questions</h3><p class="desc mt1">Which externally exposed third parties hold sensitive data? How quickly can we identify use, contain exposure, rotate trust and notify affected parties?</p></div></div><p class="source-note">Sources for presenter verification: CISA advisory on MOVEit exploitation; Progress security advisories. Validate current figures before presenting.</p></div></section><section class="slide" id="s11"><div class="slide-inner"><p class="sub mb1">Internal adversaries and developer mistakes</p><h2>Different intent. The same control question: can one identity do too much?</h2><div class="grid2 mt2"><div class="card red-left"><h3>Malicious insider / compromised insider</h3><div class="flow mt1"><div class="flow-step">Legitimate access</div><div class="flow-arrow">→</div><div class="flow-step">Privilege or data misuse</div><div class="flow-arrow">→</div><div class="flow-step">Concealment / extortion</div></div><p class="desc mt2">Focus the discussion on separation of duties, monitoring, rapid access removal and independent investigation, not on distrust of employees.</p></div><div class="card yellow-left"><h3>Developer or operational mistake</h3><div class="flow mt1"><div class="flow-step">Secret or unsafe default</div><div class="flow-arrow">→</div><div class="flow-step">Public or broad exposure</div><div class="flow-arrow">→</div><div class="flow-step">Automated discovery</div></div><p class="desc mt2">A mistake becomes an incident when preventive controls, review, detection and response all fail to interrupt it.</p></div></div><p class="big center mt3">Design for compromised credentials and predictable mistakes. Trust people, verify actions, limit blast radius.</p></div></section><section class="slide" id="s12"><div class="slide-inner"><p class="sub mb1">When cyber risk becomes business survival</p><h2>Not every incident closes a company, but some can remove its ability to operate.</h2><div class="grid3 mt2"><div class="card"><h3>Code Spaces</h3><p class="desc mt1">A destructive cloud-account compromise became a widely cited example of a technology business ceasing operations after loss of systems and backups.</p></div><div class="card"><h3>NotPetya / Maersk</h3><p class="desc mt1">A trusted software pathway and rapid propagation caused global operational disruption, showing how connected infrastructure amplifies local compromise.</p></div><div class="card"><h3>Travelex</h3><p class="desc mt1">A ransomware incident disrupted services and became part of a wider period of financial and operational stress. Avoid claiming cyber was the sole cause of later business outcomes.</p></div></div><div class="card accent-left mt3"><p class="desc"><strong style="color:var(--t1)">Facilitator rule:</strong> separate confirmed facts from interpretation. Use “contributed to”, “disrupted” or “amplified” unless a primary source establishes sole causation.</p></div><p class="source-note">Presenter sources to retain: Maersk annual reporting / public statements; official incident or administrator records where available. Avoid unsupported breach-cost or shutdown claims.</p></div></section>
+<!-- Slide 7 — Meet BankSploit -->
+<section class="slide" id="s13">
+<div class="slide-inner">
+<h2 class="mb1">Meet BankSploit</h2>
+<p class="desc mb2">A fully functional retail banking application. Real features, real workflows, real data.</p>
+<div class="grid3">
+<div class="card"><h3>🔐 Authentication</h3><p class="mt1 desc">Login with Customer ID, password, and 2-factor OTP verification</p></div>
+<div class="card"><h3>💳 Dashboard</h3><p class="mt1 desc">Account balances, recent transactions, account summary</p></div>
+<div class="card"><h3>💸 Transfers</h3><p class="mt1 desc">IMPS/NEFT/RTGS fund transfer wizard with beneficiary management</p></div>
+<div class="card"><h3>📄 Statements</h3><p class="mt1 desc">Transaction history with date filters, search, and PDF export</p></div>
+<div class="card"><h3>🏦 Loans &amp; Cards</h3><p class="mt1 desc">Loan applications, EMI calculator, card management</p></div>
+<div class="card"><h3>💰 Payments</h3><p class="mt1 desc">Bill payments, payment history, beneficiary-based payouts</p></div>
+</div>
+<p class="mt2 center" style="color:var(--t3);font-size:.9rem">Built on PHP 8.3 / MySQL 8 • No frameworks • Realistic Indian retail-banking UI</p>
+</div>
+</section>
+<!-- Slide 8 — Looks Normal -->
+<section class="slide" id="s14">
+<div class="slide-inner center">
+<p style="font-size:5rem;margin-bottom:1rem">🏛️</p>
+<h2>Developers build and maintain applications like this.</h2>
+<p class="big mt2" style="color:var(--t2)">It looks normal. It works. Customers use it every day.</p>
+<p class="mt3" style="color:var(--t3);font-size:.95rem">« Live app walkthrough: login → dashboard → transfer → statements »</p>
+</div>
+</section>
+<!-- Slide 9 — What You Won't See Coming -->
+<section class="slide" id="s15">
+<div class="slide-inner center">
+<h1 class="gradient" style="font-size:clamp(2rem,4vw,3rem)">This app has 8 critical security vulnerabilities.</h1>
+<p class="big mt2">None are visible from the UI.</p>
+<p class="big">All are exploitable with just a browser.</p>
+<p class="mt3 desc" style="font-size:1.1rem">2,000 points across 8 challenges. Easy (100 pts) to Hard (300 pts).</p>
+</div>
+</section>
+<!-- ============================================================ -->
+<!-- PHASE 2: LIVE DEMONSTRATIONS                                 -->
+<!-- ============================================================ -->
+<!-- Slide 10 — Section Title -->
+<section class="slide section-slide" id="s16">
+<div class="slide-inner center">
+<div class="icon">🔴</div>
+<p class="sub">Phase 2</p>
+<h1>Live Demonstrations</h1>
+<p class="big mt2" style="color:var(--t2)">We're going to break into this bank.</p>
+</div>
+</section>
+<!-- ── DEMO 1: SQL Injection ── -->
+<!-- Slide 11 — Demo 1 Title -->
+<section class="slide" id="s17">
+<div class="slide-inner">
+<div class="flex-row mb2">
+<span class="badge badge-red">🔴 Demo 1</span>
+<span style="color:var(--t3);font-size:.8rem">G1 • CWE-89 • OWASP A03:2021</span>
+</div>
+<h1>SQL Injection — Login Bypass</h1>
+<p class="big mt2">"We're going to log in as anyone, without their password."</p>
+</div>
+</section>
+<!-- Slide 12 — Normal Login Flow -->
+<section class="slide" id="s18">
+<div class="slide-inner">
+<h3 class="mb2">How Login Normally Works</h3>
+<p class="desc mb2">You type your Customer ID and password. The server checks the database.</p>
+<pre><code><span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> customer_id = <span class="str">'BS100234'</span>
+  <span class="kw">AND</span> password_md5 = <span class="str">'5f4dcc3b5aa765d...'</span></code></pre>
+<p class="mt2 desc">If the Customer ID and password match a row in the database, you're in. Simple and correct — as long as the input is handled safely.</p>
+</div>
+</section>
+<!-- Slide 13 — The Attack -->
+<section class="slide" id="s19">
+<div class="slide-inner">
+<h3 class="mb2">The Attack</h3>
+<div class="grid2 gap2">
+<div>
+<p class="sub">What we type</p>
+<div class="card red-left mt1">
+<p style="color:var(--t3);font-size:.85rem">Customer ID:</p>
+<p style="font-family:var(--mono);font-size:1.2rem;color:var(--red)">BS100234' --  </p>
+<p style="color:var(--t3);font-size:.85rem;margin-top:.5rem">Password:</p>
+<p style="font-family:var(--mono);font-size:1.2rem;color:var(--t2)">anything</p>
+</div>
+</div>
+<div>
+<p class="sub">What the server executes</p>
+<pre class="mt1"><code><span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> customer_id = <span class="str">'BS100234'</span><span class="vuln-hl"> -- '</span>
+  <span class="cm">AND password_md5 = '...'</span></code></pre>
+<p class="desc mt1">The <code>--</code> turns the password check into a comment. The database never evaluates it. We're in.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Slide 14 — Vulnerable Code -->
+<section class="slide" id="s20">
+<div class="slide-inner">
+<h3 class="mb1">The Vulnerable Code</h3>
+<p class="desc mb2">From the actual login handler — the user's input is concatenated directly into the SQL string.</p>
+<pre><code><span class="cm">// login_vuln.php — Level 0: classic SQL injection</span>
+<span class="var">$sql</span> = <span class="str">"SELECT id, customer_id, name, role FROM users "</span>
+     . <span class="str">"WHERE customer_id = '"</span> . <span class="vuln-hl">$cid</span> . <span class="str">"' "</span>
+     . <span class="str">"AND password_md5 = '"</span> . <span class="fn">md5</span>(<span class="var">$password</span>) . <span class="str">"' LIMIT 1"</span>;
+
+<span class="var">$result</span> = <span class="var">$pdo</span>-&gt;<span class="fn">query</span>(<span class="var">$sql</span>);</code></pre>
+<p class="mt2 desc"><span class="vuln-hl">$cid</span> — User-supplied value pasted directly into SQL. Whatever the user types becomes part of the query. The attacker controls the database logic.</p>
+</div>
+</section>
+<!-- Slide 15 — The Moment -->
+<section class="slide" id="s21">
+<div class="slide-inner center">
+<h1 style="color:var(--red);font-size:clamp(1.6rem,3vw,2.4rem)">This bank's entire authentication just collapsed because of one missing function call.</h1>
+<div class="sep" style="max-width:200px;margin:2rem auto"></div>
+<p class="big" style="color:var(--t2)">SQL injection is a 25-year-old vulnerability class.<br/>It's still in the OWASP Top 10.<br/>It's still being written today.</p>
+</div>
+</section>
+<!-- Slide 16 — The Fix -->
+<section class="slide" id="s22">
+<div class="slide-inner">
+<h3 class="mb1">The Fix — And Why It Works</h3>
+<div class="grid2 gap2">
+<div>
+<pre><code><span class="cm">// login_secure.php — parameterized query</span>
+<span class="var">$stmt</span> = <span class="var">$pdo</span>-&gt;<span class="fn">prepare</span>(
+    <span class="str">'SELECT id, customer_id, name, role,
+            password_hash
+       FROM users
+       WHERE customer_id = <span class="fix-hl">:cid</span>
+       LIMIT 1'</span>
+);
+<span class="var">$stmt</span>-&gt;<span class="fn">execute</span>([<span class="str">':cid'</span> =&gt; <span class="var">$customerId</span>]);
+
+<span class="cm">// + password_verify() replaces MD5</span></code></pre>
+</div>
+<div>
+<p class="sub mb1">Why this works</p>
+<div class="card green-left">
+<p class="desc"><strong style="color:var(--green)">Step 1:</strong> The database receives the SQL template and compiles it into an execution plan. The <strong>query structure is locked</strong>.</p>
+<p class="desc mt1"><strong style="color:var(--green)">Step 2:</strong> User data (<code>:cid</code>) is sent <strong>separately</strong> and bound to the placeholder as a literal value.</p>
+<p class="desc mt1"><strong style="color:var(--green)">Step 3:</strong> The data is <strong>never parsed as SQL</strong>. Even if the user types <code>' OR 1=1 --</code>, the database treats the entire string as a value to search for — not as code to execute.</p>
+</div>
+<p class="desc mt1" style="font-size:.85rem;color:var(--t3)">Think of a printed form with blank fields. The form's structure is fixed. Whatever you write in the blanks is content — you can't rewrite the form itself.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Slide 17 — Org Tie-In: AppSec -->
+<section class="slide" id="s23">
+<div class="slide-inner">
+<h3 class="mb2">Who Should Have Caught This?</h3>
+<div class="card accent-left">
+<h3 style="color:var(--indigo)">Application Security</h3>
+<p class="desc mt1"><strong>SAST scanners</strong> flag string concatenation in SQL queries automatically. This is one of the most well-known static analysis rules in existence.</p>
+<p class="desc mt1"><strong>Code review</strong> catches <code>$pdo-&gt;query($sql)</code> with variable interpolation. A single reviewer asking "where does this variable come from?" prevents this vulnerability entirely.</p>
+<p class="desc mt1"><strong>Secure coding standards</strong> mandate parameterized queries. The pattern is documented in every language, every framework, every security guide written in the last two decades.</p>
+</div>
+<p class="mt2 big center">"This is a 25-year-old vulnerability. Automated tools detect it.<br/>The question is: does your SAST pipeline run before merge?"</p>
+</div>
+</section>
+<!-- ── DEMO 2: IDOR ── -->
+<!-- Slide 18 — Demo 2 Title -->
+<section class="slide" id="s24">
+<div class="slide-inner">
+<div class="flex-row mb2">
+<span class="badge badge-red">🔴 Demo 2</span>
+<span style="color:var(--t3);font-size:.8rem">SL1 • CWE-639 • OWASP A01:2021</span>
+</div>
+<h1>IDOR — View Another Customer's Statements</h1>
+<p class="big mt2">"We're going to read another customer's financial history."</p>
+</div>
+</section>
+<!-- Slide 19 — The Setup -->
+<section class="slide" id="s25">
+<div class="slide-inner">
+<h3 class="mb2">The Setup</h3>
+<div class="step"><div class="step-num">1</div><div><p class="desc">We're logged in as <strong style="color:var(--t1)">Rahul Sharma</strong>. We navigate to the Statements page.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">We notice the URL contains our account number:</p><pre style="margin-top:.5rem"><code>/statements?account=<span class="str">50100100000001</span></code></pre></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">We visit the <strong style="color:var(--t1)">Beneficiaries</strong> page. We can see other people's account numbers — that's normal, we pay them.</p></div></div>
+<div class="step"><div class="step-num">4</div><div><p class="desc">We see Priya Menon's account number: <code style="color:var(--red)">50100100000002</code></p></div></div>
+</div>
+</section>
+<!-- Slide 20 — The Attack -->
+<section class="slide" id="s26">
+<div class="slide-inner">
+<h3 class="mb2">The Attack</h3>
+<p class="desc">We change one number in the URL bar. That's the entire attack.</p>
+<div class="grid2 gap2 mt2">
+<div class="card red-left">
+<p class="sub">Before (my account)</p>
+<p style="font-family:var(--mono);font-size:1.1rem;margin-top:.5rem;color:var(--t2)">/statements?account=<span style="color:var(--green)">50100100000001</span></p>
+</div>
+<div class="card red-left">
+<p class="sub">After (Priya's account)</p>
+<p style="font-family:var(--mono);font-size:1.1rem;margin-top:.5rem;color:var(--t2)">/statements?account=<span style="color:var(--red)">50100100000002</span></p>
+</div>
+</div>
+<p class="big mt3 center">We press Enter. We can see all of Priya Menon's transactions.</p>
+</div>
+</section>
+<!-- Slide 21 — Vulnerable Code -->
+<section class="slide" id="s27">
+<div class="slide-inner">
+<h3 class="mb2">The Vulnerable Code</h3>
+<pre><code><span class="cm">// VULNERABLE: no ownership check</span>
+<span class="var">$stmt</span> = <span class="var">$pdo</span>-&gt;<span class="fn">prepare</span>(
+    <span class="str">"SELECT ... FROM accounts a
+       JOIN users u ON u.id = a.user_id
+       WHERE a.account_number = <span class="vuln-hl">:acct</span>"</span>
+);
+<span class="var">$stmt</span>-&gt;<span class="fn">execute</span>([<span class="str">':acct'</span> =&gt; <span class="var">$accountNumber</span>]);</code></pre>
+<p class="mt2 desc">The query finds the account by number. It parameterises the input (no SQL injection). But it never checks <strong style="color:var(--red)">whether the logged-in user owns that account</strong>. Any valid account number works for any user.</p>
+</div>
+</section>
+<!-- Slide 22 — The Moment -->
+<section class="slide" id="s28">
+<div class="slide-inner center">
+<h1 style="color:var(--red);font-size:clamp(1.6rem,3vw,2.4rem)">We just committed a data breach.<br/>We didn't hack anything.<br/>We changed a number in the URL.</h1>
+<div class="sep" style="max-width:200px;margin:2rem auto"></div>
+<p class="big" style="color:var(--t2)">No tools. No scripts. No technical knowledge.<br/>Just a browser address bar.</p>
+</div>
+</section>
+<!-- Slide 23 — The Fix -->
+<section class="slide" id="s29">
+<div class="slide-inner">
+<h3 class="mb2">The Fix</h3>
+<pre><code><span class="cm">// SECURE: ownership check added</span>
+<span class="var">$stmt</span> = <span class="var">$pdo</span>-&gt;<span class="fn">prepare</span>(
+    <span class="str">"SELECT ... FROM accounts a
+       JOIN users u ON u.id = a.user_id
+       WHERE a.account_number = :acct
+       <span class="fix-hl">AND a.user_id = :uid</span>"</span>
+);
+<span class="var">$stmt</span>-&gt;<span class="fn">execute</span>([<span class="str">':acct'</span> =&gt; <span class="var">$accountNumber</span>, <span class="str">':uid'</span> =&gt; <span class="var">$currentUserId</span>]);</code></pre>
+<p class="mt2 big center"><span class="fix-hl">AND a.user_id = :uid</span> — five words. That's the entire fix.</p>
+</div>
+</section>
+<!-- Slide 24 — Org Tie-In: Why Automated Tools Miss This -->
+<section class="slide" id="s30">
+<div class="slide-inner">
+<h3 class="mb2">Why Automated Tools Miss This</h3>
+<div class="card accent-left">
+<p class="desc">This is <strong style="color:var(--t1)">OWASP #1: Broken Access Control</strong> — the most common web application vulnerability category in the world.</p>
+<p class="desc mt1"><strong>SAST tools may flag suspicious data flows or inconsistent checks, but they cannot reliably prove the intended authorisation policy without business context.</strong> SQL injection is a <em>code pattern</em> — string concatenation in queries. IDOR is a <strong style="color:var(--red)">business logic flaw</strong>. A scanner can't know that <em>this</em> page should check ownership but <em>that</em> page is intentionally public. It requires understanding the application's authorization context.</p>
+<p class="desc mt1"><strong>IAM</strong> designed the access rules. The system authenticates correctly — it knows who you are. But knowing who you are is not the same as enforcing what you're allowed to see.</p>
+<p class="desc mt1"><strong>Penetration Testing</strong> is the primary detection method. A pen tester's first instinct on any URL with an ID parameter: <em>"What happens if I change this?"</em></p>
+</div>
+<p class="mt2 big center">"The authorization policy existed. The code didn't enforce it.<br/>No scanner can tell you that — only a human reviewing the logic."</p>
+</div>
+</section>
+<!-- ── DEMO 3: Command Injection ── -->
+<!-- Slide 25 — Demo 3 Title -->
+<section class="slide" id="s31">
+<div class="slide-inner">
+<div class="flex-row mb2">
+<span class="badge badge-red">🔴 Demo 3</span>
+<span style="color:var(--t3);font-size:.8rem">G9 • CWE-78 • OWASP A03:2021</span>
+</div>
+<h1>Command Injection — Server Takeover</h1>
+<p class="big mt2">"We're going to take control of the server. From a PDF download button."</p>
+</div>
+</section>
+<!-- Slide 26 — Normal Flow -->
+<section class="slide" id="s32">
+<div class="slide-inner">
+<h3 class="mb2">The Normal Flow</h3>
+<p class="desc">The Statements page has an <strong style="color:var(--t1)">"Export PDF"</strong> feature. It takes a filename and passes it to a command-line tool that generates the PDF.</p>
+<pre class="mt2"><code><span class="cm">// The intended command:</span>
+wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code></pre>
+<p class="desc mt2">The filename — <code>statement.pdf</code> — comes from the request. The developer assumed it would always be a simple filename. It isn't.</p>
+</div>
+</section>
+<!-- Slide 27 — Attack Step 1 -->
+<section class="slide" id="s33">
+<div class="slide-inner">
+<h3 class="mb2">Step 1: Discovery</h3>
+<p class="desc">We change the filename to include a <strong style="color:var(--red)">shell metacharacter</strong>:</p>
+<div class="card red-left mt2">
+<p style="font-family:var(--mono);font-size:1.1rem;color:var(--red)">filename = x.pdf;ls;</p>
+</div>
+<p class="desc mt2">The semicolon ends the PDF command and starts a new one. The server executes:</p>
+<pre class="mt1"><code>wkhtmltopdf /tmp/src.html /tmp/<span class="vuln-hl">x.pdf;ls;</span></code></pre>
+<p class="desc mt2">Instead of a PDF, the server returns a <strong style="color:var(--t1)">directory listing</strong>. We can see every file on the server's temp directory — including a suspicious file called <code style="color:var(--amber)">flag_g9_1.txt</code>.</p>
+</div>
+</section>
+<!-- Slide 28 — Attack Step 2 -->
+<section class="slide" id="s34">
+<div class="slide-inner">
+<h3 class="mb2">Step 2: Extraction</h3>
+<p class="desc">Now we read the flag file:</p>
+<div class="card red-left mt2">
+<p style="font-family:var(--mono);font-size:1.1rem;color:var(--red)">filename = x.pdf;cat /tmp/flag_g9_1.txt;</p>
+</div>
+<p class="desc mt2">The server outputs the contents of the file. The flag appears in the response.</p>
+<div class="card mt2" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)">
+<p style="font-family:var(--mono);font-size:1.1rem;color:var(--amber)">BANKSPLOIT{A8F3C21D9E0B}</p>
+</div>
+<p class="big mt2 center">"We just ran arbitrary commands on the server.<br/>From a PDF download button. In a banking app."</p>
+</div>
+</section>
+<!-- Slide 29 — Vulnerable Code -->
+<section class="slide" id="s35">
+<div class="slide-inner">
+<h3 class="mb2">The Vulnerable Code</h3>
+<pre><code><span class="cm">// VULNERABLE: user-supplied filename concatenated into shell command</span>
+<span class="var">$cmd</span> = <span class="str">"wkhtmltopdf $src {$tmpDir}/"</span> . <span class="vuln-hl">$filename</span> . <span class="str">" 2&gt;&amp;1"</span>;</code></pre>
+<p class="mt2 desc"><span class="vuln-hl">$filename</span> — whatever the user sends in the request becomes part of the command line. Shell metacharacters (<code>;</code> <code>|</code> <code>`</code> <code>$()</code>) break out of the intended command and execute whatever the attacker wants.</p>
+</div>
+</section>
+<!-- Slide 30 — The Fix: Two Layers -->
+<section class="slide" id="s36">
+<div class="slide-inner">
+<h3 class="mb2">The Fix — Two Layers</h3>
+<div class="vs">
+<div>
+<p class="sub" style="color:var(--green)">Primary: Input Validation (Whitelist)</p>
+<pre class="mt1"><code><span class="cm">// BEST: only accept safe characters</span>
+<span class="kw">if</span> (!<span class="fn">preg_match</span>(
+    <span class="str">'/^[a-zA-Z0-9._-]+$/'</span>,
+    <span class="var">$filename</span>
+)) {
+    <span class="kw">throw new</span> \<span class="fn">InvalidArgumentException</span>(
+        <span class="str">'Invalid filename'</span>
+    );
+}
+<span class="cm">// Letters, digits, dots, underscores,</span>
+<span class="cm">// hyphens only — everything else rejected</span></code></pre>
+<p class="desc mt1">Define what's <strong style="color:var(--green)">allowed</strong>, reject everything else. The attack input <code>x.pdf;ls;</code> never reaches the shell — the semicolons fail the whitelist.</p>
+</div>
+<div>
+<p class="sub" style="color:var(--sky)">Secondary: Shell Escaping (Quick Fix)</p>
+<pre class="mt1"><code><span class="cm">// GOOD: escape shell arguments</span>
+<span class="var">$cmd</span> = <span class="str">'wkhtmltopdf '</span>
+  . <span class="fn">escapeshellarg</span>(<span class="var">$src</span>)
+  . <span class="str">' '</span>
+  . <span class="fix-hl"><span class="fn">escapeshellarg</span>(<span class="var">$out</span>)</span>
+  . <span class="str">' 2&gt;&amp;1'</span>;</code></pre>
+<p class="desc mt1"><span class="fix-hl">escapeshellarg()</span> wraps the value in single quotes and escapes special characters. Good, but relies on the escaping function being bug-free.</p>
+</div>
+</div>
+<div class="sep"></div>
+<p class="big center">Whitelist first. Escape as a safety net. Both together is best.</p>
+</div>
+</section>
+<!-- Slide 31 — Org Tie-In: Defence in Depth -->
+<section class="slide" id="s37">
+<div class="slide-inner">
+<h3 class="mb2">Defence in Depth</h3>
+<p class="desc mb2">When Application Security misses a command injection, which other layers should catch it?</p>
+<div class="grid2 gap2">
+<div class="card">
+<h3 style="color:var(--sky)">🛡️ Cyber Operations / SOC</h3>
+<p class="desc mt1">Should detect unusual process execution — <code>cat</code>, <code>ls</code>, <code>whoami</code> spawned by a web server process is a red flag. Behavioural anomaly detection catches what code review missed.</p>
+</div>
+<div class="card">
+<h3 style="color:var(--sky)">🏗️ Infrastructure Security</h3>
+<p class="desc mt1">Principle of least privilege. The web process shouldn't have read access to arbitrary files. Container sandboxing, restricted shells, and process isolation limit blast radius.</p>
+</div>
+</div>
+<p class="mt2 big center">"Security is layers. When one fails, the next should catch it."</p>
+</div>
+</section>
+<!-- ============================================================ -->
+<!-- PHASE 3: GUIDED HANDS-ON                                     -->
+<!-- ============================================================ -->
+<!-- Slide 32 — Section Title -->
+<section class="slide section-slide" id="s38">
+<div class="slide-inner center">
+<div class="icon">🟡</div>
+<p class="sub">Phase 3</p>
+<h1>Your Turn</h1>
+<p class="big mt2" style="color:var(--t2)">First we reproduce the basic path together. Then the lab increases the difficulty and you solve the next variant independently.</p>
+</div>
+</section>
+<!-- ── EXERCISE 1: OTP in JS ── -->
+<!-- Slide 33 — Exercise 1 Title -->
+<section class="slide" id="s39">
+<div class="slide-inner">
+<div class="flex-row mb2">
+<span class="badge badge-yellow">🟡 Exercise 1</span>
+<span style="color:var(--t3);font-size:.8rem">L11 • CWE-200 • OWASP A04:2021 • 100 pts</span>
+</div>
+<h2>Find the OTP Without a Phone</h2>
+<p class="big mt2">You've logged in with the correct Customer ID and password. You're on the OTP verification screen. You don't have the victim's phone.</p>
+<p class="big mt1" style="color:var(--amber)">Can you still get in?</p>
+<div class="mt3 flex-row" style="justify-content:center;gap:1.2rem">
+<p class="desc" style="font-size:1.1rem">⏱️ 8 minutes. Work in pairs if you'd like.</p>
+<button class="timer-btn" onclick="timerStart(480)">▶ Start 8:00</button>
+</div>
+</div>
+</section>
+<!-- Slide 34 — Exercise 1 Instructions -->
+<section class="slide" id="s40">
+<div class="slide-inner">
+<h3 class="mb2">Instructions</h3>
+<div class="step"><div class="step-num">1</div><div><p class="desc">You're on the OTP verification page. The page is waiting for a 4-digit code.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Open DevTools: press <strong style="color:var(--t1)">F12</strong> (Windows) or <strong style="color:var(--t1)">Cmd+Opt+I</strong> (Mac).</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">Explore. The OTP is somewhere your browser has <em>already downloaded</em>. You don't need to make any new requests.</p></div></div>
+<div class="sep"></div>
+<p class="desc">The attacker's superpower isn't hacking — it's <strong style="color:var(--t1)">reading what the application is already sending</strong>.</p>
+</div>
+</section>
+<!-- Slide 35 — Exercise 1 Hints -->
+<section class="slide" id="s41">
+<div class="slide-inner">
+<h3 class="mb2">Hints (if you're stuck)</h3>
+<div class="flex-col gap2">
+<div class="card yellow-left"><p class="desc"><strong>Hint 1:</strong> Go to the <strong style="color:var(--t1)">Sources</strong> tab in DevTools.</p></div>
+<div class="card yellow-left"><p class="desc"><strong>Hint 2:</strong> Look at the JavaScript files the page loaded. There's one called <code>otp-validation.js</code>.</p></div>
+<div class="card yellow-left"><p class="desc"><strong>Hint 3:</strong> Open it. Search for <code>SESSION_DATA</code>. The OTP is right there — along with the CTF flag.</p></div>
+</div>
+</div>
+</section>
+<!-- Slide 36 — Exercise 1 Solution -->
+<section class="slide" id="s42">
+<div class="slide-inner">
+<h3 class="mb2">The Answer</h3>
+<pre><code><span class="cm">// otp-validation.js — loaded by the OTP page</span>
+<span class="kw">var</span> SESSION_DATA = {
+    <span class="str">"_t"</span>:    <span class="str">"otp"</span>,
+    <span class="str">"_v"</span>:    <span class="str">"2.1.4"</span>,
+    <span class="vuln-hl"><span class="str">"_otp"</span>:  <span class="str">"7241"</span></span>,       <span class="cm">// ← THE OTP</span>
+    <span class="vuln-hl"><span class="str">"_flag"</span>: <span class="str">"BANKSPLOIT{...}"</span></span>, <span class="cm">// ← THE CTF FLAG</span>
+    <span class="str">"_sid"</span>:  <span class="str">"abc123"</span>,
+    <span class="str">"_exp"</span>:  <span class="num">1719500000</span>
+};</code></pre>
+<p class="mt2 desc">A developer left debug data in a JavaScript file that gets shipped to every user's browser. The OTP — a secret that should only exist server-side — is embedded in client-side code.</p>
+</div>
+</section>
+<!-- Slide 37 — Exercise 1 Lesson -->
+<section class="slide" id="s43">
+<div class="slide-inner center">
+<h2>Client-side code is not secret.</h2>
+<p class="big mt2" style="color:var(--t2)">Everything sent to the browser is visible to the user. JavaScript files, hidden form fields, API responses, cookies — all of it is readable.</p>
+<div class="sep" style="max-width:200px;margin:2rem auto"></div>
+<p class="big">Secrets belong on the server. Never in JavaScript.</p>
+</div>
+</section>
+<!-- ── EXERCISE 2: IDOR Transfer ── -->
+<!-- Slide 38 — Exercise 2 Title -->
+<section class="slide" id="s44">
+<div class="slide-inner">
+<div class="flex-row mb2">
+<span class="badge badge-yellow">🟡 Exercise 2</span>
+<span style="color:var(--t3);font-size:.8rem">L1 • CWE-639 • OWASP A01:2021 • 300 pts</span>
+</div>
+<h2>Transfer Money from Someone Else's Account</h2>
+<p class="big mt2">The "From Account" field is greyed out. You can only transfer from your own account.</p>
+<p class="big mt1" style="color:var(--amber)">Or can you?</p>
+<div class="mt3 flex-row" style="justify-content:center;gap:1.2rem">
+<p class="desc" style="font-size:1.1rem">⏱️ 10 minutes.</p>
+<button class="timer-btn" onclick="timerStart(600)">▶ Start 10:00</button>
+</div>
+</div>
+</section>
+<!-- Slide 39 — Exercise 2 Instructions -->
+<section class="slide" id="s45">
+<div class="slide-inner">
+<h3 class="mb2">Instructions</h3>
+<div class="step"><div class="step-num">1</div><div><p class="desc">Go to the <strong style="color:var(--t1)">Transfer</strong> page. Notice the "From Account" field is <strong style="color:var(--t3)">disabled (greyed out)</strong>.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Right-click the greyed-out field. Click <strong style="color:var(--t1)">Inspect Element</strong>.</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">Look at the HTML. There's a <code>&lt;input type="hidden" name="from_account_id"&gt;</code> that carries the actual value the server reads.</p></div></div>
+<div class="step"><div class="step-num">4</div><div><p class="desc">Change its value to another user's account ID. Complete the transfer wizard.</p></div></div>
+<div class="sep"></div>
+<p class="desc">Think about it: the UI says you can't change this field. But <strong style="color:var(--t1)">who enforces that</strong> — the browser, or the server?</p>
+</div>
+</section>
+<!-- Slide 40 — Exercise 2 Solution -->
+<section class="slide" id="s46">
+<div class="slide-inner">
+<h3 class="mb2">The Answer</h3>
+<pre><code><span class="cm">&lt;!-- What the Transfer page renders --&gt;</span>
+&lt;<span class="kw">select</span> <span class="vuln-hl">disabled</span> class=<span class="str">"..."</span>&gt;
+  &lt;<span class="kw">option</span>&gt;50100100000001 (Savings)&lt;/<span class="kw">option</span>&gt;
+&lt;/<span class="kw">select</span>&gt;
+
+<span class="cm">&lt;!-- The hidden input the server actually reads --&gt;</span>
+&lt;<span class="kw">input</span> type=<span class="str">"hidden"</span> name=<span class="str">"from_account_id"</span>
+       value=<span class="vuln-hl">"1"</span>&gt;  <span class="cm">&lt;!-- Change this to "4" --&gt;</span></code></pre>
+<p class="mt2 desc">The <code>disabled</code> attribute is a UI hint to the browser. The <code>hidden</code> input is what the server reads. Change value <code>"1"</code> to <code>"4"</code> (another user's account), submit the form, and the transfer goes through. The server never checked ownership.</p>
+</div>
+</section>
+<!-- Slide 41 — Exercise 2 Lesson -->
+<section class="slide" id="s47">
+<div class="slide-inner center">
+<h2 style="color:var(--red)">The developer thought a disabled form field was a security control.</h2>
+<p class="big mt2" style="color:var(--t2)">It's a suggestion to the browser. The server must enforce it independently.</p>
+<div class="sep" style="max-width:200px;margin:2rem auto"></div>
+<p class="big">Client-side validation is UX.<br/>Server-side validation is security.<br/>They are not interchangeable.</p>
+</div>
+</section>
+<!-- ============================================================ -->
+<!-- PHASE 4: SECURITY IS A MINDSET                               -->
+<!-- ============================================================ -->
+<!-- Slide 42 — Section Title -->
+<section class="slide section-slide" id="s48">
+<div class="slide-inner center">
+<div class="icon">🔵</div>
+<p class="sub">Phase 4</p>
+<h1>Security Is a Mindset</h1>
+<p class="big mt2" style="color:var(--t2)">The pattern across all 8 vulnerabilities</p>
+</div>
+</section>
+<!-- Slide 43 — Vulnerability Matrix (Part 1) -->
+<section class="slide" id="s49">
+<div class="slide-inner">
+<h3 class="mb2">What Went Wrong — Every Time</h3>
+<table>
+<thead><tr><th>What Developers Trusted</th><th>What Attackers Did</th><th>Mindset Lesson</th></tr></thead>
+<tbody>
+<tr><td><strong style="color:var(--t1)">User input</strong><br/><span style="font-size:.8rem">G1 — SQLi Login, G2 — SQLi Extract</span></td><td style="color:var(--red)">Injected SQL code into input fields</td><td style="color:var(--green)">Validate and parameterise everything</td></tr>
+<tr><td><strong style="color:var(--t1)">The browser</strong><br/><span style="font-size:.8rem">L1 — IDOR Transfer, L11 — OTP in JS</span></td><td style="color:var(--red)">Edited the DOM, read JavaScript files</td><td style="color:var(--green)">Never trust the client</td></tr>
+<tr><td><strong style="color:var(--t1)">"Nobody will try that"</strong><br/><span style="font-size:.8rem">L10 — OTP Brute-Force</span></td><td style="color:var(--red)">Automated 10,000 attempts in seconds</td><td style="color:var(--green)">Assume automation</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Slide 44 — Vulnerability Matrix (Part 2) -->
+<section class="slide" id="s50">
+<div class="slide-inner">
+<h3 class="mb2">What Went Wrong — Every Time (continued)</h3>
+<table>
+<thead><tr><th>What Developers Trusted</th><th>What Attackers Did</th><th>Mindset Lesson</th></tr></thead>
+<tbody>
+<tr><td><strong style="color:var(--t1)">URL parameters</strong><br/><span style="font-size:.8rem">SL1 — IDOR Statements</span></td><td style="color:var(--red)">Changed a number in the address bar</td><td style="color:var(--green)">Authorise every access</td></tr>
+<tr><td><strong style="color:var(--t1)">Library defaults</strong><br/><span style="font-size:.8rem">L12 — JWT alg:none</span></td><td style="color:var(--red)">Forged an unsigned JWT token</td><td style="color:var(--green)">Understand your dependencies</td></tr>
+<tr><td><strong style="color:var(--t1)">OS boundaries</strong><br/><span style="font-size:.8rem">G9 — Command Injection</span></td><td style="color:var(--red)">Escaped the intended command</td><td style="color:var(--green)">Isolate and sandbox</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Slide 45 — The Fix Was Always Simple -->
+<section class="slide" id="s51">
+<div class="slide-inner">
+<h3 class="mb2">The Fix Was Always Simple</h3>
+<div class="grid2 gap2">
+<div>
+<div class="card green-left mb1"><p class="desc"><strong>G1 — SQLi Login:</strong> Parameterized query — one pattern change</p></div>
+<div class="card green-left mb1"><p class="desc"><strong>SL1 — IDOR:</strong> <code>AND user_id = ?</code> — five words</p></div>
+<div class="card green-left mb1"><p class="desc"><strong>G9 — Command Injection:</strong> Whitelist valid characters — one regex check</p></div>
+<div class="card green-left mb1"><p class="desc"><strong>L11 — OTP Leak:</strong> Remove debug data from JS — delete one object</p></div>
+</div>
+<div>
+<div class="card green-left mb1"><p class="desc"><strong>L1 — IDOR Transfer:</strong> Server-side ownership check — one conditional</p></div>
+<div class="card green-left mb1"><p class="desc"><strong>L10 — Brute Force:</strong> Rate limiter + lockout — a counter and a timestamp</p></div>
+<div class="card green-left mb1"><p class="desc"><strong>L12 — JWT:</strong> Reject <code>alg:none</code> — one configuration line</p></div>
+<div class="card green-left mb1"><p class="desc"><strong>G2 — SQLi Extract:</strong> Parameterized query — same as G1</p></div>
+</div>
+</div>
+<div class="sep"></div>
+<p class="big center">"Each fix was 1–3 lines of code. The technology existed.<br/>What was missing was the thinking."</p>
+</div>
+</section>
+<!-- Slide 46 — Your Impact -->
+<section class="slide" id="s52">
+<div class="slide-inner center">
+<h2 style="color:var(--green)">You just saw what attackers see. That changes everything.</h2>
+<p class="big mt2" style="color:var(--t2)">Investing two hours to understand these attack patterns first-hand puts you ahead of most technology leaders in the industry. You now have something most don't: a <strong style="color:var(--t1)">visceral understanding</strong> of how simple these attacks are — and how simple the fixes can be.</p>
+<div class="sep" style="max-width:200px;margin:2rem auto"></div>
+<p class="big" style="margin-bottom:.8rem">You now know the questions to ask:</p>
+<div class="flex-col" style="max-width:700px;margin-left:auto;margin-right:auto;text-align:left">
+<p class="desc" style="font-size:1.05rem">✅ <em>"Does our SAST pipeline run before every merge?"</em></p>
+<p class="desc" style="font-size:1.05rem">✅ <em>"Do we have ownership checks on every data query?"</em></p>
+<p class="desc" style="font-size:1.05rem">✅ <em>"When was our last pen test? What happened to the findings?"</em></p>
+<p class="desc" style="font-size:1.05rem">✅ <em>"Is security training part of developer onboarding?"</em></p>
+</div>
+<p class="mt2 desc" style="font-size:1rem">The fixes were 1–3 lines of code. Your influence as leaders ensures those lines get written.</p>
+</div>
+</section>
+<!-- Slide 47 — When a High-Risk Finding Lands on Your Desk -->
+<section class="slide" id="s53">
+<div class="slide-inner">
+<h3 class="mb1">When a High-Risk Finding Lands on Your Desk</h3>
+<p class="desc mb2">Before raising an ORAC (Operational Risk Acceptance Certificate), ask these questions:</p>
+<div class="grid2 gap2">
+<div class="card yellow-left">
+<h3 style="color:var(--amber)">🛡️ Compensating Controls</h3>
+<p class="desc mt1"><em>"If we can't fix it now, what reduces the risk?"</em><br/>WAF rules for injection, enhanced logging for IDOR, network segmentation for command injection, rate limiting for brute force.</p>
+</div>
+<div class="card yellow-left">
+<h3 style="color:var(--amber)">📅 Fix Timeline</h3>
+<p class="desc mt1"><em>"What is the hard deadline to remediate?"</em><br/>Risk acceptance without a fix date is risk ignorance. Set a date. Track it. Escalate if it slips.</p>
+</div>
+<div class="card yellow-left">
+<h3 style="color:var(--amber)">💥 Exploitation Impact</h3>
+<p class="desc mt1"><em>"If this is exploited tomorrow, what's the blast radius?"</em><br/>Financial loss? Regulatory penalty? Reputational damage? Customer data exposed? Quantify — don't guess.</p>
+</div>
+<div class="card yellow-left">
+<h3 style="color:var(--amber)">🔍 Validation</h3>
+<p class="desc mt1"><em>"Has Pen Testing confirmed this is exploitable? Can SOC detect exploitation?"</em><br/>Ask the security team to prove the risk. Then ask if monitoring can catch it live.</p>
+</div>
+</div>
+<div class="sep"></div>
+<p class="big center">Risk acceptance is not risk ignorance.<br/>Accept with controls, timelines, and accountability.</p>
+</div>
+</section>
+<!-- ============================================================ -->
+<!-- PHASE 5: AI IN SECURITY                                      -->
+<!-- ============================================================ -->
+<!-- Slide 48 — Section Title -->
+<section class="slide section-slide" id="s54">
+<div class="slide-inner center">
+<div class="icon">🔵</div>
+<p class="sub">Phase 5</p>
+<h1>AI in Security</h1>
+<p class="big mt2" style="color:var(--t2)">The Accelerant</p>
+</div>
+</section>
+<!-- Slide 49 — AI as Attacker -->
+<section class="slide" id="s55">
+<div class="slide-inner">
+<h3 class="mb1" style="color:var(--red)">AI as Attacker</h3>
+<p class="desc mb2">Everything demonstrated in this session — the SQL injection payloads, the JWT forgery, the IDOR patterns, the command injection — an AI model can generate all of it from a single prompt.</p>
+<div class="grid2 gap2">
+<div class="card red-left">
+<h3>What AI Can Do Today</h3>
+<p class="desc mt1">Generate SQL injection payloads tailored to any login form. Craft JWT forgeries given a sample token. Enumerate IDOR patterns from API documentation. Write brute-force scripts in any language, in seconds.</p>
+</div>
+<div class="card red-left">
+<h3>What This Means</h3>
+<p class="desc mt1">AI can lower the skill and time required to attempt familiar attacks, but successful exploitation still depends on access, context, validation and operational skill. The practical implication is greater attack volume and faster iteration.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Slide 50 — AI Attack Example -->
+<section class="slide" id="s56">
+<div class="slide-inner">
+<h3 class="mb2">The Bar Has Dropped to Zero</h3>
+<div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2)">
+<p style="color:var(--t3);font-size:.85rem">Prompt:</p>
+<p style="font-family:var(--mono);color:var(--t1);margin:.5rem 0">"Generate SQL injection payloads to bypass a login form that checks customer_id and password"</p>
+<div class="sep"></div>
+<p style="color:var(--t3);font-size:.85rem">AI Output:</p>
+<pre style="margin-top:.5rem;border:none;background:transparent;padding:0"><code><span class="str">BS100234' -- </span>                <span class="cm">// Comment out password check</span>
+<span class="str">' OR 1=1 -- </span>                  <span class="cm">// Tautology bypass</span>
+<span class="str">' UNION SELECT 1,2,3,4 -- </span>    <span class="cm">// Column enumeration</span>
+<span class="str">admin'/*</span>                       <span class="cm">// Block comment variant</span></code></pre>
+</div>
+<p class="big mt2 center">AI can accelerate payload design and testing, but its output must be authorised, validated and constrained. It does not remove the need for technical expertise.</p>
+</div>
+</section>
+<!-- Slide 51 — AI as Defender -->
+<section class="slide" id="s57">
+<div class="slide-inner">
+<h3 class="mb1" style="color:var(--green)">AI as Defender</h3>
+<p class="desc mb2">The same AI capabilities that enable attacks also power defence at unprecedented speed and scale.</p>
+<div class="grid2 gap2">
+<div class="card green-left">
+<h3>SAST / DAST with AI</h3>
+<p class="desc mt1">AI-assisted analysis can flag suspicious injection patterns, unsafe APIs, exposed client-side data and risky configurations. Business-logic and authorisation findings still require context and validation.</p>
+</div>
+<div class="card green-left">
+<h3>AI Code Review</h3>
+<p class="desc mt1">Identifies client-trust anti-patterns, reviews pull requests for security regressions, suggests fixes with correct code. Scales security review to every commit, not just the ones a human has time to read.</p>
+</div>
+<div class="card green-left">
+<h3>Anomaly Detection</h3>
+<p class="desc mt1">AI-based SOC tools flag unusual command execution from web processes, detect brute-force patterns across login endpoints, identify bulk data extraction from statement APIs.</p>
+</div>
+<div class="card green-left">
+<h3>Pen Test Triage</h3>
+<p class="desc mt1">Prioritises findings by exploitability and business impact. Maps vulnerabilities to OWASP categories and CWEs automatically. Reduces triage time from days to hours.</p>
+</div>
+</div>
+<p class="center mt2 desc" style="font-size:1rem;color:var(--amber)">« Insert your AI scan results of BankSploit here »</p>
+</div>
+</section>
+<!-- Slide 52 — The Balance -->
+<section class="slide" id="s58">
+<div class="slide-inner">
+<h3 class="mb2 center">AI Accelerates Both Sides Equally</h3>
+<div class="vs mt2">
+<div>
+<h3 style="color:var(--red)">Attackers</h3>
+<p class="desc mt1">Lower barrier to entry. Automated payload generation. Faster reconnaissance. Wider target surface. Anyone with a prompt can attempt what once required years of expertise.</p>
+</div>
+<div>
+<h3 style="color:var(--green)">Defenders</h3>
+<p class="desc mt1">Automated vulnerability detection. Continuous code review at scale. Real-time anomaly detection. Faster incident triage. Security testing on every commit, not just quarterly pen tests.</p>
+</div>
+</div>
+<div class="sep"></div>
+<p class="big center">The difference is who adopts it first and uses it consistently.</p>
+</div>
+</section>
+<!-- Slide 53 — What AI Still Cannot Do -->
+<section class="slide" id="s59">
+<div class="slide-inner">
+<h3 class="mb1" style="color:var(--amber)">What AI Still Cannot Do</h3>
+<p class="desc mb2">AI is a powerful tool, but these require a human in the loop — today and for the foreseeable future.</p>
+<div class="grid2 gap2">
+<div class="card">
+<h3>🧠 Business Context</h3>
+<p class="desc mt1">AI can flag a missing auth check but can't know if that page is <em>intentionally</em> public. Understanding the business requirement behind code is a human judgment call.</p>
+</div>
+<div class="card">
+<h3>⚖️ Risk Acceptance Decisions</h3>
+<p class="desc mt1">"We accept this risk for 90 days with compensating controls" — weighing business priorities, regulatory exposure, and customer trust. No model can own that decision.</p>
+</div>
+<div class="card">
+<h3>🔍 Validating AI Output</h3>
+<p class="desc mt1">AI hallucinates — it generates confident, plausible, and completely wrong security advice. Every AI recommendation must be validated by someone who knows the domain.</p>
+</div>
+<div class="card">
+<h3>🚨 The 2 AM Judgment Call</h3>
+<p class="desc mt1">When the alert fires: escalate or contain? Notify the regulator now or investigate first? Shut down the service or accept partial risk? Human decisions with human consequences.</p>
+</div>
+<div class="card">
+<h3>🤝 Stakeholder Negotiation</h3>
+<p class="desc mt1">Convincing a product team to delay a launch for a critical fix. Explaining risk to the board in non-technical language. AI can draft the memo — but can't have the conversation.</p>
+</div>
+<div class="card">
+<h3>🏗️ Culture Building</h3>
+<p class="desc mt1">Making developers <em>want</em> to write secure code. Creating an environment where reporting vulnerabilities is rewarded, not punished. Culture comes from leaders, not algorithms.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Slide 54 — The Human Factor -->
+<section class="slide" id="s60">
+<div class="slide-inner center">
+<h2>AI is a force multiplier for your security teams, not a replacement.</h2>
+<p class="big mt2" style="color:var(--t2)">AI can find the SQL injection in milliseconds. But a human decided to skip the code review that would have caught it. AI can detect the brute-force in real time. But a human decided not to fund the SOC tooling.</p>
+<div class="sep" style="max-width:200px;margin:2rem auto"></div>
+<p class="big">It still takes a human to decide that security matters.<br/>To fund the tools. To set the culture.<br/>To respond when the alert fires at 2 AM.</p>
+</div>
+</section>
+<!-- ============================================================ -->
+<!-- PHASE 6: ORG MAPPING                                         -->
+<!-- ============================================================ -->
+<!-- Slide 55 — Section Title -->
+<section class="slide section-slide" id="s61">
+<div class="slide-inner center">
+<div class="icon">🔵</div>
+<p class="sub">Phase 6</p>
+<h1>How Our Security Organisation Connects</h1>
+</div>
+</section>
+<!-- Slide 56 — The Mapping Table -->
+<section class="slide" id="s62">
+<div class="slide-inner">
+<h3 class="mb2">Every Vulnerability Maps to Multiple Functions</h3>
+<table>
+<thead><tr><th>Function</th><th>Responsibility</th><th>Relevant Vulns</th><th>Role in Defence</th></tr></thead>
+<tbody>
+<tr>
+<td><strong style="color:var(--indigo)">Application Security</strong></td>
+<td>Secure coding standards, SAST/DAST, code review</td>
+<td style="font-family:var(--mono);font-size:.8rem">G1, G2, L11, G9</td>
+<td>First line. If they catch it, nobody else needs to.</td>
+</tr>
+<tr>
+<td><strong style="color:var(--sky)">IAM</strong></td>
+<td>Authentication, authorisation, access control policies</td>
+<td style="font-family:var(--mono);font-size:.8rem">L12, SL1, L1, L10</td>
+<td>Designs the rules that AppSec must enforce in code.</td>
+</tr>
+<tr>
+<td><strong style="color:var(--amber)">Penetration Testing</strong></td>
+<td>Red team, adversary simulation, vulnerability assessment</td>
+<td style="font-family:var(--mono);font-size:.8rem">All 8</td>
+<td>This IS pen testing. Every demo today is a pen test finding.</td>
+</tr>
+<tr>
+<td><strong style="color:var(--green)">Cyber Ops / SOC</strong></td>
+<td>Detection, monitoring, incident response</td>
+<td style="font-family:var(--mono);font-size:.8rem">L10, G9, G2</td>
+<td>Last line. When everything else fails, SOC detects the breach.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Slide 57 — Security Is a System -->
+<section class="slide" id="s63">
+<div class="slide-inner center">
+<h2>Every vulnerability we found today touches at least two security functions.</h2>
+<div class="flex-col mt3 gap2" style="max-width:700px;margin-left:auto;margin-right:auto;text-align:left">
+<p class="desc" style="font-size:1.1rem">If <strong style="color:var(--indigo)">AppSec</strong> misses the SQL injection, <strong style="color:var(--green)">SOC</strong> should detect the data extraction.</p>
+<p class="desc" style="font-size:1.1rem">If <strong style="color:var(--sky)">IAM</strong> designs the access policy, <strong style="color:var(--indigo)">AppSec</strong> must enforce it in code.</p>
+<p class="desc" style="font-size:1.1rem">If <strong style="color:var(--amber)">Pen Testing</strong> finds the IDOR, the fix flows back to <strong style="color:var(--indigo)">AppSec</strong>.</p>
+<p class="desc" style="font-size:1.1rem">If <strong style="color:var(--green)">SOC</strong> detects the brute-force, <strong style="color:var(--sky)">IAM</strong> enforces the lockout policy.</p>
+</div>
+<div class="sep" style="max-width:200px;margin:2.5rem auto"></div>
+<p class="huge gradient">Security is a system, not a checklist.</p>
+<p class="big mt1" style="color:var(--t2)">Fund it, connect it, hold it accountable as one.</p>
+</div>
+</section>
+<!-- ============================================================ -->
+<!-- PHASE 7: TAKEAWAYS & Q&A                                     -->
+<!-- ============================================================ -->
+<!-- Slide 58 — Three Takeaways -->
+<section class="slide" id="s64">
+<div class="slide-inner">
+<div class="flex-row mb2">
+<span class="badge badge-green">🟢 Takeaways</span>
+</div>
+<h2 class="mb3">Three Things to Remember</h2>
+<div class="flex-col gap3">
+<div class="flex-row" style="align-items:flex-start;gap:1.5rem">
+<span style="font-size:2.5rem;font-weight:800;color:var(--indigo);line-height:1">1</span>
+<div><h3>The code change may be small. Sustainable prevention is systemic.</h3><p class="desc mt1">Some individual code changes may be small, but safe remediation also requires regression testing, consistent enforcement, deployment assurance and verification. The technology existed for decades. What was missing was the awareness, the review process, the culture that makes developers ask: "what could go wrong if someone did this on purpose?"</p></div>
+</div>
+<div class="flex-row" style="align-items:flex-start;gap:1.5rem">
+<span style="font-size:2.5rem;font-weight:800;color:var(--indigo);line-height:1">2</span>
+<div><h3>AI has lowered the bar for attackers AND raised the ceiling for defenders.</h3><p class="desc mt1">The attacker pool grew from thousands to millions. But AI also enables continuous code review, real-time anomaly detection, and vulnerability scanning at every commit. The teams that adopt AI-assisted security first will be the ones who stay ahead.</p></div>
+</div>
+<div class="flex-row" style="align-items:flex-start;gap:1.5rem">
+<span style="font-size:2.5rem;font-weight:800;color:var(--indigo);line-height:1">3</span>
+<div><h3>Your security org is one system. Fund it, connect it, hold it accountable as one.</h3><p class="desc mt1">AppSec, IAM, Pen Testing, and Cyber Ops are not four separate teams doing four separate things. Every vulnerability you saw today touches at least two of them. Defence in depth means every layer knows what the others are doing.</p></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Slide 59 — Q&A -->
+<section class="slide section-slide" id="s65">
+<div class="slide-inner center">
+<p style="font-size:5rem;margin-bottom:1.5rem">❓</p>
+<h1>Questions &amp; Discussion</h1>
+<p class="big mt2" style="color:var(--t2)">What surprised you? What concerned you?<br/>What will you do differently tomorrow?</p>
+</div>
+</section>
+<!-- Slide 60 — Closing -->
+<section class="slide section-slide" id="s66">
+<div class="slide-inner center">
+<h1 class="gradient" style="font-size:clamp(2rem,4vw,3rem)">Thank you.</h1>
+<div class="sep" style="max-width:200px;margin:2rem auto"></div>
+<p class="big" style="color:var(--t2)">The attacker only needs to find one gap.<br/>Defence needs to cover every layer.</p>
+<div class="sep" style="max-width:200px;margin:2rem auto"></div>
+<p class="sub">BankSploit — Security Awareness for Technology Leadership</p>
+<p style="color:var(--t3);font-size:.9rem;margin-top:.5rem">« Ankit Rai • India Lead of Penetration Testing Team • Oct 2026 »</p>
+</div>
+</section>
+<!-- ============================================================ -->
+<!-- JAVASCRIPT: Navigation Engine                                 -->
+<!-- ============================================================ -->
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const progress = document.getElementById('progress');
+  const counter = document.getElementById('counter');
+  const fsHint = document.getElementById('fs-hint');
+  let current = 0;
+
+  /* ── Phase Tracker ── */
+  const phases = [
+    {name:'Context',   start:1, end:15},
+    {name:'Demos',     start:16,end:37},
+    {name:'Hands-On',  start:38,end:47},
+    {name:'Mindset',   start:48,end:53},
+    {name:'AI',        start:54,end:60},
+    {name:'Org Map',   start:61,end:63},
+    {name:'Takeaways', start:64,end:66}
+  ];
+  const phaseTracker = document.getElementById('phase-tracker');
+  phases.forEach(function(p){
+    var pill = document.createElement('span');
+    pill.className = 'phase-pill';
+    pill.textContent = p.name;
+    pill.addEventListener('click',function(e){
+      e.stopPropagation();
+      goTo(p.start - 1);
+    });
+    phaseTracker.appendChild(pill);
+  });
+  function updatePhase(slideNum){
+    var pills = phaseTracker.querySelectorAll('.phase-pill');
+    pills.forEach(function(pill,i){
+      if(slideNum >= phases[i].start && slideNum <= phases[i].end){
+        pill.classList.add('active');
+      } else {
+        pill.classList.remove('active');
+      }
+    });
+  }
+
+  // Initialize: show first slide
+  function init(){
+    const hash = location.hash.match(/^#s(\d+)$/);
+    if(hash){
+      const n = parseInt(hash[1],10) - 1;
+      if(n >= 0 && n < total) current = n;
+    }
+    slides[current].classList.add('active');
+    updateUI();
+    // Fade out fullscreen hint after 4s
+    setTimeout(()=>{ if(fsHint) fsHint.style.opacity='0'; },4000);
+    setTimeout(()=>{ if(fsHint) fsHint.style.display='none'; },5000);
+  }
+
+  function goTo(n){
+    if(n < 0 || n >= total || n === current) return;
+    slides[current].classList.remove('active');
+    // Reset mindset reveal when leaving slide 5 (index 4)
+    if(current === 4) resetAttacker();
+    current = n;
+    slides[current].classList.add('active');
+    updateUI();
+  }
+
+  function updateUI(){
+    progress.style.width = ((current+1)/total*100)+'%';
+    counter.textContent = (current+1)+' / '+total;
+    history.replaceState(null,null,'#s'+(current+1));
+    updatePhase(current+1);
+  }
+
+  function next(){ goTo(current+1); }
+  function prev(){ goTo(current-1); }
+
+  // Keyboard
+  document.addEventListener('keydown',function(e){
+    switch(e.key){
+      case 'ArrowRight': case ' ': case 'Enter': case 'PageDown': e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'Backspace': case 'PageUp': e.preventDefault(); prev(); break;
+      case 'Home': e.preventDefault(); goTo(0); break;
+      case 'End': e.preventDefault(); goTo(total-1); break;
+    }
+  });
+
+  // Click to advance (but not on links/buttons/code)
+  document.addEventListener('click',function(e){
+    if(e.target.closest('a,button,pre,code,input,select')) return;
+    const x = e.clientX;
+    if(x < window.innerWidth * 0.3){ prev(); }
+    else { next(); }
+  });
+
+  // Touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart',function(e){ touchX = e.changedTouches[0].screenX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    const dx = e.changedTouches[0].screenX - touchX;
+    if(Math.abs(dx) > 50){ dx < 0 ? next() : prev(); }
+  },{passive:true});
+
+  init();
+
+  /* ── Mindset Reveal ── */
+  var atkRevealed = false;
+  window.revealAttacker = function(){
+    if(atkRevealed) return;
+    atkRevealed = true;
+    document.querySelectorAll('.atk-col').forEach(function(el){ el.style.opacity = '1'; });
+    document.getElementById('mindset-reveal-btn').style.display = 'none';
+    document.getElementById('mindset-pre').style.display = 'none';
+    document.getElementById('mindset-post').style.display = 'block';
+  };
+  function resetAttacker(){
+    atkRevealed = false;
+    document.querySelectorAll('.atk-col').forEach(function(el){ el.style.opacity = '0'; });
+    document.getElementById('mindset-reveal-btn').style.display = '';
+    document.getElementById('mindset-pre').style.display = '';
+    document.getElementById('mindset-post').style.display = 'none';
+  }
+
+  /* ── Timer Widget ── */
+  var timerWidget = document.getElementById('timer-widget');
+  var timerDisplay = document.getElementById('timer-display');
+  var timerToggleBtn = document.getElementById('timer-toggle-btn');
+  var timerSeconds = 0, timerOriginal = 0, timerInterval = null, timerRunning = false;
+
+  function fmtTime(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+
+  window.timerStart = function(secs){
+    timerOriginal = secs;
+    timerSeconds = secs;
+    timerRunning = false;
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+    timerDisplay.classList.remove('expired');
+    timerDisplay.textContent = fmtTime(secs);
+    timerWidget.classList.add('visible');
+    // Auto-start
+    window.timerToggle();
+  };
+
+  window.timerToggle = function(){
+    if(timerRunning){
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerRunning = false;
+      timerToggleBtn.textContent = '▶';
+    } else {
+      if(timerSeconds <= 0) return;
+      timerRunning = true;
+      timerToggleBtn.textContent = '⏸';
+      timerInterval = setInterval(function(){
+        timerSeconds--;
+        timerDisplay.textContent = fmtTime(timerSeconds);
+        if(timerSeconds <= 0){
+          clearInterval(timerInterval);
+          timerInterval = null;
+          timerRunning = false;
+          timerDisplay.classList.add('expired');
+          timerDisplay.textContent = "TIME'S UP";
+          timerToggleBtn.textContent = '▶';
+        }
+      },1000);
+    }
+  };
+
+  window.timerReset = function(){
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+    timerRunning = false;
+    timerSeconds = timerOriginal;
+    timerDisplay.classList.remove('expired');
+    timerDisplay.textContent = fmtTime(timerOriginal);
+    timerToggleBtn.textContent = '▶';
+  };
+
+  window.timerHide = function(){
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+    timerRunning = false;
+    timerWidget.classList.remove('visible');
+  };
+})();
+</script>
+</body>
+</html>

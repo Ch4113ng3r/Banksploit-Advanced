@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankSploit CTF - Vulnerability Hunting Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #818cf8;
+            --primary-dark: #6366f1;
+            --primary-glow: rgba(129, 140, 248, 0.4);
+            --secondary: #f472b6;
+            --secondary-glow: rgba(244, 114, 182, 0.3);
+            --accent: #34d399;
+            --success: #10b981;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --bg-dark: #0a0e1a;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --bg-card-solid: #111827;
+            --bg-light: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-subtle: rgba(129, 140, 248, 0.12);
+            --border-hover: rgba(129, 140, 248, 0.4);
+            --glass: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(148, 163, 184, 0.08);
+            --radius-sm: 0.5rem;
+            --radius-md: 1rem;
+            --radius-lg: 1.5rem;
+            --shadow-glow: 0 0 60px rgba(129, 140, 248, 0.08);
+            --nav-bg: rgba(10, 14, 26, 0.85);
+            --code-bg: rgba(0, 0, 0, 0.4);
+            --code-color: var(--accent);
+        }
+
+        /* Light Theme */
+        [data-theme="light"] {
+            --bg-dark: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --bg-card-solid: #ffffff;
+            --bg-light: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border-subtle: rgba(99, 102, 241, 0.15);
+            --border-hover: rgba(99, 102, 241, 0.5);
+            --glass: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(99, 102, 241, 0.1);
+            --shadow-glow: 0 0 60px rgba(99, 102, 241, 0.06);
+            --nav-bg: rgba(248, 250, 252, 0.9);
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #059669;
+            --code-bg: rgba(15, 23, 42, 0.05);
+            --code-color: #059669;
+        }
+
+        [data-theme="light"] .bg-grid {
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+        }
+
+        [data-theme="light"] .bg-grid::before {
+            background-image: linear-gradient(rgba(99, 102, 241, 0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
+        }
+
+        [data-theme="light"] .orb-1 { background: rgba(99, 102, 241, 0.08); }
+        [data-theme="light"] .orb-2 { background: rgba(236, 72, 153, 0.06); }
+        [data-theme="light"] .orb-3 { background: rgba(16, 185, 129, 0.05); }
+        [data-theme="light"] .slide-content { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+        [data-theme="light"] .code-block {
+            background: var(--code-bg);
+            border-color: rgba(99, 102, 241, 0.15);
+            color: var(--code-color);
+        }
+        [data-theme="light"] .quote-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.04), rgba(236, 72, 153, 0.04));
+        }
+        [data-theme="light"] .highlight {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+        [data-theme="light"] .vuln-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-color: rgba(99, 102, 241, 0.12);
+        }
+        [data-theme="light"] .vuln-card:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.1), 0 0 20px rgba(99, 102, 241, 0.05);
+        }
+        [data-theme="light"] .nav-arrow { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2); }
+        [data-theme="light"] .nav-arrow:hover { background: rgba(99, 102, 241, 0.2); }
+        [data-theme="light"] .section-nav { border-bottom-color: rgba(99, 102, 241, 0.1); }
+        [data-theme="light"] .section-nav.scrolled { box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06); }
+        [data-theme="light"] .section-btn { color: var(--text-secondary); }
+        [data-theme="light"] .section-btn:hover { background: rgba(99, 102, 241, 0.08); }
+        [data-theme="light"] .section-btn.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.05));
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        [data-theme="light"] ::selection { background: rgba(99, 102, 241, 0.2); }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            line-height: 1.6;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        /* Animated Background */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(244, 114, 182, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(52, 211, 153, 0.03) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .bg-grid::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(129, 140, 248, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(129, 140, 248, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb-1 { width: 400px; height: 400px; background: rgba(99, 102, 241, 0.15); top: -100px; left: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: rgba(244, 114, 182, 0.1); bottom: -50px; right: -50px; animation-delay: -7s; }
+        .orb-3 { width: 250px; height: 250px; background: rgba(52, 211, 153, 0.08); top: 50%; left: 50%; animation-delay: -14s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 10px) scale(1.02); }
+        }
+
+        /* Section Navigation Header */
+        .section-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px) saturate(1.5);
+            -webkit-backdrop-filter: blur(20px) saturate(1.5);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            padding: 0.6rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .section-nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-nav-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .section-buttons {
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .section-btn {
+            padding: 0.4rem 0.8rem;
+            background: transparent;
+            border: 1.5px solid var(--border-subtle);
+            color: var(--text-secondary);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.78rem;
+            font-weight: 500;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .section-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+            background: rgba(129, 140, 248, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .section-btn.active {
+            background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(244, 114, 182, 0.1));
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 20px rgba(129, 140, 248, 0.15);
+        }
+
+        /* Slide Container */
+        .slides-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4.5rem 3rem 5rem;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .slide.exit-left {
+            opacity: 0;
+            transform: translateX(-100px);
+        }
+
+        .slide.exit-right {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+
+        .slide-content {
+            max-width: 900px;
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            max-height: calc(100vh - 10rem);
+            overflow-y: auto;
+        }
+
+        .slide-content::-webkit-scrollbar { width: 6px; }
+        .slide-content::-webkit-scrollbar-track { background: transparent; }
+        .slide-content::-webkit-scrollbar-thumb { background: var(--bg-light); border-radius: 3px; }
+
+        /* Hero slides (title slides) */
+        .slide-content.hero-slide {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .slide-content.hero-slide .hero-emoji {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .slide-content.hero-slide h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease-in-out infinite;
+        }
+
+        .slide-content.hero-slide p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Content styling */
+        .slide-content h2 {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            letter-spacing: -0.3px;
+        }
+
+        .slide-content h3 {
+            color: var(--primary);
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-top: 1.75rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .slide-content h4 {
+            color: var(--secondary);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .slide-content p {
+            color: var(--text-secondary);
+            line-height: 1.75;
+            margin-bottom: 0.75rem;
+        }
+
+        .slide-content ul, .slide-content ol {
+            list-style: none;
+            padding: 0;
+        }
+
+        .slide-content li {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 0.6rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border-left: 2px solid transparent;
+            transition: all 0.25s ease;
+        }
+
+        .slide-content li:hover {
+            background: rgba(129, 140, 248, 0.04);
+            border-left-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .slide-content li strong {
+            color: var(--text-primary);
+        }
+
+        /* Quote Box */
+        .quote-box {
+            background: linear-gradient(135deg, rgba(129, 140, 248, 0.06), rgba(244, 114, 182, 0.06));
+            border-left: 3px solid var(--secondary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: 1.5rem 0;
+            font-style: italic;
+            font-size: 1rem;
+            color: var(--text-primary);
+            line-height: 1.7;
+            position: relative;
+        }
+
+        .quote-box::before {
+            content: '\201C';
+            position: absolute;
+            top: -0.5rem;
+            left: 1rem;
+            font-size: 2.5rem;
+            color: var(--primary);
+            opacity: 0.3;
+            font-style: normal;
+            font-family: Georgia, serif;
+        }
+
+        .quote-author {
+            margin-top: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            text-align: right;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.82rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            color: var(--accent);
+            line-height: 1.8;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            border-radius: 3px 0 0 3px;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: rgba(129, 140, 248, 0.15);
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            color: var(--primary);
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88em;
+            border: 1px solid rgba(129, 140, 248, 0.2);
+        }
+
+        /* Vuln Grid */
+        .vuln-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .vuln-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .vuln-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(129, 140, 248, 0.08);
+        }
+
+        .vuln-card .icon { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
+        .vuln-card h3 { color: var(--text-primary); font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; margin-top: 0; }
+        .vuln-card p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin-bottom: 0; }
+
+        .difficulty {
+            display: inline-flex;
+            padding: 0.25rem 0.65rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        .difficulty.easy { background: rgba(16, 185, 129, 0.12); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .difficulty.medium { background: rgba(251, 191, 36, 0.12); color: var(--warning); border: 1px solid rgba(251, 191, 36, 0.2); }
+        .difficulty.hard { background: rgba(248, 113, 113, 0.12); color: var(--danger); border: 1px solid rgba(248, 113, 113, 0.2); }
+
+        /* Feature grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+        .feature-item {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+        }
+        .feature-item h3 { margin-top: 0 !important; margin-bottom: 0.4rem; }
+        .feature-item p { margin-bottom: 0; font-size: 0.88rem; }
+
+        /* Steps */
+        .step {
+            display: flex;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-start;
+        }
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(244, 114, 182, 0.1));
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .step-content h3 { color: var(--text-primary); font-weight: 600; margin-bottom: 0.3rem; font-size: 1rem; margin-top: 0; }
+        .step-content p { color: var(--text-secondary); line-height: 1.7; }
+
+        /* Score grid */
+        .score-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+        .score-item {
+            padding: 1.25rem;
+            border-radius: var(--radius-md);
+            border-left: 3px solid;
+        }
+        .score-item h3 { margin-top: 0 !important; margin-bottom: 0.4rem; }
+        .score-item p { margin-bottom: 0; }
+
+        /* Info boxes */
+        .info-box {
+            margin-bottom: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
+            border-left: 3px solid;
+        }
+        .info-box strong { display: block; margin-bottom: 0.3rem; }
+        .info-box p { margin-bottom: 0; font-size: 0.9rem; }
+
+        /* Navigation Controls (bottom) */
+        .slide-nav {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            z-index: 100;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 3rem;
+            padding: 0.6rem 1.5rem;
+        }
+
+        .nav-arrow {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(129, 140, 248, 0.1);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 1.2rem;
+            user-select: none;
+        }
+
+        .nav-arrow:hover {
+            background: rgba(129, 140, 248, 0.2);
+            border-color: var(--border-hover);
+            transform: scale(1.1);
+        }
+
+        .nav-arrow:active { transform: scale(0.95); }
+        .nav-arrow.disabled { opacity: 0.3; pointer-events: none; }
+
+        .slide-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .slide-counter .current { color: var(--primary); font-weight: 600; }
+
+        /* Progress bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            z-index: 1001;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            width: 38px;
+            height: 22px;
+            border-radius: 11px;
+            background: var(--bg-light);
+            border: 1.5px solid var(--border-subtle);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0 3px;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover { border-color: var(--border-hover); }
+        .theme-toggle-knob {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+        [data-theme="light"] .theme-toggle { background: #e2e8f0; }
+        [data-theme="light"] .theme-toggle-knob { transform: translateX(16px); background: var(--warning); box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4); }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.75rem;
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 1.25rem;
+        }
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .slide { padding: 4rem 1rem 5rem; }
+            .slide-content { padding: 2rem 1.5rem; }
+            .slide-content.hero-slide h1 { font-size: 2rem; }
+            .vuln-grid { grid-template-columns: 1fr; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .score-grid { grid-template-columns: 1fr; }
+            .slide-nav { bottom: 1rem; padding: 0.5rem 1rem; gap: 1rem; }
+            .section-nav-container { flex-direction: column; gap: 0.4rem; }
+            .section-buttons { justify-content: center; }
+            .section-btn { padding: 0.3rem 0.6rem; font-size: 0.72rem; }
+            .section-nav-logo { font-size: 1rem; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--bg-light); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(129, 140, 248, 0.4); }
+
+        ::selection { background: rgba(129, 140, 248, 0.3); color: var(--text-primary); }
+
+        /* Floating Feedback Button */
+        .feedback-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.25rem;
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 3rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: feedbackPulse 3s ease-in-out infinite;
+        }
+
+        .feedback-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+        }
+
+        .feedback-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .feedback-btn .feedback-icon {
+            font-size: 1.1rem;
+        }
+
+        @keyframes feedbackPulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset; }
+            50% { box-shadow: 0 4px 25px rgba(99, 102, 241, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15) inset, 0 0 0 4px rgba(99, 102, 241, 0.1); }
+        }
+
+        @media (max-width: 768px) {
+            .feedback-btn {
+                bottom: 5rem;
+                right: 1rem;
+                padding: 0.6rem 1rem;
+                font-size: 0.78rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background effects -->
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Progress bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Section Navigation Header -->
+    <div class="section-nav" id="sectionNav">
+        <div class="section-nav-container">
+            <div class="section-nav-logo">🏦 BankSploit CTF</div>
+            <div class="section-buttons" id="sectionButtons">
+                <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">
+                    <div class="theme-toggle-knob" id="themeKnob">🌙</div>
+                </div>
+                <button class="section-btn active" data-section="objective" onclick="jumpToSection('objective')">🎯 Objective</button>
+                <button class="section-btn" data-section="app-intro" onclick="jumpToSection('app-intro')">📱 App Intro</button>
+                <button class="section-btn" data-section="vulns" onclick="jumpToSection('vulns')">🔓 Vulnerabilities</button>
+                <button class="section-btn" data-section="deep-dive" onclick="jumpToSection('deep-dive')">⚔️ Deep Dive</button>
+                <button class="section-btn" data-section="getting-started" onclick="jumpToSection('getting-started')">🚀 Getting Started</button>
+                <button class="section-btn" data-section="leaderboard" onclick="jumpToSection('leaderboard')">📊 Leaderboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slides -->
+    <div class="slides-wrapper">
+
+        <!-- Slide 1: Title -->
+        <div class="slide active" data-slide="1" data-section="objective">
+            <div class="slide-content hero-slide">
+                <div class="hero-emoji">🎯</div>
+                <h1>Vulnerability Hunting Lab</h1>
+                <p>Discover Security Vulnerabilities Hidden in Code</p>
+                <p style="margin-top: 2rem; font-size: 0.9rem; opacity: 0.7;">Press <kbd style="background: var(--bg-light); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 2px 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">→</kbd> to begin</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Session Objective -->
+        <div class="slide" data-slide="2" data-section="objective">
+            <div class="slide-content">
+                <h2>🌟 Session Objective</h2>
+                <p>Welcome to a hands-on security exploration session! In today's lab, you will:</p>
+                <div style="margin-top: 1.5rem;">
+                    <div class="step">
+                        <div class="step-number">👨‍💻</div>
+                        <div class="step-content">
+                            <h3>For Software Builders</h3>
+                            <p>Understand how vulnerabilities creep into code, learn defensive coding practices, and build security into your architecture from day one.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">🔍</div>
+                        <div class="step-content">
+                            <h3>For Quality Assurance Specialists</h3>
+                            <p>Learn to think like an attacker, discover edge cases in application logic, and identify security flaws before they reach production.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">🛡️</div>
+                        <div class="step-content">
+                            <h3>For Security Enthusiasts</h3>
+                            <p>Deep dive into real-world attack vectors, exploit intentionally vulnerable code, and understand the attacker's mindset.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">🧠</div>
+                        <div class="step-content">
+                            <h3>For Technology Leaders</h3>
+                            <p>Gain firsthand experience with security risks, understand the technical debt of shortcuts, and make informed decisions about security investments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: What You'll Learn -->
+        <div class="slide" data-slide="3" data-section="objective">
+            <div class="slide-content">
+                <h2>✅ What You'll Learn</h2>
+                <ul>
+                    <li>🔓 <strong>SQL Injection:</strong> How to manipulate database queries to bypass authentication and extract data</li>
+                    <li>⚙️ <strong>Command Injection:</strong> Breaking out of intended OS commands to execute arbitrary system instructions</li>
+                    <li>🔑 <strong>JWT Attacks:</strong> Forging authentication tokens and exploiting algorithm confusion</li>
+                    <li>📊 <strong>IDOR (Insecure Direct Object Reference):</strong> Accessing other users' data by manipulating identifiers</li>
+                    <li>🚀 <strong>Brute Force:</strong> Systematically bypassing weak protections like OTP without rate limiting</li>
+                    <li>💾 <strong>Sensitive Data Exposure:</strong> Finding secrets hidden in client-side code and debug data</li>
+                    <li>🎮 <strong>Business Logic Bypass:</strong> Exploiting application workflows that trust user inputs</li>
+                    <li>🧠 <strong>Security Mindset:</strong> How attackers think, what they look for, and where code fails</li>
+                </ul>
+                <div class="quote-box">
+                    "Security is not a feature, it's a mindset. Every line of code is a potential door—the question is: who has the keys?"
+                    <div class="quote-author">— The Paranoid Developer</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Meet BankSploit -->
+        <div class="slide" data-slide="4" data-section="app-intro">
+            <div class="slide-content hero-slide">
+                <div class="hero-emoji">📱</div>
+                <h1>Meet BankSploit</h1>
+                <p>A Deliberately Vulnerable Banking Application</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: What is BankSploit -->
+        <div class="slide" data-slide="5" data-section="app-intro">
+            <div class="slide-content">
+                <h2>🏦 What is BankSploit?</h2>
+                <p>BankSploit is an intentionally vulnerable web banking application built to teach security concepts through hands-on exploration. It mimics a real banking system with authentication, account management, money transfers, and transaction history—but with deliberate security flaws waiting to be discovered.</p>
+
+                <h2 style="margin-top: 2rem;">🎭 Your Role</h2>
+                <p>You are a security researcher tasked with finding hidden vulnerabilities. Your mission:</p>
+                <div class="quote-box" style="border-left-color: var(--primary);">
+                    <strong>Exploit 8 intentionally embedded vulnerabilities</strong> to retrieve flags and prove your findings.
+                    <div class="quote-author">Mission Brief</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Key Features -->
+        <div class="slide" data-slide="6" data-section="app-intro">
+            <div class="slide-content">
+                <h2>🔐 Key Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-item" style="border-color: rgba(129, 140, 248, 0.15);">
+                        <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">🔑</div>
+                        <h3 style="color: var(--text-primary);">Authentication</h3>
+                        <p>Login with customer credentials, receive OTP codes, manage JWT sessions.</p>
+                    </div>
+                    <div class="feature-item" style="border-color: rgba(52, 211, 153, 0.15);">
+                        <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">💰</div>
+                        <h3 style="color: var(--text-primary);">Banking Operations</h3>
+                        <p>View accounts, check balances, transfer funds, review transaction history.</p>
+                    </div>
+                    <div class="feature-item" style="border-color: rgba(244, 114, 182, 0.15);">
+                        <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">🎯</div>
+                        <h3 style="color: var(--text-primary);">Flag Submission</h3>
+                        <p>Submit captured flags to earn points and climb the leaderboard.</p>
+                    </div>
+                    <div class="feature-item" style="border-color: rgba(251, 191, 36, 0.15);">
+                        <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">📊</div>
+                        <h3 style="color: var(--text-primary);">Real-time Leaderboard</h3>
+                        <p>Track your progress and see how you compete with others.</p>
+                    </div>
+                </div>
+                <div class="quote-box">
+                    "In security, every assumption can be attacked. What looks safe is usually just untested."
+                    <div class="quote-author">— The Experienced Pentester</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: The 8 Vulnerabilities -->
+        <div class="slide" data-slide="7" data-section="vulns">
+            <div class="slide-content">
+                <h2>🎯 The 8 Vulnerabilities</h2>
+                <p>Eight intentional vulnerabilities have been embedded throughout the application. Each exploitation yields a flag in the format: <span class="highlight">BANKSPLOIT{xxxxx}</span></p>
+
+                <div class="vuln-grid">
+                    <div class="vuln-card">
+                        <div class="icon">🔓</div>
+                        <h3>SQL Injection (Auth)</h3>
+                        <p>Bypass login by manipulating SQL queries.</p>
+                        <div class="difficulty easy">Beginner</div>
+                    </div>
+                    <div class="vuln-card">
+                        <div class="icon">⚔️</div>
+                        <h3>OTP Brute Force</h3>
+                        <p>No rate limiting. Try all 10,000 combinations.</p>
+                        <div class="difficulty easy">Beginner</div>
+                    </div>
+                    <div class="vuln-card">
+                        <div class="icon">👁️</div>
+                        <h3>OTP Leak in Code</h3>
+                        <p>Debug OTP exposed in JavaScript source.</p>
+                        <div class="difficulty easy">Beginner</div>
+                    </div>
+                    <div class="vuln-card">
+                        <div class="icon">🔑</div>
+                        <h3>JWT Algorithm Confusion</h3>
+                        <p>Forge tokens with 'none' algorithm.</p>
+                        <div class="difficulty medium">Intermediate</div>
+                    </div>
+                    <div class="vuln-card">
+                        <div class="icon">📋</div>
+                        <h3>IDOR - Statements</h3>
+                        <p>Access other users' statements.</p>
+                        <div class="difficulty easy">Beginner</div>
+                    </div>
+                    <div class="vuln-card">
+                        <div class="icon">💸</div>
+                        <h3>IDOR - Transfers</h3>
+                        <p>Transfer from accounts you don't own.</p>
+                        <div class="difficulty medium">Intermediate</div>
+                    </div>
+                    <div class="vuln-card">
+                        <div class="icon">🗄️</div>
+                        <h3>SQL Injection (Extraction)</h3>
+                        <p>UNION SELECT to extract database data.</p>
+                        <div class="difficulty hard">Advanced</div>
+                    </div>
+                    <div class="vuln-card">
+                        <div class="icon">💻</div>
+                        <h3>OS Command Injection</h3>
+                        <p>Execute arbitrary OS commands.</p>
+                        <div class="difficulty hard">Advanced</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: End-to-End Compromise -->
+        <div class="slide" data-slide="8" data-section="vulns">
+            <div class="slide-content" style="border-color: rgba(248, 113, 113, 0.3); background: linear-gradient(135deg, rgba(248, 113, 113, 0.06), rgba(251, 191, 36, 0.04), rgba(129, 140, 248, 0.04));">
+                <h2>⚡ End-to-End Compromise — Just Like Real Attackers</h2>
+                <p>This lab is designed to simulate a <strong>full attack chain</strong> — the same sequential compromise flow that real-world attackers use to go from zero access to owning the server.</p>
+                <div class="quote-box" style="border-left-color: var(--danger); margin-top: 1.5rem;">
+                    <strong style="color: var(--danger);">🎯 The Kill Chain:</strong> Gain initial access → Escalate privileges → Move laterally → Access sensitive data → Achieve remote code execution. Each vulnerability you exploit unlocks the next step in this chain. By the end, you will have gone from an unauthenticated outsider to executing arbitrary commands on the server — a complete compromise achieved purely by chaining the embedded vulnerabilities in sequence.
+                    <div class="quote-author">— Real-World Attack Simulation</div>
+                </div>
+                <p style="margin-top: 1rem;">Think like an attacker: <strong>start by getting in</strong> (authentication bypass), <strong>explore what you can reach</strong> (IDOR, data access), <strong>escalate your privileges</strong> (JWT forgery), and ultimately <strong>own the server</strong> (command injection). This is how breaches happen in the wild.</p>
+            </div>
+        </div>
+
+        <!-- Slide 9: Vulns Deep Dive Title -->
+        <div class="slide" data-slide="9" data-section="deep-dive">
+            <div class="slide-content hero-slide">
+                <div class="hero-emoji">⚔️</div>
+                <h1>Vulnerability Deep Dive</h1>
+                <p>Understanding the Attack Vectors</p>
+            </div>
+        </div>
+
+        <!-- Slide 10: SQL Injection - Intro -->
+        <div class="slide" data-slide="10" data-section="deep-dive">
+            <div class="slide-content">
+                <h2>🔓 SQL Injection (SQLi)</h2>
+                <p><strong>What it is:</strong> SQL injection occurs when user input is directly concatenated into SQL queries without sanitization. An attacker can inject SQL code to manipulate query logic, bypass authentication, or extract arbitrary data from the database.</p>
+
+                <h3>The Vulnerability</h3>
+                <div class="code-block">
+// Vulnerable Code<br>
+$query = "SELECT * FROM users WHERE customer_id = '" . $_POST['id'] . "' AND password = '" . $_POST['pass'] . "'";
+                </div>
+
+                <h3>🎯 Part 1: Authentication Bypass</h3>
+                <p>The simplest SQLi attack comments out the password check, allowing login without knowing credentials.</p>
+                <ul>
+                    <li>Inject a single quote <span class="highlight">'</span> to break out of the string</li>
+                    <li>Use SQL comment syntax <span class="highlight">#</span> to comment out the rest</li>
+                    <li>Result: <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">SELECT * FROM users WHERE customer_id = 'YOUR_INPUT' #</code></li>
+                    <li>The password check is effectively removed ✅</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 11: SQLi - UNION SELECT -->
+        <div class="slide" data-slide="11" data-section="deep-dive">
+            <div class="slide-content">
+                <h2>🔓 SQLi Part 2: Data Extraction (UNION SELECT)</h2>
+                <p>Beyond bypass, SQLi can extract any data from the database. This requires understanding the query structure.</p>
+
+                <h4>Step 1️⃣: Determine Column Count</h4>
+                <p>Use <span class="highlight">ORDER BY</span> to find how many columns the original query returns:</p>
+                <ul>
+                    <li>Try <span class="highlight">ORDER BY 1 #</span> → no error = 1+ columns</li>
+                    <li>Try <span class="highlight">ORDER BY 2 #</span> → no error = 2+ columns</li>
+                    <li>Keep increasing until you get an error</li>
+                    <li><strong>Example:</strong> If <span class="highlight">ORDER BY 5 #</span> works but <span class="highlight">ORDER BY 6 #</span> fails → 5 columns</li>
+                </ul>
+
+                <h4>Step 2️⃣: Extract Data With UNION SELECT</h4>
+                <ul>
+                    <li>Construct a UNION SELECT with the same number of columns</li>
+                    <li><strong>Example:</strong> <span class="highlight">UNION SELECT 1, 2, 3 #</span></li>
+                    <li>Numbers that appear in output = visible columns you can use</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 12: SQLi - Discovery & Extraction -->
+        <div class="slide" data-slide="12" data-section="deep-dive">
+            <div class="slide-content">
+                <h2>🔓 SQLi Part 2: Discovery & Extraction</h2>
+
+                <h4>Step 3️⃣: Discover Table Names</h4>
+                <div class="code-block">
+// MySQL: List all tables<br>
+UNION SELECT table_name, 2, 3 FROM information_schema.tables #<br>
+<br>
+// MySQL: List columns for a specific table<br>
+UNION SELECT column_name, 2, 3 FROM information_schema.columns WHERE table_name = 'table_name_here' #
+                </div>
+
+                <h4>Step 4️⃣: Extract Sensitive Data</h4>
+                <div class="code-block">
+// Generic example<br>
+UNION SELECT column1, column2, column3 FROM table_name #
+                </div>
+
+                <div class="quote-box" style="margin-top: 1.5rem;">
+                    "🧠 <strong>Your Challenge:</strong> Find where SQLi exists, enumerate the column count, discover what data is available, and extract the flag!"
+                    <div class="quote-author">— Reconnaissance Phase</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Command Injection -->
+        <div class="slide" data-slide="13" data-section="deep-dive">
+            <div class="slide-content">
+                <h2>💻 OS Command Injection</h2>
+                <p><strong>What it is:</strong> When applications pass user input to system shell commands (exec, system, passthru), metacharacters can break out of the intended command and execute arbitrary OS code.</p>
+
+                <h3>Attack Flow</h3>
+                <div class="code-block">
+// Vulnerable Code<br>
+exec("ping " . $_GET['host']);  // What could go wrong?
+                </div>
+
+                <h3>Exploitation</h3>
+                <ul>
+                    <li>Enter a legitimate value to confirm the endpoint works</li>
+                    <li>Use shell metacharacters like <span class="highlight">;</span> or <span class="highlight">|</span> to chain commands</li>
+                    <li>Example: <span class="highlight">8.8.8.8 ; ls /tmp</span> executes both the ping AND lists directory contents</li>
+                    <li>The flag is written to a file you can then read</li>
+                </ul>
+
+                <div class="quote-box">
+                    "Command injection is trusting the user to stay in their lane. The shell doesn't care about lanes."
+                    <div class="quote-author">— Systems Administrator</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: JWT -->
+        <div class="slide" data-slide="14" data-section="deep-dive">
+            <div class="slide-content">
+                <h2>🔑 JWT Algorithm Confusion</h2>
+                <p><strong>What it is:</strong> JSON Web Tokens (JWT) are cryptographically signed claims. If a server accepts the 'none' algorithm, an attacker can forge tokens with arbitrary claims.</p>
+
+                <h3>How JWT Works</h3>
+                <ul>
+                    <li>JWT = three parts: <strong>Header.Payload.Signature</strong></li>
+                    <li>Server signs the token with a secret to verify authenticity</li>
+                    <li>The 'none' algorithm is meant for debugging — it signs nothing</li>
+                </ul>
+
+                <h3>The Attack</h3>
+                <p>Use <strong><a href="https://jwt.io" target="_blank" style="color: var(--secondary); text-decoration: underline;">jwt.io</a></strong> to:</p>
+                <ul>
+                    <li>Decode an existing token to see its structure</li>
+                    <li>Change the algorithm to 'none' in the header</li>
+                    <li>Modify claims (like role: 'superadmin')</li>
+                    <li>Clear the signature (leave it blank)</li>
+                    <li>Use the forged token in the application</li>
+                </ul>
+
+                <div class="quote-box">
+                    "Trust, but verify. If you're verifying signatures, make sure you're actually verifying them."
+                    <div class="quote-author">— Cryptography Researcher</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: IDOR -->
+        <div class="slide" data-slide="15" data-section="deep-dive">
+            <div class="slide-content">
+                <h2>📊 IDOR (Insecure Direct Object Reference)</h2>
+                <p><strong>What it is:</strong> When applications use client-supplied identifiers to fetch records without verifying ownership. Changing the identifier exposes other users' data.</p>
+
+                <h3>Two Flavors in This Lab</h3>
+                <ul>
+                    <li><strong>Statements IDOR:</strong> Manipulate the URL parameters on the statements page to view other users' transaction history</li>
+                    <li><strong>Transfer IDOR:</strong> Modify the source account details in the transfer request to move money from accounts you don't own (client-side protections are cosmetic)</li>
+                </ul>
+
+                <h3>The Security Lesson</h3>
+                <p>Client-side restrictions (disabled form fields, hidden inputs, readonly attributes) are <strong>cosmetic only</strong>. The server must verify ownership on <strong>every single request</strong>. Never trust the client.</p>
+
+                <div class="quote-box">
+                    "The browser is the attacker's computer. Never trust anything the client sends."
+                    <div class="quote-author">— Backend Security Principal</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Brute Force & Data Exposure -->
+        <div class="slide" data-slide="16" data-section="deep-dive">
+            <div class="slide-content">
+                <h2>🚀 Brute Force & Sensitive Data Exposure</h2>
+                <p><strong>Brute Force:</strong> When systems use short numeric codes (like 4-digit OTPs) without rate limiting, an attacker can try all 10,000 combinations in seconds.</p>
+                <p><strong>Sensitive Data Exposure:</strong> Developers sometimes leave debug information in production code—OTP values in JavaScript, API keys in network responses, secrets in HTML comments.</p>
+                <div class="quote-box">
+                    "Debug mode must never ship to production. Every console.log could be a security breach."
+                    <div class="quote-author">— Code Review Expert</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Getting Started Title -->
+        <div class="slide" data-slide="17" data-section="getting-started">
+            <div class="slide-content hero-slide">
+                <div class="hero-emoji">🚀</div>
+                <h1>Getting Started</h1>
+                <p>Your Step-by-Step Guide to the Lab</p>
+            </div>
+        </div>
+
+        <!-- Slide 18: Steps -->
+        <div class="slide" data-slide="18" data-section="getting-started">
+            <div class="slide-content">
+                <h2>📋 What You Need to Do</h2>
+                <div class="step">
+                    <div class="step-number">1️⃣</div>
+                    <div class="step-content">
+                        <h3>Access the Application</h3>
+                        <p>Open the BankSploit application in your browser. You'll see a login page.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2️⃣</div>
+                    <div class="step-content">
+                        <h3>Start Hunting Vulnerabilities</h3>
+                        <p>Begin with <strong>SQL Injection on the Login Page</strong>. Try to bypass authentication without knowing valid credentials.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3️⃣</div>
+                    <div class="step-content">
+                        <h3>Capture the Flag</h3>
+                        <p>When you successfully exploit a vulnerability, a modal will appear with your flag. Copy it immediately!</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4️⃣</div>
+                    <div class="step-content">
+                        <h3>Submit Your Flag</h3>
+                        <p>Navigate to "Submit Flag" in the app. Paste the flag (format: <span class="highlight">BANKSPLOIT{xxxxx}</span>). Each flag earns points!</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5️⃣</div>
+                    <div class="step-content">
+                        <h3>Repeat & Compete</h3>
+                        <p>Exploit all 8 vulnerabilities. Be the first to capture them all and score the most points.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 19: Pro Tips -->
+        <div class="slide" data-slide="19" data-section="getting-started">
+            <div class="slide-content">
+                <h2>💡 Pro Tips for Success</h2>
+                <div class="info-box" style="background: rgba(251, 191, 36, 0.06); border-left-color: var(--warning);">
+                    <strong style="color: var(--warning);">🌐 Browser-Only Challenge</strong>
+                    <p style="color: var(--text-secondary);">This CTF is designed to be exploited using <strong>only a web browser</strong>. No additional tools, command-line utilities, or specialized security software needed.</p>
+                </div>
+                <ul>
+                    <li><strong>Copilot is OK:</strong> Use AI assistants to understand concepts, but aim to understand the exploit yourself.</li>
+                    <li><strong>Read Error Messages:</strong> Database errors, stack traces, and API responses are your friends.</li>
+                    <li><strong>Document Your Process:</strong> Note which vulnerability you exploited and how.</li>
+                    <li><strong>Time Management:</strong> Prioritize easier vulnerabilities first for quick points.</li>
+                    <li><strong>Ask for Hints:</strong> If stuck, hints will be released after a few minutes.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 20: Important Notes -->
+        <div class="slide" data-slide="20" data-section="getting-started">
+            <div class="slide-content">
+                <h2>⚠️ Important Notes</h2>
+                <ul>
+                    <li><strong>Ethical Boundaries:</strong> These exploits are authorized against this intentionally vulnerable app ONLY. Never test on systems you don't own without permission.</li>
+                    <li><strong>Collaboration:</strong> Discussing tactics and sharing strategies with teammates is encouraged. Security is a team sport.</li>
+                    <li><strong>Persistence:</strong> Not every exploit will work on the first try. Adjust, refine, iterate.</li>
+                    <li><strong>Learn the Why:</strong> Understanding <em>why</em> something works is more valuable than just finding the flag.</li>
+                </ul>
+                <div class="quote-box">
+                    "The attacker's advantage is that they only need to find one way in. Defenders must find and patch them all. Be relentless."
+                    <div class="quote-author">— Offensive Security Trainer</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 21: Leaderboard -->
+        <div class="slide" data-slide="21" data-section="leaderboard">
+            <div class="slide-content">
+                <h2>📈 The Leaderboard</h2>
+                <p>The leaderboard updates in real-time as you submit flags:</p>
+                <div class="score-grid">
+                    <div class="score-item" style="background: rgba(16, 185, 129, 0.06); border-left-color: var(--success);">
+                        <h3 style="color: var(--success);">Primary Score</h3>
+                        <p style="color: var(--text-secondary);">Total points from all flags you've submitted.</p>
+                    </div>
+                    <div class="score-item" style="background: rgba(129, 140, 248, 0.06); border-left-color: var(--primary);">
+                        <h3 style="color: var(--primary);">Speed Bonus</h3>
+                        <p style="color: var(--text-secondary);">Being among the first to capture each flag earns bonus points.</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 1.5rem;">How Hints Work</h3>
+                <div class="info-box" style="background: linear-gradient(135deg, rgba(3, 102, 214, 0.06), rgba(59, 130, 246, 0.06)); border-left-color: var(--primary);">
+                    <strong style="color: var(--primary);">💬 Hint Side Panel</strong>
+                    <p style="color: var(--text-secondary);">When the instructor enables a hint, a floating panel appears with strategic guidance.</p>
+                </div>
+                <div class="info-box" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(217, 119, 6, 0.06)); border-left-color: var(--warning);">
+                    <strong style="color: var(--warning);">⏰ Instructor-Controlled</strong>
+                    <p style="color: var(--text-secondary);">Hints are released by the instructor as the session progresses. If stuck, check back!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 22: Recommended Attack Sequence -->
+        <div class="slide" data-slide="22" data-section="leaderboard">
+            <div class="slide-content">
+                <h2>🎯 Recommended Attack Sequence</h2>
+                <p>While all vulnerabilities are available simultaneously, this order is recommended based on difficulty:</p>
+                <ul>
+                    <li><strong>1. SQL Injection (Login)</strong> — Start here. It's the gateway to everything else.</li>
+                    <li><strong>2. OTP Leak</strong> — Easiest flag once logged in. Look in browser source code.</li>
+                    <li><strong>3. OTP Brute Force</strong> — Methodically test all OTP values.</li>
+                    <li><strong>4. IDOR (Statements)</strong> — URL manipulation is a core security skill.</li>
+                    <li><strong>5. IDOR (Transfers)</strong> — Requires understanding form tampering.</li>
+                    <li><strong>6. JWT Algorithm Confusion</strong> — Use jwt.io to understand and forge tokens.</li>
+                    <li><strong>7. SQL Injection (Extraction)</strong> — UNION SELECT to extract database data.</li>
+                    <li><strong>8. OS Command Injection</strong> — Most complex. Shell metacharacters.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 23: Launch -->
+        <div class="slide" data-slide="23" data-section="leaderboard">
+            <div class="slide-content hero-slide">
+                <div class="hero-emoji">🚀</div>
+                <h1>Ready to Begin?</h1>
+                <p>Capture all 8 flags. Climb the leaderboard. Own the server.</p>
+                <button class="cta-button" onclick="redirectToBankSploit()">Launch BankSploit App →</button>
+                <p style="margin-top: 2rem; font-size: 0.85rem; opacity: 0.6;">© 2024 BankSploit CTF Lab. Intentionally Vulnerable for Educational Purposes.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Floating Feedback Button -->
+    <a href="https://forms.cloud.microsoft/e/ALYnRwmWAc" target="_blank" class="feedback-btn" title="Share your feedback">
+        <span class="feedback-icon">💬</span> Feedback
+    </a>
+
+    <!-- Bottom Navigation -->
+    <div class="slide-nav">
+        <div class="nav-arrow" id="prevBtn" onclick="prevSlide()">←</div>
+        <div class="slide-counter"><span class="current" id="currentSlide">1</span> / <span id="totalSlides">23</span></div>
+        <div class="nav-arrow" id="nextBtn" onclick="nextSlide()">→</div>
+    </div>
+
+    <script>
+        let current = 1;
+        const total = document.querySelectorAll('.slide').length;
+        document.getElementById('totalSlides').textContent = total;
+
+        // Section → first slide mapping
+        const sectionMap = {
+            'objective': 1,
+            'app-intro': 4,
+            'vulns': 7,
+            'deep-dive': 9,
+            'getting-started': 17,
+            'leaderboard': 21
+        };
+
+        function showSlide(n, direction) {
+            if (n < 1 || n > total) return;
+
+            const slides = document.querySelectorAll('.slide');
+            const activeSlide = document.querySelector('.slide.active');
+
+            if (activeSlide) {
+                activeSlide.classList.remove('active');
+                const exitClass = direction === 'next' ? 'exit-left' : 'exit-right';
+                activeSlide.classList.add(exitClass);
+                setTimeout(() => {
+                    activeSlide.classList.remove(exitClass);
+                }, 10);
+            }
+
+            current = n;
+            const newSlide = slides[current - 1];
+            newSlide.style.transform = direction === 'next' ? 'translateX(100px)' : 'translateX(-100px)';
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    newSlide.classList.add('active');
+                    newSlide.style.transform = '';
+                });
+            });
+
+            // Update counter
+            document.getElementById('currentSlide').textContent = current;
+
+            // Update progress bar
+            document.getElementById('progressBar').style.width = ((current / total) * 100) + '%';
+
+            // Update arrow states
+            document.getElementById('prevBtn').classList.toggle('disabled', current === 1);
+            document.getElementById('nextBtn').classList.toggle('disabled', current === total);
+
+            // Scroll content to top
+            const content = newSlide.querySelector('.slide-content');
+            if (content) content.scrollTop = 0;
+
+            // Update section nav highlight
+            updateSectionHighlight();
+        }
+
+        function nextSlide() { showSlide(current + 1, 'next'); }
+        function prevSlide() { showSlide(current - 1, 'prev'); }
+
+        // Jump to section (first slide of that section)
+        function jumpToSection(sectionId) {
+            const targetSlide = sectionMap[sectionId];
+            if (targetSlide && targetSlide !== current) {
+                const direction = targetSlide > current ? 'next' : 'prev';
+                showSlide(targetSlide, direction);
+            }
+        }
+
+        // Update which section button is highlighted based on current slide
+        function updateSectionHighlight() {
+            const currentSlideEl = document.querySelectorAll('.slide')[current - 1];
+            const currentSection = currentSlideEl.getAttribute('data-section');
+
+            document.querySelectorAll('.section-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-section') === currentSection);
+            });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                showSlide(1, 'prev');
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                showSlide(total, 'next');
+            } else if (e.key === 'f' || e.key === 'F') {
+                // Toggle fullscreen
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Touch/swipe support
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+        document.addEventListener('touchend', (e) => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                diff > 0 ? nextSlide() : prevSlide();
+            }
+        });
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const knob = document.getElementById('themeKnob');
+            if (html.getAttribute('data-theme') !== 'light') {
+                html.setAttribute('data-theme', 'light');
+                knob.textContent = '☀️';
+                localStorage.setItem('banksploit-theme', 'light');
+            } else {
+                html.removeAttribute('data-theme');
+                knob.textContent = '🌙';
+                localStorage.setItem('banksploit-theme', 'dark');
+            }
+        }
+
+        // Apply saved theme
+        (function() {
+            const saved = localStorage.getItem('banksploit-theme');
+            if (saved === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('themeKnob').textContent = '☀️';
+            }
+        })();
+
+        function redirectToBankSploit() {
+            window.location.href = '/login';
+        }
+
+        // Initialize
+        document.getElementById('progressBar').style.width = ((1 / total) * 100) + '%';
+        document.getElementById('prevBtn').classList.add('disabled');
+        updateSectionHighlight();
+    </script>
+</body>
+</html>

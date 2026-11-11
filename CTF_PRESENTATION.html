@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankSploit CTF - Security Challenge Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .presentation {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            min-height: 600px;
+            padding: 60px;
+            background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Title Slide */
+        .slide-title {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+        }
+
+        .slide-title h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .slide-title .subtitle {
+            font-size: 1.8em;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .slide-title .meta {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-top: 40px;
+        }
+
+        h2 {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 1.8em;
+            color: #764ba2;
+            margin: 25px 0 15px 0;
+        }
+
+        p, li {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #333;
+            margin: 12px 0;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-top: 15px;
+        }
+
+        li {
+            margin-bottom: 15px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            border-left: 4px solid #667eea;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 20px;
+            border-left: 4px solid #ffc107;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .section-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .vuln-card {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .vuln-card:hover {
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .vuln-card .severity {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .severity-critical {
+            background: #dc3545;
+            color: white;
+        }
+
+        .severity-high {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .severity-medium {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            background: #f5f7fa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .slide-counter {
+            font-size: 1.1em;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .dot-nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #667eea;
+            transform: scale(1.3);
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .column {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            margin-bottom: 30px;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 25px;
+            width: 2px;
+            height: 25px;
+            background: #667eea;
+        }
+
+        .timeline-item:last-child:after {
+            display: none;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px;
+                min-height: 400px;
+            }
+
+            .slide-title h1 {
+                font-size: 2.5em;
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                padding: 15px 30px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            h2 {
+                font-size: 1.8em;
+            }
+
+            h3 {
+                font-size: 1.4em;
+            }
+
+            p, li {
+                font-size: 0.95em;
+            }
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .step-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .key-point {
+            display: flex;
+            align-items: flex-start;
+            margin: 15px 0;
+        }
+
+        .key-point-icon {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .feature-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .feature-item .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .feature-item h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 60px;
+            background: #f5f7fa;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <!-- Slide 1: Title -->
+        <div class="slide slide-title active">
+            <div>
+                <h1>🏦 BankSploit CTF</h1>
+                <p class="subtitle">Hands-On Security Challenge</p>
+                <p class="meta">Learn real-world web vulnerabilities through a realistic banking application</p>
+                <div style="margin-top: 60px; font-size: 1em;">
+                    <p>🎯 Capture Flags | 📊 Climb the Leaderboard | 🏆 Earn Points</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Event Overview -->
+        <div class="slide">
+            <h2>📋 What is BankSploit CTF?</h2>
+            <p>An interactive <strong>Capture The Flag</strong> security challenge where you:</p>
+            <ul>
+                <li><strong>Explore</strong> a realistic banking web application</li>
+                <li><strong>Identify</strong> intentional security vulnerabilities</li>
+                <li><strong>Exploit</strong> them following guidelines</li>
+                <li><strong>Capture</strong> flags proving successful exploitation</li>
+                <li><strong>Submit</strong> flags to earn points</li>
+                <li><strong>Compete</strong> on the leaderboard</li>
+            </ul>
+            <div class="highlight" style="margin-top: 30px;">
+                <strong>⚠️ Note:</strong> This is a learning environment. Vulnerabilities are intentional and confined to this application.
+            </div>
+        </div>
+
+        <!-- Slide 3: Learning Objectives -->
+        <div class="slide">
+            <h2>🎓 What You'll Learn</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="icon">🔐</div>
+                    <h4>Authentication</h4>
+                    <p>How login systems can be bypassed</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">💾</div>
+                    <h4>SQL Injection</h4>
+                    <p>Database attack techniques</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">👤</div>
+                    <h4>IDOR</h4>
+                    <p>Access control weaknesses</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">🔑</div>
+                    <h4>JWT Issues</h4>
+                    <p>Token forgery & validation</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">⚙️</div>
+                    <h4>Command Injection</h4>
+                    <p>System command exploitation</p>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">📝</div>
+                    <h4>Best Practices</h4>
+                    <p>Secure coding patterns</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Core Vulnerabilities - Intro -->
+        <div class="slide">
+            <h2>🚨 Key Vulnerabilities You'll Encounter</h2>
+            <p>This CTF focuses on these core security flaws commonly found in real applications:</p>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <strong>SQL Injection (SQLi)</strong>
+                    <p style="margin-top: 5px;">Attacker injects SQL commands to manipulate database queries</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>Insecure Direct Object References (IDOR)</strong>
+                    <p style="margin-top: 5px;">Access data of other users by modifying object IDs</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>JWT Algorithm Confusion</strong>
+                    <p style="margin-top: 5px;">Forge authentication tokens by exploiting weak JWT validation</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>Command Injection</strong>
+                    <p style="margin-top: 5px;">Execute arbitrary system commands through unsanitized input</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: SQL Injection Explained -->
+        <div class="slide">
+            <h2>🔴 SQL Injection (SQLi)</h2>
+            <h3>What is it?</h3>
+            <p>An attacker inserts malicious SQL code into input fields to manipulate database queries.</p>
+
+            <h3>Example:</h3>
+            <div class="code-block">
+-- Normal login query
+SELECT * FROM users WHERE customer_id = 'BS100234' AND password = 'mypass'
+
+-- If we inject: BS100234' OR '1'='1
+SELECT * FROM users WHERE customer_id = 'BS100234' OR '1'='1'
+AND password = 'mypass'
+
+-- Result: Always TRUE → Login bypassed!
+            </div>
+
+            <h3>Real-World Impact:</h3>
+            <ul>
+                <li>Bypass authentication (login without password)</li>
+                <li>Extract sensitive data (customer info, transactions)</li>
+                <li>Modify or delete database records</li>
+            </ul>
+        </div>
+
+        <!-- Slide 6: IDOR Explained -->
+        <div class="slide">
+            <h2>🟠 Insecure Direct Object References (IDOR)</h2>
+            <h3>What is it?</h3>
+            <p>An application exposes direct references to objects (like account IDs or user IDs) without proper authorization checks.</p>
+
+            <h3>Example:</h3>
+            <div class="code-block">
+-- You login as user A (account_id = 1)
+-- You try to view statements for: /statements?account_id=4
+-- Server returns statements for account_id=4 (belongs to user B)
+-- No check: "Does user A own account 4?"
+            </div>
+
+            <h3>Real-World Impact:</h3>
+            <ul>
+                <li>View other users' bank statements</li>
+                <li>Steal money from other accounts</li>
+                <li>Access sensitive personal information</li>
+            </ul>
+        </div>
+
+        <!-- Slide 7: JWT Issues Explained -->
+        <div class="slide">
+            <h2>🟡 JWT Algorithm Confusion</h2>
+            <h3>What is it?</h3>
+            <p>JSON Web Tokens (JWT) are vulnerable when the server doesn't properly validate the algorithm used to sign them.</p>
+
+            <h3>The Attack - "alg: none":</h3>
+            <div class="code-block">
+// Attacker creates JWT with no signature
+{
+  "header": {"alg": "none"},
+  "payload": {"role": "admin", "user_id": "123"},
+  "signature": ""
+}
+
+// Server accepts it as valid
+// Attacker is now "admin"!
+            </div>
+
+            <h3>Real-World Impact:</h3>
+            <ul>
+                <li>Forge admin tokens without password</li>
+                <li>Elevate privileges from user to admin</li>
+                <li>Bypass authentication entirely</li>
+            </ul>
+        </div>
+
+        <!-- Slide 8: Command Injection Explained -->
+        <div class="slide">
+            <h2>🔴 Command Injection</h2>
+            <h3>What is it?</h3>
+            <p>An application executes system commands with unsanitized user input, allowing attackers to inject arbitrary commands.</p>
+
+            <h3>Example:</h3>
+            <div class="code-block">
+// Application converts PDF (using wkhtmltopdf)
+$filename = $_GET['file'];  // User input
+exec("wkhtmltopdf /files/$filename output.pdf");
+
+// Attacker injects: file.pdf; rm -rf /
+exec("wkhtmltopdf /files/file.pdf; rm -rf / output.pdf");
+// Server deletes all files!
+            </div>
+
+            <h3>Real-World Impact:</h3>
+            <ul>
+                <li>Execute arbitrary commands on server</li>
+                <li>Delete files or entire system</li>
+                <li>Install malware or backdoors</li>
+                <li>Access sensitive files</li>
+            </ul>
+        </div>
+
+        <!-- Slide 9: App Architecture -->
+        <div class="slide">
+            <h2>🏗️ Application Architecture</h2>
+            <h3>Access Points:</h3>
+            <div class="two-column">
+                <div class="column">
+                    <strong>Main Banking App</strong>
+                    <p><code>http://localhost:9443</code></p>
+                    <ul>
+                        <li>Login</li>
+                        <li>Dashboard</li>
+                        <li>Transfers</li>
+                        <li>Statements</li>
+                        <li>Cards & Loans</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <strong>CTF Control Panel</strong>
+                    <p><code>http://localhost:8888</code></p>
+                    <ul>
+                        <li>Instructor only</li>
+                        <li>Leaderboard</li>
+                        <li>Flag submission</li>
+                        <li>Progress tracking</li>
+                    </ul>
+                </div>
+            </div>
+            <h3 style="margin-top: 30px;">Key Features:</h3>
+            <ul>
+                <li>🔬 <strong>Lab Mode:</strong> Hints and difficulty levels</li>
+                <li>📊 <strong>Request Inspector:</strong> See every HTTP request/response</li>
+                <li>👥 <strong>Code Viewer:</strong> Compare vulnerable vs. secure code</li>
+                <li>🏆 <strong>Leaderboard:</strong> Real-time scoring</li>
+            </ul>
+        </div>
+
+        <!-- Slide 10: Getting Started -->
+        <div class="slide">
+            <h2>🚀 Getting Started - Step by Step</h2>
+            <div style="margin: 20px 0;">
+                <div class="step-box">
+                    <span class="step-number">1</span>
+                    <span class="step-content"><strong>Visit the App:</strong> Open <code>http://localhost:9443</code> in your browser</span>
+                </div>
+                <div class="step-box">
+                    <span class="step-number">2</span>
+                    <span class="step-content"><strong>Login:</strong> Use provided credentials (e.g., BS100234 / password123)</span>
+                </div>
+                <div class="step-box">
+                    <span class="step-number">3</span>
+                    <span class="step-content"><strong>Verify OTP:</strong> Check Lab Mode or database for OTP</span>
+                </div>
+                <div class="step-box">
+                    <span class="step-number">4</span>
+                    <span class="step-center"><strong>Explore:</strong> Navigate the banking features (Dashboard, Transfer, Statements)</span>
+                </div>
+                <div class="step-box">
+                    <span class="step-number">5</span>
+                    <span class="step-content"><strong>Test Vulnerabilities:</strong> Try the exploits without tools first</span>
+                </div>
+                <div class="step-box">
+                    <span class="step-number">6</span>
+                    <span class="step-content"><strong>Capture Flags:</strong> Extract flags from successful exploits</span>
+                </div>
+                <div class="step-box">
+                    <span class="step-number">7</span>
+                    <span class="step-content"><strong>Submit Flags:</strong> Go to Lab Mode and submit for points</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Where to Find Flags -->
+        <div class="slide">
+            <h2>🚩 Where Flags Are Hidden</h2>
+            <p>Flags are revealed when you successfully exploit a vulnerability:</p>
+
+            <h3>Flag Locations:</h3>
+            <ul>
+                <li><strong>In Modal Popups:</strong> "🚩 FLAG CAPTURED!" dialog appears with flag text</li>
+                <li><strong>In HTTP Headers:</strong> Check <code>X-CTF-Flag</code> header (use Inspector or DevTools)</li>
+                <li><strong>In API Responses:</strong> JSON responses from special endpoints contain flags</li>
+                <li><strong>Browser Console:</strong> JavaScript logs may show flag values</li>
+            </ul>
+
+            <h3>How to Capture a Flag:</h3>
+            <ol>
+                <li>Successfully exploit a vulnerability</li>
+                <li>A modal or alert shows your flag</li>
+                <li>Copy the flag (format: <code>BANKSPLOIT{...}</code>)</li>
+                <li>Go to <strong>Lab Mode Dashboard → Challenges</strong></li>
+                <li>Paste flag and click Submit</li>
+            </ol>
+
+            <div class="highlight">
+                <strong>💡 Tip:</strong> Each user gets a unique flag for each vulnerability. You cannot share flags with others.
+            </div>
+        </div>
+
+        <!-- Slide 12: Exploitation Without Tools -->
+        <div class="slide">
+            <h2>💻 How to Approach: No Special Tools Required</h2>
+            <h3>All you need:</h3>
+            <ul>
+                <li>A web browser (Chrome, Firefox, etc.)</li>
+                <li>Browser Developer Tools (Press F12)</li>
+                <li>A text editor or notepad</li>
+                <li>Your brain! 🧠</li>
+            </ul>
+
+            <h3>Step-by-Step Approach:</h3>
+            <div class="step-box" style="margin-top: 20px;">
+                <strong>1. Understand the vulnerability:</strong> Read the explanation and examples above
+            </div>
+            <div class="step-box">
+                <strong>2. Identify vulnerable input:</strong> Find fields that accept user input (login, search, forms)
+            </div>
+            <div class="step-box">
+                <strong>3. Test the payload:</strong> Try the injection/manipulation described in hints
+            </div>
+            <div class="step-box">
+                <strong>4. Observe the result:</strong> Check if the app behaves unexpectedly
+            </div>
+            <div class="step-box">
+                <strong>5. Capture the flag:</strong> Look for the flag in modal, headers, or console
+            </div>
+            <div class="step-box">
+                <strong>6. Submit for points:</strong> Verify flag format and submit in Lab dashboard
+            </div>
+        </div>
+
+        <!-- Slide 13: SQLi Attack Walkthrough -->
+        <div class="slide">
+            <h2>🎯 Live Demo: SQL Injection Attack</h2>
+            <h3>Step 1: Go to Login Page</h3>
+            <p>Visit <code>http://localhost:9443/login</code></p>
+
+            <h3>Step 2: Try Normal Login</h3>
+            <div class="code-block">Customer ID: BS100234
+Password: password123</div>
+
+            <h3>Step 3: Try SQL Injection Payload</h3>
+            <div class="code-block">Customer ID: BS100234' or '1'='1
+Password: anything</div>
+
+            <h3>Step 4: What Happens</h3>
+            <p>✅ Login succeeds even with wrong password!</p>
+            <p>✅ Modal appears: "🚩 FLAG CAPTURED!"</p>
+            <p>✅ Flag text: <code>BANKSPLOIT{auth.g1-...}</code></p>
+
+            <h3>Step 5: Get Your Flag</h3>
+            <ul>
+                <li>Copy the complete flag from modal</li>
+                <li>Go to <code>/training</code> dashboard</li>
+                <li>Find vulnerability "auth.g1"</li>
+                <li>Paste and submit</li>
+            </ul>
+        </div>
+
+        <!-- Slide 14: IDOR Attack Walkthrough -->
+        <div class="slide">
+            <h2>🎯 Live Demo: IDOR (Account Statements)</h2>
+            <h3>Step 1: Login Normally</h3>
+            <p>Use: <code>BS100234</code> / <code>password123</code></p>
+
+            <h3>Step 2: Navigate to Statements</h3>
+            <p>After login → <strong>Statements</strong> menu</p>
+
+            <h3>Step 3: Modify the URL</h3>
+            <p>Current URL: <code>/statements?account_id=1</code></p>
+            <p>Change to: <code>/statements?account_id=4</code></p>
+            <p>Press Enter</p>
+
+            <h3>Step 4: What Happens</h3>
+            <p>✅ You see statements for account_id=4 (NOT your account!)</p>
+            <p>✅ Modal shows: "🚩 FLAG CAPTURED!"</p>
+            <p>✅ Flag: <code>BANKSPLOIT{statements.l1-...}</code></p>
+
+            <h3>Step 5: Submit Your Flag</h3>
+            <p>Copy flag → Go to Training Lab → Submit for points</p>
+        </div>
+
+        <!-- Slide 15: JWT Attack Walkthrough -->
+        <div class="slide">
+            <h2>🎯 Advanced: JWT Token Forgery</h2>
+            <h3>What You'll Do:</h3>
+            <p>Create a fake admin JWT token without knowing the secret</p>
+
+            <h3>Step 1: Open Browser Console</h3>
+            <p>Press <code>F12</code> → Console tab</p>
+
+            <h3>Step 2: Create Forged Token</h3>
+            <div class="code-block">
+// Run this in console:
+const header = btoa(JSON.stringify({typ:"JWT", alg:"none"})).replace(/=/g,'')
+const payload = btoa(JSON.stringify({role:"admin", sub:"BS100234"})).replace(/=/g,'')
+const token = header + '.' + payload + '.'
+console.log(token)
+            </div>
+
+            <h3>Step 3: Call Vault Endpoint</h3>
+            <div class="code-block">
+fetch('/api/v1/auth/vault', {
+  headers: {'Authorization': 'Bearer ' + token}
+}).then(r => r.json()).then(d => console.log(d))
+            </div>
+
+            <h3>Step 4: Capture Your Flag</h3>
+            <p>✅ Response contains: <code>flag: "BANKSPLOIT{...}"</code></p>
+        </div>
+
+        <!-- Slide 16: The Challenge Map -->
+        <div class="slide">
+            <h2>🗺️ Challenge Map: All 4 Vulnerabilities</h2>
+            <table class="table">
+                <tr>
+                    <th>Challenge</th>
+                    <th>Vulnerability</th>
+                    <th>Points</th>
+                    <th>Difficulty</th>
+                    <th>Location</th>
+                </tr>
+                <tr>
+                    <td><strong>1. SQLi Login</strong></td>
+                    <td>SQL Injection</td>
+                    <td>200</td>
+                    <td>🟢 Easy</td>
+                    <td>/login</td>
+                </tr>
+                <tr>
+                    <td><strong>2. OTP Brute</strong></td>
+                    <td>No Rate Limiting</td>
+                    <td>200</td>
+                    <td>🟢 Easy</td>
+                    <td>OTP Field</td>
+                </tr>
+                <tr>
+                    <td><strong>3. IDOR Statements</strong></td>
+                    <td>Access Control</td>
+                    <td>200</td>
+                    <td>🟡 Medium</td>
+                    <td>/statements</td>
+                </tr>
+                <tr>
+                    <td><strong>4. JWT Forgery</strong></td>
+                    <td>Algorithm Confusion</td>
+                    <td>300</td>
+                    <td>🟡 Medium</td>
+                    <td>/api/v1/auth/vault</td>
+                </tr>
+            </table>
+            <p style="margin-top: 20px;"><strong>Total Available Points:</strong> 1100+</p>
+        </div>
+
+        <!-- Slide 17: Leaderboard & Scoring -->
+        <div class="slide">
+            <h2>🏆 Leaderboard & Scoring</h2>
+            <h3>How Scoring Works:</h3>
+            <ul>
+                <li>Each vulnerability has a point value</li>
+                <li>Successfully exploit → Capture flag</li>
+                <li>Submit flag → Earn points</li>
+                <li>Points accumulate on your profile</li>
+                <li>Leaderboard updates in real-time</li>
+            </ul>
+
+            <h3>View Your Progress:</h3>
+            <div class="two-column">
+                <div class="column">
+                    <strong>Leaderboard:</strong>
+                    <p><code>/leaderboard</code></p>
+                    <p>See all participants ranked by points</p>
+                </div>
+                <div class="column">
+                    <strong>Lab Dashboard:</strong>
+                    <p><code>/training</code></p>
+                    <p>Track your captured flags and progress</p>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">What Gets Tracked:</h3>
+            <ul>
+                <li>✅ Total flags captured</li>
+                <li>✅ Total points earned</li>
+                <li>✅ Your current rank</li>
+                <li>✅ Time of last capture</li>
+                <li>✅ Progress by vulnerability category</li>
+            </ul>
+        </div>
+
+        <!-- Slide 18: Hints System -->
+        <div class="slide">
+            <h2>💡 Hints & Help System</h2>
+            <h3>Getting Hints:</h3>
+            <p>If you're stuck on a challenge, hints are available in the Training Lab:</p>
+
+            <div class="section-box">
+                <strong>Hint Levels (Progressive):</strong>
+                <ul>
+                    <li>💡 <strong>Level 1:</strong> General direction</li>
+                    <li>💡💡 <strong>Level 2:</strong> Specific technique</li>
+                    <li>💡💡💡 <strong>Level 3:</strong> Nearly complete solution</li>
+                </ul>
+            </div>
+
+            <h3>How to Access Hints:</h3>
+            <ol>
+                <li>Go to <code>/training</code> (Lab Dashboard)</li>
+                <li>Find the challenge you're stuck on</li>
+                <li>Click the vulnerability card</li>
+                <li>Click "View Hints"</li>
+                <li>Read hints progressively</li>
+            </ol>
+
+            <div class="highlight">
+                <strong>📢 Timeline:</strong> Hints will be released as you progress through challenges. We'll announce when new hints become available.
+            </div>
+        </div>
+
+        <!-- Slide 19: Code Learning -->
+        <div class="slide">
+            <h2>📚 Learn from Code</h2>
+            <h3>Side-by-Side Code Comparison:</h3>
+            <p>Every vulnerability has both <strong>vulnerable</strong> and <strong>secure</strong> code versions.</p>
+
+            <h3>How to Access:</h3>
+            <ol>
+                <li>Go to <code>/training</code></li>
+                <li>Click any vulnerability</li>
+                <li>Click "View Code"</li>
+                <li>See vulnerable code on LEFT</li>
+                <li>See secure code on RIGHT</li>
+                <li>Compare line by line</li>
+            </ol>
+
+            <h3>What You'll Learn:</h3>
+            <ul>
+                <li>🔴 What makes code vulnerable?</li>
+                <li>🟢 How should it be written?</li>
+                <li>🔧 What specific fixes prevent the flaw?</li>
+                <li>🛡️ Best practices for secure coding</li>
+            </ul>
+
+            <p style="margin-top: 20px;"><strong>Pro Tip:</strong> Understanding secure code helps you both exploit AND defend!</p>
+        </div>
+
+        <!-- Slide 20: Difficulty Levels -->
+        <div class="slide">
+            <h2>⚙️ Difficulty Levels (Configurable)</h2>
+            <p>Each vulnerability can be set to different difficulty levels:</p>
+
+            <div class="vuln-card">
+                <span class="badge">🟢 Level 0: Fully Vulnerable</span>
+                <p>Complete vulnerability with no protections. Exploit is straightforward.</p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="badge">🟡 Level 1: Partial Protections</span>
+                <p>Some defenses in place. Requires understanding of the vulnerability.</p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="badge">🟠 Level 2: Strong Protections</span>
+                <p>Multiple layers of defense. Exploitation requires advanced techniques.</p>
+            </div>
+
+            <div class="vuln-card">
+                <span class="badge">🔴 Level 3: Secure/Fixed</span>
+                <p>Vulnerability is patched and prevented. Good for learning secure code.</p>
+            </div>
+
+            <p style="margin-top: 20px;"><strong>For This Event:</strong> All challenges are set at <strong>Level 0</strong> for easy exploitation and learning.</p>
+        </div>
+
+        <!-- Slide 21: Timeline & Announcements -->
+        <div class="slide">
+            <h2>📅 Event Timeline</h2>
+            <h3>What Happens When:</h3>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <strong>Phase 1: Exploration (First 1-2 hours)</strong>
+                    <p style="margin-top: 5px;">Participants explore the app, understand basic features, attempt first exploits</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>Phase 2: Early Attempts (Next 1-2 hours)</strong>
+                    <p style="margin-top: 5px;">Initial flag captures begin, leaderboard starts populating</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>Phase 3: Hints Released</strong>
+                    <p style="margin-top: 5px;">After you've tried vulnerabilities, we'll release progressive hints</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>Phase 4: Advanced Challenges</strong>
+                    <p style="margin-top: 5px;">More complex vulnerabilities and techniques introduced</p>
+                </div>
+            </div>
+
+            <div class="highlight" style="margin-top: 30px;">
+                <strong>📢 We will announce when hints become available. Try on your own first!</strong>
+            </div>
+        </div>
+
+        <!-- Slide 22: Important Rules -->
+        <div class="slide">
+            <h2>⚖️ Rules & Guidelines</h2>
+            <h3>What IS Allowed:</h3>
+            <ul>
+                <li>✅ Use browser DevTools (F12)</li>
+                <li>✅ Modify URLs and parameters</li>
+                <li>✅ Inspect HTTP requests/responses</li>
+                <li>✅ Read page source (View Source)</li>
+                <li>✅ Use browser console (JavaScript)</li>
+                <li>✅ Ask questions in the chat</li>
+                <li>✅ Collaborate and discuss approaches</li>
+            </ul>
+
+            <h3>What is NOT Allowed:</h3>
+            <ul>
+                <li>❌ Use automated scanning tools (Burp Suite, OWASP ZAP, etc.)</li>
+                <li>❌ DoS/Brute force attacks</li>
+                <li>❌ Access files outside the app</li>
+                <li>❌ Share captured flags with others</li>
+                <li>❌ Attack other participants</li>
+                <li>❌ Modify the application code</li>
+            </ul>
+
+            <div class="highlight">
+                <strong>Remember:</strong> We're learning, not attacking. Help others, ask questions, and have fun!
+            </div>
+        </div>
+
+        <!-- Slide 23: Troubleshooting -->
+        <div class="slide">
+            <h2>🔧 Troubleshooting & Help</h2>
+            <h3>Common Issues:</h3>
+
+            <div class="vuln-card">
+                <strong>❓ Can't login to app</strong>
+                <p>Check your credentials and OTP. Use DevTools Console to see error messages.</p>
+            </div>
+
+            <div class="vuln-card">
+                <strong>❓ Flag modal didn't appear</strong>
+                <p>Check browser console (F12 → Console tab) for error messages. Try again.</p>
+            </div>
+
+            <div class="vuln-card">
+                <strong>❓ Flag format looks wrong</strong>
+                <p>Format must be: <code>BANKSPLOIT{...}</code>. Copy exactly as shown.</p>
+            </div>
+
+            <div class="vuln-card">
+                <strong>❓ My exploit didn't work</strong>
+                <p>Review the hint. Check that you're using exact payload. Try alternative approaches.</p>
+            </div>
+
+            <h3 style="margin-top: 30px;">Get Help:</h3>
+            <ul>
+                <li>🙋 Raise your hand or chat with instructor</li>
+                <li>💬 Ask in group chat</li>
+                <li>👥 Discuss with teammates</li>
+                <li>📖 Review hints and documentation</li>
+            </ul>
+        </div>
+
+        <!-- Slide 24: Advanced Techniques -->
+        <div class="slide">
+            <h2>🚀 After You Capture Initial Flags</h2>
+            <h3>Ready for More Challenge?</h3>
+            <p>Once you've captured basic flags, explore advanced techniques:</p>
+
+            <div class="section-box">
+                <strong>🔬 Request Inspector:</strong>
+                <p>View every HTTP request sent. See headers, body, cookies. Useful for understanding app behavior.</p>
+            </div>
+
+            <div class="section-box">
+                <strong>📋 API Documentation:</strong>
+                <p>Visit <code>/swagger-ui</code> to see all API endpoints. Discover endpoints you didn't know existed!</p>
+            </div>
+
+            <div class="section-box">
+                <strong>🧪 Code Review:</strong>
+                <p>Compare vulnerable vs. secure code for each vulnerability. Learn WHY fixes work.</p>
+            </div>
+
+            <div class="section-box">
+                <strong>🔐 Difficulty Escalation:</strong>
+                <p>Instructors can increase difficulty levels. Test your skills against stronger defenses.</p>
+            </div>
+        </div>
+
+        <!-- Slide 25: Final Summary -->
+        <div class="slide">
+            <h2>🎯 Your Mission</h2>
+            <h3>You will:</h3>
+            <div class="key-point">
+                <div class="key-point-icon">1️⃣</div>
+                <div>Explore the banking application thoroughly</div>
+            </div>
+            <div class="key-point">
+                <div class="key-point-icon">2️⃣</div>
+                <div>Identify vulnerable input fields and features</div>
+            </div>
+            <div class="key-point">
+                <div class="key-point-icon">3️⃣</div>
+                <div>Test payloads to exploit vulnerabilities</div>
+            </div>
+            <div class="key-point">
+                <div class="key-point-icon">4️⃣</div>
+                <div>Capture flags from successful exploits</div>
+            </div>
+            <div class="key-point">
+                <div class="key-point-icon">5️⃣</div>
+                <div>Submit flags to earn points</div>
+            </div>
+            <div class="key-point">
+                <div class="key-point-icon">6️⃣</div>
+                <div>Climb the leaderboard and compete</div>
+            </div>
+            <div class="key-point">
+                <div class="key-point-icon">7️⃣</div>
+                <div>Learn secure coding practices</div>
+            </div>
+
+            <h3 style="margin-top: 30px; text-align: center; color: #667eea;">
+                🏆 Most importantly: Have fun and learn! 🏆
+            </h3>
+        </div>
+
+        <!-- Slide 26: End -->
+        <div class="slide slide-title" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div>
+                <h1>Ready to Begin? 🚀</h1>
+                <p class="subtitle" style="margin-top: 30px;">Go to http://localhost:9443 and start exploring!</p>
+                <div style="margin-top: 60px;">
+                    <p style="font-size: 1.3em; margin-bottom: 20px;">Questions? We're here to help!</p>
+                    <p style="font-size: 1em; opacity: 0.9;">
+                        💡 Remember: Try exploits without tools first<br>
+                        📢 We'll announce hints as you progress<br>
+                        🏆 Compete, learn, and have fun!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <div class="dot-nav" id="dotNav"></div>
+            <button id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+        <div style="text-align: center; padding: 15px; background: #f5f7fa; border-top: 1px solid #e0e0e0;">
+            <span class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">26</span></span>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = document.querySelectorAll('.slide').length;
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+
+            if (n > totalSlides) {
+                currentSlide = totalSlides;
+            }
+            if (n < 1) {
+                currentSlide = 1;
+            }
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlide - 1].classList.add('active');
+
+            document.getElementById('currentSlide').textContent = currentSlide;
+
+            // Update dots
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide - 1);
+            });
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        function changeSlide(n) {
+            currentSlide += n;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            showSlide(currentSlide);
+        }
+
+        // Create dots
+        const dotNav = document.getElementById('dotNav');
+        for (let i = 1; i <= totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.onclick = () => goToSlide(i);
+            dotNav.appendChild(dot);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        // Initialize
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

