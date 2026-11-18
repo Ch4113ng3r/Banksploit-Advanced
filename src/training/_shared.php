@@ -249,16 +249,23 @@ if (!function_exists('tr_session_name')) {
             $points = Flags::points($result['vuln_key'], $curLevel);
             tr_set_status($pdo, $result['vuln_key'], 'exploited');
 
-            // Log to ctf_submissions for leaderboard (INSERT IGNORE = no dupes)
-            $pdo->prepare(
+            // Log to ctf_submissions for leaderboard (INSERT IGNORE = no dupes).
+            // rowCount() tells us whether this was the FIRST capture, so a repeat
+            // submission is reported honestly instead of claiming points again.
+            $ins = $pdo->prepare(
                 'INSERT IGNORE INTO ctf_submissions (user_id, vuln_key, points)
                  VALUES (:uid, :vk, :pts)'
-            )->execute([':uid' => $userId, ':vk' => $result['vuln_key'], ':pts' => $points]);
+            );
+            $ins->execute([':uid' => $userId, ':vk' => $result['vuln_key'], ':pts' => $points]);
+            $firstCapture = $ins->rowCount() > 0;
 
             return ['ok' => true, 'correct' => true,
-                    'message' => "🚩 Correct! {$title} — +{$points} pts",
-                    'vuln_id' => $result['vuln_key'],
-                    'points'  => $points];
+                    'message' => $firstCapture
+                        ? "🚩 Correct! {$title} — +{$points} pts"
+                        : "✓ {$title} — already captured, no additional points.",
+                    'vuln_id'   => $result['vuln_key'],
+                    'points'    => $firstCapture ? $points : 0,
+                    'duplicate' => !$firstCapture];
         }
 
         return ['ok' => true, 'correct' => false, 'message' => 'Incorrect flag.', 'vuln_id' => null];

@@ -930,6 +930,30 @@ if (!function_exists('is_debug_enabled')) {
     }
 }
 
+if (!function_exists('is_lab_open')) {
+    /**
+     * Master kill switch for the whole lab environment.
+     *
+     * Stored as the `lab_open` row in feature_toggles. A MISSING row means the
+     * lab is OPEN, so an instance that was never switched off keeps working.
+     * When this returns false the front controller serves a "lab closed" page
+     * for every routed request.
+     */
+    function is_lab_open(): bool
+    {
+        try {
+            $pdo = bs_lookup('db');
+            if (!$pdo) return true;
+            $stmt = $pdo->prepare('SELECT is_enabled FROM feature_toggles WHERE feature_key = :key');
+            $stmt->execute([':key' => 'lab_open']);
+            $result = $stmt->fetchColumn();
+            return $result === null ? true : (bool) $result;
+        } catch (Exception $e) {
+            return true;
+        }
+    }
+}
+
 /**
  * Get all feature toggles for UI display.
  *

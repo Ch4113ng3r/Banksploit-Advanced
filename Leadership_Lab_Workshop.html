@@ -113,7 +113,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 /* ─── Print ─── */
 @media print{
   .slide{display:flex!important;opacity:1!important;position:relative;page-break-after:always;height:100vh}
-  #progress,#counter,#fs-hint,#phase-tracker,#timer-widget{display:none}
+  #progress,#counter,#fs-hint,#phase-tracker,#timer-widget,#mgr-btn,#feedback-btn{display:none}
 }
 
 .flow{display:flex;align-items:stretch;gap:.55rem;flex-wrap:wrap}.flow-step{flex:1;min-width:130px;background:var(--card);border:1px solid #1e293b;border-radius:10px;padding:1rem;text-align:center}.flow-arrow{display:flex;align-items:center;color:var(--indigo);font-weight:900;font-size:1.35rem}.source-note{margin-top:1rem;color:var(--t3);font-size:.68rem;line-height:1.35}.level-card{position:relative}.level-tag{position:absolute;top:.65rem;right:.7rem;font-size:.65rem;font-weight:800;text-transform:uppercase;padding:.2rem .5rem;border-radius:999px;background:rgba(99,102,241,.16);color:#c7d2fe}.decision{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}.decision .card{padding:1rem}
@@ -145,12 +145,22 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 /* ─── Slide manager ─── */
 #mgr-btn{position:fixed;bottom:1.1rem;right:6.5rem;z-index:99;background:rgba(25,35,65,.75);border:1px solid rgba(99,102,241,.3);color:var(--t2);border-radius:8px;padding:.3rem .7rem;font-size:.72rem;cursor:pointer;font-family:var(--sans);font-weight:600}
 #mgr-btn:hover{color:var(--t1);border-color:rgba(99,102,241,.6)}
-#feedback-btn{position:fixed;bottom:1.15rem;left:50%;transform:translateX(-50%);z-index:99;
-  background:rgba(25,35,65,.72);border:1px solid rgba(56,189,248,.32);color:var(--t2);
-  border-radius:999px;padding:.34rem 1rem;font-size:.72rem;font-weight:600;letter-spacing:.02em;
-  text-decoration:none;font-family:var(--sans);backdrop-filter:blur(6px);
-  display:inline-flex;align-items:center;gap:.4rem;transition:color .2s,border-color .2s,background .2s}
-#feedback-btn:hover{color:var(--t1);border-color:var(--sky);background:rgba(56,189,248,.18)}
+#feedback-btn{position:fixed;bottom:3.4rem;right:2rem;z-index:99;
+  background:linear-gradient(135deg,var(--indigo),var(--sky));color:#fff;border:none;
+  border-radius:10px 10px 4px 10px;padding:.55rem 1.05rem;font-size:.76rem;font-weight:700;letter-spacing:.02em;
+  text-decoration:none;font-family:var(--sans);
+  display:inline-flex;align-items:center;gap:.45rem;
+  box-shadow:0 4px 18px rgba(56,189,248,.35);
+  opacity:0;pointer-events:none;transform:translateY(10px) scale(.96);
+  transition:opacity .45s ease,transform .45s ease}
+#feedback-btn.show{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);
+  animation:fbPulse 2.2s ease-in-out .6s 3}
+#feedback-btn:hover{filter:brightness(1.12);box-shadow:0 6px 26px rgba(56,189,248,.6)}
+#feedback-btn .fb-dot{width:.42rem;height:.42rem;border-radius:50%;background:#fff;opacity:.9;
+  animation:fbDot 1.8s ease-in-out infinite}
+@keyframes fbPulse{0%,100%{box-shadow:0 4px 18px rgba(56,189,248,.35)}
+  50%{box-shadow:0 4px 30px rgba(56,189,248,.85)}}
+@keyframes fbDot{0%,100%{opacity:.35}50%{opacity:1}}
 #slide-mgr{position:fixed;inset:0;background:rgba(5,8,18,.95);z-index:200;display:none;flex-direction:column;padding:1.6rem 3vw 1.2rem;backdrop-filter:blur(6px)}
 #slide-mgr.open{display:flex}
 #mgr-list{overflow-y:auto;flex:1;margin-top:.9rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:.35rem;align-content:start}
@@ -208,7 +218,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <div id="mgr-list"></div>
 </div>
 <!-- ===== FEEDBACK BUTTON — replace the href below with your real form/QR link ===== -->
-<a id="feedback-btn" href="https://forms.example.com/REPLACE-ME" target="_blank" rel="noopener">&#128172; Share your feedback</a>
+<a id="feedback-btn" href="https://forms.example.com/REPLACE-ME" target="_blank" rel="noopener"><span class="fb-dot"></span> Share your feedback</a>
 
 <div id="deck">
 <section id="s1" data-phase="Context" class="slide">
@@ -1596,6 +1606,8 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
   var progress = document.getElementById('progress');
   var counter  = document.getElementById('counter');
   var fsHint   = document.getElementById('fs-hint');
+  var feedbackBtn = document.getElementById('feedback-btn');
+  var FEEDBACK_AFTER = 25;   /* button appears from this slide onward */
   var slides = all.slice();
   var current = 0;
 
@@ -1707,6 +1719,7 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
     progress.style.width = ((pos+1)/Math.max(vis.length,1)*100)+'%';
     counter.textContent = (pos+1)+' / '+vis.length;
     history.replaceState(null,null,'#'+slides[current].id);
+    if(feedbackBtn) feedbackBtn.classList.toggle('show', (pos+1) >= FEEDBACK_AFTER);
     updatePhase();
   }
   function next(){ var n = nextVisible(current+1,1); if(n>=0) goTo(n); }

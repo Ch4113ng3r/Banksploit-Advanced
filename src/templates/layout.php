@@ -329,6 +329,8 @@ HTML;
                         ${vulnSubtitle}
                         <div style="font-size: 12px; color: ${theme.subtitle}; margin-bottom: 16px;">Vulnerability Exploited Successfully</div>
                         <div style="background: ${theme.boxBg}; padding: 16px; border-radius: 10px; margin-bottom: 20px; font-family: 'Monaco', 'Courier New', monospace; word-break: break-all; user-select: all; color: ${theme.text}; font-size: 13px; line-height: 1.6; border: 1px solid ${theme.boxBorder}; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);">` + escapeHtml(flag) + `</div>
+                        <button id="ctf-claim-btn" style="width: 100%; padding: 13px 16px; margin-bottom: 10px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 15px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.35);">&#127937; Submit for Points</button>
+                        <div id="ctf-claim-status" style="display:none; font-size: 12.5px; line-height:1.5; margin-bottom: 12px; padding: 9px 12px; border-radius: 8px;"></div>
                         <div style="display: flex; gap: 10px;">
                             <button id="ctf-copy-btn" style="flex: 1; padding: 11px 16px; background: ${theme.btnBg}; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; box-shadow: ${theme.btnShadow};">📋 Copy Flag</button>
                             <button id="ctf-close-btn" style="flex: 1; padding: 11px 16px; background: ${theme.btnClose}; color: ${theme.btnCloseText}; border: 1px solid ${theme.btnCloseBorder}; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s;">Close</button>
@@ -390,6 +392,63 @@ HTML;
                     const btn = this;
                     btn.textContent = '❌ Error';
                     setTimeout(() => { btn.textContent = '📋 Copy Flag'; }, 2000);
+                }
+            });
+
+            // Claim button handler — submits the flag straight to the scoreboard,
+            // so a participant never has to copy/paste into the training lab.
+            document.getElementById('ctf-claim-btn').addEventListener('click', async function() {
+                const btn = this;
+                const status = document.getElementById('ctf-claim-status');
+                if (btn.disabled) return;
+                btn.disabled = true;
+                btn.style.opacity = '0.75';
+                btn.textContent = 'Submitting\u2026';
+                const show = (msg, kind) => {
+                    status.style.display = 'block';
+                    status.textContent = msg;
+                    if (kind === 'ok') {
+                        status.style.background = 'rgba(22,163,74,0.15)';
+                        status.style.border = '1px solid rgba(22,163,74,0.45)';
+                        status.style.color = '#4ade80';
+                    } else {
+                        status.style.background = 'rgba(239,68,68,0.12)';
+                        status.style.border = '1px solid rgba(239,68,68,0.4)';
+                        status.style.color = '#fca5a5';
+                    }
+                };
+                try {
+                    const r = await fetch('/api/v1/training/submit-flag', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({flag: flag})
+                    });
+                    let d = {};
+                    try { d = await r.json(); } catch (e) { d = {}; }
+                    if (r.status === 403) {
+                        show(d.error || 'Flag submission is currently disabled by the instructor.', 'err');
+                        btn.textContent = 'Submission disabled';
+                        btn.style.background = 'rgba(100,116,139,0.5)';
+                        return;
+                    }
+                    if (d && d.correct) {
+                        btn.textContent = d.duplicate ? '\u2705 Already captured'
+                                        : (d.points ? ('\u2705 Captured  +' + d.points + ' pts') : '\u2705 Captured');
+                        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                        btn.style.opacity = '1';
+                        show(d.message || 'Flag accepted.', 'ok');
+                        if (typeof window.refreshCtfScore === 'function') window.refreshCtfScore();
+                    } else {
+                        btn.textContent = '\u26A0 Not counted';
+                        btn.style.background = 'rgba(100,116,139,0.5)';
+                        btn.style.opacity = '1';
+                        show((d && d.message) || 'This flag was not accepted.', 'err');
+                    }
+                } catch (e) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.textContent = '\u127937 Submit for Points';
+                    show('Could not reach the server. Try the training lab\u2019s submit box instead.', 'err');
                 }
             });
 

@@ -67,6 +67,30 @@ if ($auth->isAuthenticated() && !$auth->isAdmin() && !isset($_COOKIE['is_admin']
 
 $router = new Router();
 
+// --- Master kill switch (checked before every other route) ------------------
+// The instructor can close the whole lab from the panel. Nothing is routed
+// while it is closed; static assets are served by the web server, not here.
+if (!is_lab_open()) {
+    http_response_code(503);
+    header('Retry-After: 3600');
+    header('Content-Type: text/html; charset=utf-8');
+    echo '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+       . '<meta name="viewport" content="width=device-width,initial-scale=1">'
+       . '<title>Lab Closed</title><style>'
+       . 'html,body{height:100%;margin:0}'
+       . 'body{display:flex;align-items:center;justify-content:center;background:#0b1120;'
+       . 'color:#f0f4ff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;text-align:center;padding:2rem}'
+       . '.c{max-width:30rem}h1{font-size:1.6rem;margin:0 0 .75rem}'
+       . 'p{color:#94a3b8;line-height:1.6;margin:0 0 .5rem}'
+       . '.i{font-size:3rem;margin-bottom:1rem}</style></head><body><div class="c">'
+       . '<div class="i">&#128274;</div>'
+       . '<h1>The lab is closed</h1>'
+       . '<p>This training environment has been switched off by the instructor.</p>'
+       . '<p>If a session is still running, please check with your facilitator.</p>'
+       . '</div></body></html>';
+    exit;
+}
+
 // --- Feature toggle middleware (check before routing) ---
 // This intercepts requests for disabled features
 if (in_array($_SERVER['REQUEST_URI'] ?? '', ['/lab', '/training', '/training/code', '/inspector'], true)) {

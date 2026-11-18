@@ -5,6 +5,37 @@ declare(strict_types=1);
 $pdo = db();
 $engine = engine();
 
+// --- Master kill switch -----------------------------------------------------
+// Closes the entire lab app (port 9443). The instructor panel stays reachable.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    $input = json_decode((string) file_get_contents('php://input'), true) ?? $_POST;
+    if (!csrf_verify($input['csrf_token'] ?? null)) {
+        echo json_encode(['ok' => false, 'error' => 'CSRF token invalid.']);
+        exit;
+    }
+    if ((string) ($input['action'] ?? '') === 'lab-switch') {
+        $open = (bool) ($input['open'] ?? false);
+        $pdo->prepare(
+            'INSERT INTO feature_toggles (feature_key, is_enabled, description)
+             VALUES (:k, :v, :d)
+             ON DUPLICATE KEY UPDATE is_enabled = VALUES(is_enabled)'
+        )->execute([
+            ':k' => 'lab_open',
+            ':v' => $open ? 1 : 0,
+            ':d' => 'Master switch for the whole lab environment',
+        ]);
+        echo json_encode(['ok' => true, 'open' => $open]);
+        exit;
+    }
+    echo json_encode(['ok' => false, 'error' => 'Unknown action.']);
+    exit;
+}
+
+$labOpenRow = $pdo->query("SELECT is_enabled FROM feature_toggles WHERE feature_key = 'lab_open'")->fetchColumn();
+$labOpen    = $labOpenRow === false ? true : (bool) $labOpenRow;
+$saCsrf     = csrf_token();
+
 // --- Stats cards data ---
 $activeUsers = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE is_suspended = 0")->fetchColumn();
 $totalUsers  = (int) $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
@@ -122,6 +153,17 @@ $ctfDataJson = json_encode([
 ], JSON_UNESCAPED_UNICODE);
 
 $content = <<<'HTML'
+    <div id="labSwitchCard" class="rounded-xl ring-1 px-5 py-4 mb-6 flex flex-wrap items-center justify-between gap-4 LAB_CARD_CLS">
+        <div class="min-w-0">
+            <div class="flex items-center gap-2">
+                <span id="labDot" class="inline-block w-2.5 h-2.5 rounded-full LAB_DOT_CLS"></span>
+                <span class="text-sm font-semibold text-gray-900 dark:text-white">Lab environment is <span id="labStateText">LAB_STATE_TEXT</span></span>
+            </div>
+            <p class="text-xs text-gray-600 dark:text-slate-400 mt-1 max-w-2xl">LAB_HELP_TEXT</p>
+        </div>
+        <button id="labSwitchBtn" onclick="toggleLab()" class="rounded-lg px-4 py-2 text-xs font-bold whitespace-nowrap text-white LAB_BTN_CLS">LAB_BTN_TEXT</button>
+    </div>
+
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="rounded-xl bg-white dark:bg-slate-900/60 shadow-sm dark:shadow-none ring-1 ring-gray-200 dark:ring-slate-800 p-5">
             <div class="text-xs text-gray-500 dark:text-slate-500 uppercase font-medium">Active Users</div>
@@ -557,6 +599,49 @@ $content = <<<'HTML'
 HTML;
 
 // Inject dynamic PHP values into the HTML template
+$content .= <<<'HTML'
+<script>
+const LAB_CSRF = "SA_CSRF_TOKEN";
+async function toggleLab(){
+    const open = document.getElementById('labStateText').textContent.trim().toLowerCase() === 'open';
+    const next = !open;
+    const msg = next
+        ? 'Reopen the lab? Participants will be able to reach the application again.'
+        : 'Close the ENTIRE lab environment?\n\nEvery participant page stops working immediately and shows a "lab closed" notice. This panel stays available, and nothing is deleted \u2014 you can reopen at any time.';
+    if (!confirm(msg)) return;
+    const btn = document.getElementById('labSwitchBtn');
+    btn.disabled = true; btn.style.opacity = '.6';
+    const r = await fetch('/dashboard', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'lab-switch', open: next, csrf_token: LAB_CSRF})
+    });
+    const d = await r.json();
+    if (d.ok) { location.reload(); }
+    else { alert(d.error || 'Failed'); btn.disabled = false; btn.style.opacity = '1'; }
+}
+</script>
+HTML;
+
+$content = str_replace('SA_CSRF_TOKEN', $saCsrf, $content);
+
+$content = str_replace(
+    ['LAB_CARD_CLS', 'LAB_DOT_CLS', 'LAB_STATE_TEXT', 'LAB_HELP_TEXT', 'LAB_BTN_CLS', 'LAB_BTN_TEXT'],
+    $labOpen
+        ? ['bg-emerald-50 dark:bg-emerald-500/10 ring-emerald-200 dark:ring-emerald-500/30',
+           'bg-emerald-500',
+           'open',
+           'Participants can reach the application normally. Use this to shut everything down at the end of the session \u2014 nothing is deleted and you can reopen instantly.',
+           'bg-red-600 hover:bg-red-500',
+           'Close Lab']
+        : ['bg-red-50 dark:bg-red-500/10 ring-red-200 dark:ring-red-500/40',
+           'bg-red-500 animate-pulse',
+           'CLOSED',
+           'Every participant request is being refused with a "lab closed" notice. This panel is unaffected. Reopen whenever you are ready.',
+           'bg-emerald-600 hover:bg-emerald-500',
+           'Reopen Lab'],
+    $content
+);
+
 $content = str_replace(
     ['ACTIVE_USERS', 'TOTAL_USERS', 'TOTAL_TXNS', 'FLAGS_CAPTURED', 'LVL0', 'LVL1', 'LVL2', 'LVL3', 'MAX_PTS', 'CTF_DATA_JSON'],
     [(string)$activeUsers, (string)$totalUsers, (string)$totalTxns, (string)$flagsCaptured,
