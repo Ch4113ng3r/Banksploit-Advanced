@@ -39,10 +39,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $action = (string) input('action', '');
 
         if ($action === 'initiate') {
-            // Store the from_account_number as-is (allows IDOR manipulation)
-            $fromAccNum = (string) input('from_account_number', '');
-            // Store the to_account_number as-is (allows IDOR manipulation)
-            $toAccNum = (string) input('to_account_number', '');
+            // Decode the per-level "from account" reference to an account number
+            // (transfer.l1). Ownership is NOT checked here — only L3's execute
+            // path enforces it — so L0/L1/L2 stay exploitable with a crafted ref.
+            $fromAccNum = xfer_resolve_from_ref($pdo, $engine, (string) input('from_account_ref', ''), (string) input('from_account_sig', ''));
+            // Resolve the per-level "to account" reference. At L1 the client sends
+            // the plain number plus its HMAC signature, verified in O(1) — the same
+            // signing scheme as the from field, which is what leaks valid pairs.
+            $toAccNum = xfer_resolve_to_ref($engine, (string) input('to_account_number', ''), (string) input('to_account_sig', ''));
 
             if ($fromAccNum === '' || $toAccNum === '') {
                 $error = 'Please select both accounts.';
@@ -136,7 +140,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         $_SESSION['transfer_ctf_vuln'] = 'transfer.l1';
                     }
                     xfer_flow_clear();
-                    $receipt = xfer_receipt($pdo, $engine, $uid, (int) $res['txn_id']);
+                    // Confirmation for the transfer we just executed this request:
+                    // fetch it directly by the id the server just created, not via
+                    // the ownership-scoped receipt lookup (that scoping is for the
+                    // receipt-viewing API, transfer.l2). Otherwise a transfer.l1
+                    // IDOR — whose source/destination are not the caller's own
+                    // accounts — would find no receipt and render a blank page.
+                    $rq = $pdo->prepare('SELECT * FROM transactions WHERE id = :id');
+                    $rq->execute([':id' => (int) $res['txn_id']]);
+                    $receipt = $rq->fetch() ?: null;
                     $stage = 'receipt';
                 } else {
                     $error = $res['error'];
@@ -177,26 +189,15 @@ $alert = $error !== null
 $body = '';
 
 if ($stage === 'details') {
-    $firstAccNum = (string) ($accounts[0]['account_number'] ?? '');
-    $accOpts = '';
-    foreach ($accounts as $a) {
-        $accOpts .= '<option value="' . htmlspecialchars((string) $a['account_number']) . '">'
-            . htmlspecialchars(ucfirst((string) $a['account_type']) . ' · ' . $a['account_number']
-              . ' (₹' . number_format((float) $a['balance'], 2) . ')') . '</option>';
-    }
-    $benOpts = '';
-    foreach ($beneficiaries as $b) {
-        $benOpts .= '<option value="' . htmlspecialchars((string) $b['account_number']) . '">'
-            . htmlspecialchars($b['name'] . ' · ' . $b['account_number'] . ' · ' . $b['ifsc_code']) . '</option>';
-    }
+    $l1Level   = $engine->getVulnLevel('transfer', 'l1');
+    $fromField = xfer_from_field_html($accounts, $l1Level);
+    $toField   = xfer_to_field_html($beneficiaries, $l1Level);
     $body = <<<HTML
         <form method="post" action="{$url}/transfer">
             {$csrf}
             <input type="hidden" name="action" value="initiate">
-            <label class="block text-xs text-slate-400 mb-1">From account</label>
-            <select name="from_account_number" class="w-full rounded-lg bg-slate-950 ring-1 ring-slate-700 px-3 py-2 text-slate-100 mb-3">{$accOpts}</select>
-            <label class="block text-xs text-slate-400 mb-1">To account</label>
-            <select name="to_account_number" class="w-full rounded-lg bg-slate-950 ring-1 ring-slate-700 px-3 py-2 text-slate-100 mb-3">{$benOpts}</select>
+            {$fromField}
+            {$toField}
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">Amount (₹)</label>
@@ -317,16 +318,16 @@ HTML;
         $ctfVulnEscaped = $ctfVuln ? '\'' . htmlspecialchars($ctfVuln) . '\'' : 'null';
         $body .= <<<HTML
         <script>
+        console.log('CTF Flag detected: $ctfFlagEscaped');
         (function() {
             const flag = '$ctfFlagEscaped';
             const vulnId = $ctfVulnEscaped;
-            const flagShownKey = 'flag_shown_' + (vulnId || 'default');
 
             function showFlag() {
-                const flagAlreadyShown = sessionStorage.getItem(flagShownKey) === 'true';
-                if (!flagAlreadyShown && typeof displayFlag === 'function') {
+                if (typeof displayFlag === 'function') {
                     displayFlag(flag, vulnId);
-                    sessionStorage.setItem(flagShownKey, 'true');
+                } else {
+                    console.warn('displayFlag function not available');
                 }
             }
 

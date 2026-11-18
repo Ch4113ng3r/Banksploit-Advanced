@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Presenter Notes — Theory Sections</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b1120;--card:rgba(25,35,65,.5);--t1:#f0f4ff;--t2:#9fb0c7;--t3:#6b7a90;
+  --indigo:#6366f1;--sky:#38bdf8;--red:#ef4444;--green:#22c55e;--amber:#eab308;
+  --mono:'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);line-height:1.62;
+     max-width:1000px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+h1{font-size:1.95rem;font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.3rem;margin-top:2.8rem;padding-top:1.1rem;border-top:2px solid #233049;color:var(--sky)}
+h3{font-size:1.02rem;margin-top:1.5rem;color:var(--t1)}
+h4{font-size:.9rem;margin-top:1.1rem;color:var(--t2);text-transform:uppercase;letter-spacing:.06em}
+p,li,td{color:var(--t2);font-size:.94rem}
+ul,ol{margin:.45rem 0 .45rem 1.25rem}
+li{margin:.28rem 0}
+.lead{font-size:1rem;margin-top:.6rem}
+.box{background:var(--card);border:1px solid #1e293b;border-radius:10px;padding:.95rem 1.25rem;margin-top:.85rem}
+.say{border-left:4px solid var(--green)}
+.say::before{content:'SAY SOMETHING LIKE';display:block;font-size:.6rem;font-weight:800;letter-spacing:.1em;color:var(--green);margin-bottom:.35rem}
+.say p{color:var(--t1);font-style:italic}
+.care{border-left:4px solid var(--amber)}
+.care::before{content:'ACCURACY — BE CAREFUL HERE';display:block;font-size:.6rem;font-weight:800;letter-spacing:.1em;color:var(--amber);margin-bottom:.35rem}
+.qa{border-left:4px solid var(--indigo)}
+.qa::before{content:'IF SOMEONE ASKS';display:block;font-size:.6rem;font-weight:800;letter-spacing:.1em;color:#a5b4fc;margin-bottom:.35rem}
+.why{border-left:4px solid var(--sky)}
+.why::before{content:'WHY THIS SLIDE EXISTS';display:block;font-size:.6rem;font-weight:800;letter-spacing:.1em;color:var(--sky);margin-bottom:.35rem}
+table{width:100%;border-collapse:collapse;margin-top:.85rem;font-size:.88rem}
+th{text-align:left;padding:.5rem .75rem;color:var(--t3);border-bottom:1px solid #233049;
+   text-transform:uppercase;font-size:.66rem;letter-spacing:.05em}
+td{padding:.5rem .75rem;border-bottom:1px solid rgba(35,48,73,.6);vertical-align:top}
+.ref{display:inline-block;font-family:var(--mono);font-size:.68rem;background:rgba(99,102,241,.16);
+  color:#c7d2fe;border:1px solid rgba(99,102,241,.3);padding:.08rem .45rem;border-radius:5px;margin-right:.5rem}
+.toc{background:var(--card);border:1px solid #1e293b;border-radius:10px;padding:.9rem 1.3rem;margin-top:1.4rem}
+.toc a{color:var(--sky);text-decoration:none;font-size:.9rem}
+.toc a:hover{text-decoration:underline}
+strong{color:var(--t1)}
+@media print{
+  body{background:#fff;color:#111;max-width:none;padding:1rem}
+  h2{color:#1e3a8a;border-top-color:#bbb}h3,h1,strong{color:#111}p,li,td{color:#333}
+  .box{background:#f5f6fa;border-color:#ddd}.say p{color:#111}
+}
+</style>
+</head>
+<body>
+
+<h1>Presenter Notes &mdash; Theory Sections</h1>
+<p class="lead">Think Like an Attacker: The Cyber Leadership Lab. Covers the four non-lab sections only:
+the Security Mindset reveal, the Threat Economy, Business Survival, and the AI block.
+Slide numbers refer to the default order of <code>Leadership_Lab_Workshop.html</code>.</p>
+
+<div class="toc">
+<strong style="font-size:.9rem">Sections</strong>
+<ul style="list-style:none;margin-left:0">
+<li><a href="#mindset">1. The Security Mindset &mdash; running the reveal (s7)</a></li>
+<li><a href="#economy">2. The Threat Economy (s8)</a></li>
+<li><a href="#survival">3. When Cyber Risk Becomes Business Survival (s9)</a></li>
+<li><a href="#ai">4. AI in Security (the Phase 5 block)</a></li>
+</ul>
+</div>
+
+<!-- ========================================================= -->
+<h2 id="mindset">1. The Security Mindset &mdash; running the reveal</h2>
+<p><span class="ref">s7</span>Two columns. The right-hand column is hidden until you press the button.</p>
+
+<div class="box why">
+<p>This is the slide that sets up everything that follows. The point is <strong>not</strong> that developers
+are careless. It is that the sentences which quietly become security controls are always reasonable
+sentences &mdash; which is exactly why nobody challenges them. If the room accepts this, every demo
+afterwards lands as "oh, that's the pattern again" rather than "wow, bad code".</p>
+</div>
+
+<h3>How to run it &mdash; roughly three minutes</h3>
+<ol>
+<li><strong>Do not press the button yet.</strong> Read three of the left-hand sentences out loud, slowly.
+Pick the ones closest to your audience &mdash; for a bank, "it is an internal API" and
+"we are on HTTPS" usually land hardest.</li>
+<li><strong>Ask for agreement.</strong> "Has anyone here said something like this, or heard it in a design
+review this month?" Hands go up. That is the moment you need.</li>
+<li><strong>Let them own it.</strong> "Good &mdash; because none of these are wrong. Every one of them is a
+competent engineer making a defensible statement."</li>
+<li><strong>Now press the button.</strong> Then stop talking for about five seconds while they read.</li>
+<li><strong>Deliver the closing line yourself</strong>, don't let the slide carry it alone.</li>
+</ol>
+
+<div class="box say">
+<p>"Every sentence on the left is true. The problem is that each one is doing the job of a security
+control without actually being one. Nobody decided that 'nobody knows the URL' was our access control
+&mdash; it just quietly became it."</p>
+</div>
+
+<h3>Why this version is written for you rather than for engineers</h3>
+<p>The earlier draft of this slide compared "what the builder assumes" with "what the attacker sees",
+using examples like decompiling a mobile app. That is accurate but it is a developer's list &mdash; a
+senior leader cannot act on it. This version uses <strong>sentences you will actually hear in a meeting</strong>,
+which turns the slide into something you can use on a Tuesday afternoon: when you hear one of these,
+ask what the real control is.</p>
+
+<div class="box qa">
+<p><strong>"Isn't this just saying our engineers are wrong?"</strong> &mdash; No, and say so firmly. Every
+statement is factually correct. The failure is that a true statement was allowed to substitute for a
+control. That is a process and review gap, not a competence gap. Getting this right protects your
+relationship with the engineering leaders in the room.</p>
+</div>
+
+<!-- ========================================================= -->
+<h2 id="economy">2. The Threat Economy</h2>
+<p><span class="ref">s8</span>"An exploit is not the whole attack. It is one product in a supply chain."</p>
+
+<div class="box why">
+<p>Leaders carry a mental image of a lone attacker who picked them. Almost everything about that image
+leads to bad budget decisions. This slide replaces it with the correct one: a specialised, commercial
+supply chain in which different people do different jobs and sell to each other.</p>
+</div>
+
+<h3>The four roles on the slide, in plain terms</h3>
+<table>
+<thead><tr><th style="width:22%">Role</th><th>What they actually do</th></tr></thead>
+<tbody>
+<tr><td><strong>Access broker</strong></td><td>Specialises in getting a foothold &mdash; valid credentials, an exposed remote-access service, a compromised supplier. They usually do not attack you further. They sell the way in to somebody who will.</td></tr>
+<tr><td><strong>Exploit / tooling</strong></td><td>Builds and maintains the capability. Increasingly sold as a product with versioning, documentation and support, because the buyers are not necessarily skilled.</td></tr>
+<tr><td><strong>Operator</strong></td><td>Buys access, moves through the network, finds what matters, steals or encrypts it. This is the group that behaves like an intruder in your environment.</td></tr>
+<tr><td><strong>Monetisation</strong></td><td>Extortion negotiation, fraud, or resale of the data. A separate skill set again &mdash; often a separate group entirely.</td></tr>
+</tbody>
+</table>
+
+<h3>The three points worth making out loud</h3>
+<ul>
+<li><strong>Specialisation means scale.</strong> Nobody in this chain needs to be good at all four things.
+That is precisely why the volume of attacks keeps rising &mdash; the hard parts have been productised.</li>
+<li><strong>You are usually found, not chosen.</strong> Most initial access is opportunistic: the internet is
+scanned continuously, and whatever answers gets tried. "Why would anyone target us?" is the wrong
+question. Nobody targeted you; you simply answered.</li>
+<li><strong>You do not have to be unbreakable.</strong> You have to be more expensive than the next
+organisation on the list. Every control that adds cost and time shifts the economics, and the
+economics are what decide whether anyone finishes the job.</li>
+</ul>
+
+<div class="box say">
+<p>"There is no single villain here. There is a market. Somebody sells the way in, somebody else buys it,
+and a third party handles the money. When we talk about raising the cost of an attack, this is the
+chain we are raising it on &mdash; and we only have to break it in one place."</p>
+</div>
+
+<h3>Connecting it to the leadership lens on the slide</h3>
+<p>The card at the bottom lists secure engineering, identity controls, segmentation, detection and
+rehearsed recovery. Make the mapping explicit, because this is the slide's practical payoff:</p>
+<ul>
+<li><strong>Secure engineering and identity</strong> make the access broker's job harder &mdash; the first link.</li>
+<li><strong>Segmentation</strong> makes the operator's job slower &mdash; the middle link.</li>
+<li><strong>Detection</strong> shortens how long they have.</li>
+<li><strong>Rehearsed recovery</strong> destroys the monetisation step: an organisation that can restore does not need to negotiate.</li>
+</ul>
+
+<div class="box qa">
+<p><strong>"So should we just buy cyber insurance?"</strong> &mdash; Insurance covers some of the financial loss.
+It does not restore your systems, your customers' trust, or your regulatory position, and insurers
+increasingly require evidence of exactly these controls before they will pay. It is a financial
+instrument, not a control.</p>
+<p style="margin-top:.5rem"><strong>"Are we actually a target?"</strong> &mdash; Use the point above: you are found,
+not chosen. Then make it concrete: anything of yours reachable from the internet is being probed today,
+by automation, continuously.</p>
+</div>
+
+<!-- ========================================================= -->
+<h2 id="survival">3. When Cyber Risk Becomes Business Survival</h2>
+<p><span class="ref">s9</span>Three cases: Code Spaces, NotPetya / Maersk, Travelex.</p>
+
+<div class="box why">
+<p>This is the only slide in the deck that argues cyber risk can be <em>existential</em> rather than
+expensive. Use it sparingly and precisely &mdash; overclaiming here is the fastest way to lose a
+sceptical CFO, and you will not get their attention back.</p>
+</div>
+
+<h3>Code Spaces &mdash; the short, brutal one</h3>
+<p>A code-hosting business. An attacker gained control of its cloud administration console and, when
+challenged, destroyed the environment &mdash; including the backups, which lived in the same account
+under the same credentials. The company could not rebuild and ceased operating.</p>
+<p><strong>The lesson to draw:</strong> it was not the intrusion that ended the company, it was that a single
+identity could reach both production and the backups. That is a design decision, and it is one your
+own teams have made somewhere.</p>
+
+<h3>NotPetya and Maersk &mdash; the one to spend the most time on</h3>
+<p>Destructive malware spread through a trusted software update channel and propagated across global
+networks within minutes. Maersk, which was not the intended target, lost the great majority of its
+end-user devices and servers and ran a global shipping operation on manual processes for roughly
+ten days while rebuilding.</p>
+<p>The detail worth telling: the rebuild depended on recovering a domain controller from an office in
+Ghana that happened to be offline during the attack because of a local power cut. Their recovery
+rested on an accident.</p>
+<div class="box say">
+<p>"Their disaster recovery plan worked because of a power cut in Ghana. I would like us to be able to
+answer this question without relying on luck: if we lost our identity infrastructure tonight, what is
+our actual path back, and has anyone ever walked it?"</p>
+</div>
+
+<h3>Travelex &mdash; handle with care</h3>
+<p>A ransomware incident over the New Year period took customer-facing services offline for an extended
+time, and the business later entered administration during a period that also included severe
+pandemic disruption to foreign exchange.</p>
+<div class="box care">
+<p>Do <strong>not</strong> say cyber killed Travelex. Say the incident "contributed to" or "compounded" an
+already difficult position. If you overstate it, someone in the room who knows the detail will correct
+you, and the whole slide loses its force. The same caution applies to any breach-cost figure you quote
+&mdash; if you cannot name where the number came from, round it or drop it.</p>
+</div>
+
+<h3>The single idea this slide must leave behind</h3>
+<p>Across all three, the difference between an expensive incident and a terminal one was <strong>recovery,
+not prevention</strong>. Everyone in the room already funds prevention. Far fewer have ever tested a full
+restore of the systems the business actually runs on.</p>
+
+<div class="box qa">
+<p><strong>"We have backups."</strong> &mdash; The right follow-up is: are they reachable with the same
+credentials as production, when were they last restored end-to-end rather than spot-checked, and how
+long did that restore take? Code Spaces had backups too.</p>
+</div>
+
+<!-- ========================================================= -->
+<h2 id="ai">4. AI in Security</h2>
+<p><span class="ref">Phase 5</span>Seven slides: AI as attacker, the lowered bar, AI as defender,
+both sides equally, what AI still cannot do, and the closing force-multiplier line. Budget about 20 minutes.</p>
+
+<div class="box why">
+<p>Your audience arrives with one of two beliefs: AI has made attackers unstoppable, or AI is vendor
+noise. Both are wrong, and the section works only if you refuse both. The honest position is narrower
+and more useful: <strong>AI changes speed, scale and accessibility. It has not changed the underlying
+vulnerabilities.</strong> Every flaw demonstrated in this session predates modern AI by decades.</p>
+</div>
+
+<h3>On the offensive side &mdash; what is genuinely different</h3>
+<ul>
+<li><strong>The entry barrier has dropped.</strong> Work that needed real expertise can now be attempted by
+someone who can describe what they want. Expect more attempts, from more people.</li>
+<li><strong>Iteration is faster.</strong> The loop of trying something, failing, and adjusting is now very
+cheap. Defences that relied on attackers giving up early age badly.</li>
+<li><strong>Social engineering got better, not just faster.</strong> This is the change your staff will actually
+meet. The old advice &mdash; look for clumsy language &mdash; no longer works, and synthetic voice makes
+"I recognised their voice" an unsafe basis for approving anything.</li>
+</ul>
+
+<div class="box care">
+<p>Resist the temptation to claim AI is "writing novel attacks". It mostly reproduces and adapts known
+techniques very quickly. Successful intrusion still needs access, context, persistence and
+operational judgement. If you overstate this, the technical people in the room will discount the whole
+section &mdash; and they are the ones you need on side.</p>
+</div>
+
+<h3>On the defensive side</h3>
+<ul>
+<li><strong>Review at a scale humans never had.</strong> Every commit can be examined, not just the ones
+somebody had time for.</li>
+<li><strong>Triage.</strong> The practical win for most security operations teams is not detection but
+sorting &mdash; cutting the queue so analysts spend attention where it matters.</li>
+<li><strong>Explanation.</strong> Turning a technical finding into something an engineering team will act on
+has always been a bottleneck. This is a real and unglamorous gain.</li>
+</ul>
+
+<h3>The three limits to state plainly</h3>
+<ol>
+<li><strong>Business context.</strong> A model can tell you an authorisation check is missing. It cannot tell
+you whether that page is deliberately public. Only your people know that.</li>
+<li><strong>Risk acceptance.</strong> Deciding to carry a risk for ninety days with compensating controls is an
+accountable human judgement. No model owns it, and no regulator will accept that one did.</li>
+<li><strong>Validating its own output.</strong> It will produce confident, plausible, wrong security advice.
+Anything acted on needs a competent human who could have reached the answer themselves.</li>
+</ol>
+
+<div class="box say">
+<p>"AI has not changed what is wrong with our applications. Every vulnerability you broke today is
+twenty years old. What has changed is how many people can attempt them, how fast, and how convincing
+the social engineering around them has become. The same leverage is available to our defenders &mdash;
+and the only question that matters is which side uses it consistently."</p>
+</div>
+
+<div class="box qa">
+<p><strong>"Will AI replace our security team?"</strong> &mdash; No, and the closing slide makes the argument for
+you: AI can find the flaw in milliseconds, but a human decided whether to fund the review that would
+have caught it, and a human has to answer at two in the morning. It changes what the team spends its
+time on, not whether you need one.</p>
+<p style="margin-top:.5rem"><strong>"Should we block AI tools internally?"</strong> &mdash; Blocking mostly moves
+usage somewhere you cannot see. The more productive questions are what data may go into which tools,
+who reviews output before it ships, and whether your people have an approved option that is good
+enough that they do not route around it.</p>
+<p style="margin-top:.5rem"><strong>"Are attackers using this against us today?"</strong> &mdash; Yes, most visibly
+in social engineering quality. That is the part worth briefing your workforce on this quarter.</p>
+</div>
+
+<h3>Landing the section</h3>
+<p>Close on the force-multiplier slide and resist adding to it. The sentence you want them repeating
+afterwards is that AI lowered the bar for attackers and raised the ceiling for defenders &mdash; and that
+which of those matters more to your organisation is a decision, not a forecast.</p>
+
+</body>
+</html>

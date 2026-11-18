@@ -87,7 +87,11 @@ if ($requestedAccountId > 0) {
 $ctfFlag = null;
 $ctfVuln = null;
 if ($account !== null && isset($account['user_id']) && (int) $account['user_id'] !== $uid) {
-    if ($engine->isVulnerable('statements', 'l1')) {
+    // Deliver the flag only when statements.l1 is actually selected for the CTF
+    // (isCtfActive = ctf_eligible AND ctf_active). The IDOR still works as a lab
+    // exercise at vuln levels, but viewing another account hands out a flag only
+    // when this specific vuln is the active CTF challenge.
+    if ($engine->isCtfActive('statements', 'l1')) {
         $ctfFlag = Flags::generate('statements.l1', $uid);
         $ctfVuln = 'statements.l1';
         if (flags_delivered()) { header('X-CTF-Flag: ' . $ctfFlag); }
@@ -117,17 +121,21 @@ foreach ($accounts as $a) {
     $options .= '<option value="' . (int) $a['id'] . '"' . $sel . '>' . $label . '</option>';
 }
 
-// statements.g4 reflected XSS: the search term is echoed via vuln_out() (raw at
-// vuln levels, escaped at the secure level).
-// @vuln-start: reflected XSS — search term echoed unescaped at vuln levels (statements.g4)
-// @fix-start: reflected XSS — vuln_out() HTML-escapes the echo at level 3 (statements.g4)
-$qEcho = $q !== '' ? '<p class="text-sm text-slate-400 mb-3">Results for: ' . vuln_out($q, 'statements', 'g4') . '</p>' : '';
-// The search-box value is ALWAYS escaped. The intended, level-governed g4 sink
-// is the $qEcho paragraph above; without escaping here the input value="" would
-// be an ungoverned reflected-XSS sink that fires even at the secure level.
-$qAttr = htmlspecialchars($q, ENT_QUOTES);
+// statements.g4 reflected XSS: the search term is reflected into TWO contexts,
+// each with its own level-governed encoding (see g4_text()/g4_attr()):
+//   - TEXT sink  ($qEcho): the "Results for: …" line — L0 raw, L1 single-pass
+//     <script> strip, L2/L3 encoded.
+//   - ATTR sink  ($qAttr): the search box value="…" — encoded except at L2,
+//     where it is raw so a quote breaks out (the L2 vector).
+// @vuln-start: [L0-2] reflected XSS — term reflected into text + attribute sinks (statements.g4)
+// @fix-start: [L3] both sinks HTML-encoded — the reflected value can no longer break out (statements.g4)
+$qEcho = $q !== '' ? '<p class="text-sm text-slate-400 mb-3">Results for: ' . g4_text($q) . '</p>' : '';
+$qAttr = g4_attr($q);
 // @vuln-end
 // @fix-end
+// Note: a strict CSP (script-src 'self') is the recommended extra hardening, but
+// this training app renders legitimate inline scripts, so enforcing it here would
+// break the page. L3's real fix is the context-aware encoding above.
 
 $errBox = $txError !== null
     ? '<div class="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 text-red-300 px-3 py-2 text-sm font-mono">' . htmlspecialchars($txError) . '</div>'

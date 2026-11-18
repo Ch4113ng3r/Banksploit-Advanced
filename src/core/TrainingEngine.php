@@ -178,13 +178,29 @@ final class TrainingEngine
     }
 
     /**
+     * Whether a vuln may ever be part of a CTF event. A vuln marked
+     * "ctf_eligible": false is training/pentest-only — shown in the labs with its
+     * full level ladder, but never scored, flagged, or selectable for the event.
+     * Vulns without the key are eligible by default.
+     */
+    public function isCtfEligible(string $module, string $vuln): bool
+    {
+        $e = $this->entry($module, $vuln);
+        return !(is_array($e) && array_key_exists('ctf_eligible', $e) && !$e['ctf_eligible']);
+    }
+
+    /**
      * Whether a vuln is flagged as part of the current CTF event. Unknown or
-     * unflagged vulns default to false (not in the event).
+     * unflagged vulns default to false (not in the event). A training-only vuln
+     * (ctf_eligible = false) is never active, regardless of any stored flag.
      */
     public function isCtfActive(string $module, string $vuln): bool
     {
         $e = $this->entry($module, $vuln);
-        return $e !== null && !empty($e['ctf_active']);
+        if ($e === null || !$this->isCtfEligible($module, $vuln)) {
+            return false;
+        }
+        return !empty($e['ctf_active']);
     }
 
     /**
@@ -202,6 +218,10 @@ final class TrainingEngine
         if (!isset($this->config['modules'][$module][$vuln])
             || !is_array($this->config['modules'][$module][$vuln])) {
             // Only known vulns can be selected for a CTF.
+            return;
+        }
+        // Training-only vulns can never be selected into a CTF event.
+        if (!$this->isCtfEligible($module, $vuln)) {
             return;
         }
         $this->config['modules'][$module][$vuln]['ctf_active'] = $active;

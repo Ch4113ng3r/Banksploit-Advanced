@@ -104,9 +104,11 @@ foreach ($allVulns['modules'] as $mod => $vulns) {
         $key    = $mod . '.' . strtolower($vid);
         $level  = (int) ($v['level'] ?? 0);
         $secure = $level >= 3;
+        // A training/pentest-only vuln (ctf_eligible = false) can never be in a CTF.
+        $trainingOnly = array_key_exists('ctf_eligible', $v) && !$v['ctf_eligible'];
         // A fixed (L3) vulnerability has no flag, so it cannot be part of the CTF
         // — it's shown greyed-out and uncheckable regardless of any stored flag.
-        $active = !empty($v['ctf_active']) && !$secure;
+        $active = !empty($v['ctf_active']) && !$secure && !$trainingOnly;
         $points = Flags::points($key, $level); // priced at the level that will run
         if ($active) {
             $activeCount++;
@@ -124,15 +126,23 @@ foreach ($allVulns['modules'] as $mod => $vulns) {
             ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
             : 'bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300';
         $lvlName  = $levelLabels[$level] ?? (string) $level;
-        $warn = $secure
-            ? '<div class="text-xs text-gray-500 dark:text-slate-500 mt-0.5">Fixed (L3) — set a vulnerable level in <a href="/vuln-config" class="underline">Vuln Config</a> to include it in the CTF.</div>'
-            : '';
+        if ($trainingOnly) {
+            $warn = '<div class="text-xs text-indigo-500 dark:text-indigo-400 mt-0.5">Training / pentest only — demonstrated in the labs with its full level ladder; not part of the CTF and never scored.</div>';
+        } elseif ($secure) {
+            $warn = '<div class="text-xs text-gray-500 dark:text-slate-500 mt-0.5">Fixed (L3) — set a vulnerable level in <a href="/vuln-config" class="underline">Vuln Config</a> to include it in the CTF.</div>';
+        } else {
+            $warn = '';
+        }
 
-        // Fixed vulns: disabled + greyed checkbox; otherwise the normal control.
-        $checkbox = $secure
-            ? '<input type="checkbox" disabled title="Fixed (L3) — not available for the CTF" class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 opacity-40 cursor-not-allowed">'
-            : '<input type="checkbox" onchange="setActive(\'' . $modE . '\',\'' . $vidE . '\',this.checked)"' . $checked . ' class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-amber-600 focus:ring-amber-500">';
-        $rowCls = $secure ? ' opacity-50' : '';
+        // Training-only or fixed (L3) vulns: disabled + greyed checkbox; otherwise the normal control.
+        if ($trainingOnly) {
+            $checkbox = '<input type="checkbox" disabled title="Training / pentest only — not available for the CTF" class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 opacity-40 cursor-not-allowed">';
+        } elseif ($secure) {
+            $checkbox = '<input type="checkbox" disabled title="Fixed (L3) — not available for the CTF" class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 opacity-40 cursor-not-allowed">';
+        } else {
+            $checkbox = '<input type="checkbox" onchange="setActive(\'' . $modE . '\',\'' . $vidE . '\',this.checked)"' . $checked . ' class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-amber-600 focus:ring-amber-500">';
+        }
+        $rowCls = ($secure || $trainingOnly) ? ' opacity-50' : '';
 
         $rowsByModule[$mod][] = <<<HTML
             <tr class="border-t border-gray-100 dark:border-slate-800{$rowCls}" data-key="{$key}">
@@ -153,7 +163,7 @@ foreach ($rowsByModule as $mod => $rows) {
     $modE = htmlspecialchars($mod);
     $body = implode('', $rows);
     $moduleBlocks .= <<<HTML
-        <div class="rounded-xl bg-white dark:bg-slate-900/60 shadow-sm dark:shadow-none ring-1 ring-gray-200 dark:ring-slate-800 p-4 mb-4">
+        <div data-modcard class="rounded-xl bg-white dark:bg-slate-900/60 shadow-sm dark:shadow-none ring-1 ring-gray-200 dark:ring-slate-800 p-4 mb-4">
             <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-slate-500 font-semibold mb-2">{$modE}</div>
             <table class="w-full">
                 <thead><tr class="text-gray-500 dark:text-slate-500 text-xs uppercase text-left">
@@ -164,6 +174,10 @@ foreach ($rowsByModule as $mod => $rows) {
         </div>
 HTML;
 }
+
+// Planning groups are created on the Vuln Config page; here they're a read-only
+// lens to filter the list. Selecting one NEVER changes ctf_active.
+$groupsJson = json_encode(vuln_groups_load(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
 
 $content = <<<HTML
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -192,16 +206,104 @@ $content = <<<HTML
         <button onclick="fixUnselected()" class="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-xs font-semibold whitespace-nowrap">Set unselected → Fixed</button>
     </div>
 
+    <div class="rounded-xl bg-white dark:bg-slate-900/60 ring-1 ring-gray-200 dark:ring-slate-800 px-4 py-3 mb-5">
+        <div class="text-sm font-medium text-gray-800 dark:text-slate-200 mb-1">Planning groups</div>
+        <div class="text-xs text-gray-500 dark:text-slate-500 mb-3">The same groups you build on <a href="/vuln-config" class="text-amber-700 dark:text-amber-400 underline">Vuln Config</a>. Select one to show only its vulnerabilities, in order, so you can manage the event around it. This is just a filter — it does <b>not</b> add anything to the CTF; you still tick each one yourself.</div>
+        <div id="groupsBar" class="flex flex-wrap gap-2"></div>
+    </div>
+
+    <div id="groupView" class="hidden rounded-xl bg-white dark:bg-slate-900/60 shadow-sm dark:shadow-none ring-1 ring-amber-200 dark:ring-amber-500/30 p-4 mb-4">
+        <div class="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-300 font-semibold mb-2">Group · <span id="groupViewName"></span></div>
+        <table class="w-full">
+            <thead><tr class="text-gray-500 dark:text-slate-500 text-xs uppercase text-left">
+                <th class="pb-2 pl-1 w-8">In CTF</th><th class="pb-2">ID</th><th class="pb-2">Vulnerability</th><th class="pb-2">Level</th><th class="pb-2 text-right">Points</th>
+            </tr></thead>
+            <tbody id="groupViewBody"></tbody>
+        </table>
+        <div id="groupViewEmpty" class="hidden text-xs text-gray-400 dark:text-slate-500 py-2">None of this group's vulnerabilities exist in the current config.</div>
+    </div>
+
     {$moduleBlocks}
 
     <div id="status" class="mt-3 text-sm text-gray-600 dark:text-slate-400"></div>
 
     <script>
     const CSRF = "{$csrf}";
+    const GROUPS = {$groupsJson};
+    const STORE_KEY = 'bs_ctfvulns_group';
     function setStatus(msg, ok) {
         const el = document.getElementById('status');
         el.textContent = (ok ? '✓ ' : '✗ ') + msg;
     }
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+    }
+
+    // ---- Planning groups: read-only filter. Selecting one only shows/orders its
+    // vulns; it never changes any ctf_active state. ----
+    const MODCARDS    = Array.prototype.slice.call(document.querySelectorAll('[data-modcard]'));
+    const MOD_TBODIES = MODCARDS.map(function(c){ return c.querySelector('tbody'); });
+    MOD_TBODIES.forEach(function(tb){ tb._origRows = Array.prototype.slice.call(tb.querySelectorAll('tr[data-key]')); });
+    const ROW_BY_KEY = {};
+    MOD_TBODIES.forEach(function(tb){ tb._origRows.forEach(function(tr){ ROW_BY_KEY[tr.getAttribute('data-key')] = tr; }); });
+    const GV     = document.getElementById('groupView');
+    const GVBODY = document.getElementById('groupViewBody');
+
+    let activeGroup = null;
+    try { activeGroup = localStorage.getItem(STORE_KEY) || null; } catch (e) {}
+    if (activeGroup && !GROUPS.some(function(g){ return g.id === activeGroup; })) activeGroup = null;
+
+    function restoreRows() {
+        // Move every row back to its module table in the original order.
+        MOD_TBODIES.forEach(function(tb){ tb._origRows.forEach(function(tr){ tr.style.display = ''; tb.appendChild(tr); }); });
+    }
+    function applyFilter() {
+        const g = GROUPS.find(function(x){ return x.id === activeGroup; });
+        restoreRows();
+        if (!g) {
+            MODCARDS.forEach(function(c){ c.style.display = ''; });
+            GV.classList.add('hidden');
+            return;
+        }
+        GVBODY.innerHTML = '';
+        let count = 0;
+        (g.members || []).forEach(function(m){
+            const tr = ROW_BY_KEY[m.key];
+            if (!tr) return;
+            tr.style.display = '';
+            GVBODY.appendChild(tr);   // moves the real row (with its working checkbox) here, in order
+            count++;
+        });
+        MODCARDS.forEach(function(c){ c.style.display = 'none'; });
+        document.getElementById('groupViewName').textContent = g.name + ' (' + count + ')';
+        document.getElementById('groupViewEmpty').classList.toggle('hidden', count > 0);
+        GV.classList.remove('hidden');
+    }
+    function selectGroup(id) {
+        activeGroup = id;
+        try { if (id) localStorage.setItem(STORE_KEY, id); else localStorage.removeItem(STORE_KEY); } catch (e) {}
+        applyFilter(); renderGroupsBar();
+    }
+    function renderGroupsBar() {
+        const bar = document.getElementById('groupsBar');
+        let html = '<button onclick="selectGroup(null)" class="rounded-lg px-3 py-1 text-xs font-medium '
+            + (activeGroup === null ? 'bg-amber-600 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-700')
+            + '">All vulnerabilities</button>';
+        if (!GROUPS.length) {
+            html += '<span class="text-xs text-gray-400 dark:text-slate-500 self-center">No groups yet — create one on <a href="/vuln-config" class="underline">Vuln Config</a>.</span>';
+        }
+        html += GROUPS.map(function(g){
+            const n = g.members ? g.members.length : 0;
+            const on = g.id === activeGroup;
+            return '<button onclick="selectGroup(\'' + g.id + '\')" class="rounded-lg px-3 py-1 text-xs font-medium ring-1 '
+                + (on ? 'bg-amber-50 dark:bg-amber-500/15 ring-amber-300 dark:ring-amber-500/40 text-amber-800 dark:text-amber-200' : 'ring-gray-200 dark:ring-slate-700 bg-gray-50 dark:bg-slate-800/60 text-gray-800 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700')
+                + '">' + esc(g.name) + ' <span class="text-[10px] text-gray-400 dark:text-slate-500">(' + n + ')</span></button>';
+        }).join('');
+        bar.innerHTML = html;
+    }
+    renderGroupsBar();
+    applyFilter();
+
     async function fixUnselected() {
         if (!confirm('Set every UNSELECTED vulnerability to Fixed (L3)? Selected vulnerabilities keep the level you configured.')) return;
         const r = await fetch('/ctf-vulns', {

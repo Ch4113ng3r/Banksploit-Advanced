@@ -102,15 +102,16 @@ if (!function_exists('stmt_list_accounts')) {
             $stmt->execute([':acct' => $accountNumber, ':uid' => $currentUserId]);
             // @fix-end
         }
+        // No flag is emitted here. This resolver only reads the account; the
+        // statements.l1 flag is delivered by the statements page controller,
+        // keyed to the current user and gated on isCtfActive('statements','l1').
         $row = $stmt->fetch();
-        if ($row && flags_delivered()) {
-            $row['ctf_flag'] = Flags::generate('transfer.l1', (int) $row['user_id']);
-        }
         return $row ?: null;
     }
 
     /**
-     * Fetch one account by id. IDOR (transfer.l1): at vuln levels any id works;
+     * Fetch one account by id. IDOR read surface governed by transfer.l1's level
+     * (at vuln levels any id works; at the secure level ownership is enforced).
      * at the secure level the account must belong to the current user.
      *
      * @return array<string,mixed>|null
@@ -133,10 +134,11 @@ if (!function_exists('stmt_list_accounts')) {
             $stmt = $pdo->prepare("SELECT $cols FROM accounts a JOIN users u ON u.id = a.user_id WHERE a.id = :id AND a.user_id = :uid");
             $stmt->execute([':id' => $accountId, ':uid' => $currentUserId]);
         }
+        // No flag is emitted here. This resolver only reads the account; a flag
+        // for exploiting the IDOR is delivered by the exploit's own controller
+        // (transfer execute / statements page), keyed to the current user and
+        // gated on isCtfActive — never keyed to the victim's id.
         $row = $stmt->fetch();
-        if ($row && flags_delivered()) {
-            $row['ctf_flag'] = Flags::generate('transfer.l1', (int) $row['user_id']);
-        }
         return $row ?: null;
     }
 
@@ -149,7 +151,8 @@ if (!function_exists('stmt_list_accounts')) {
      *   level 0: raw   -> in-band UNION or error-based, e.g.
      *            %' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags --
      *            (flag in the Remarks cell; the Date cell truncates to 10 chars)
-     *   level 1: leaky blacklist -> the UNION dump after bypassing the filter
+     *   level 1: leaky blacklist, raw errors still shown -> UNION dump or error-based
+     *            after bypassing the filter
      *   level 2: UNION stripped + errors hidden -> boolean-blind, one char at a time
      *
      * @return array{rows:list<array<string,mixed>>,error:?string,sql:string}
@@ -186,10 +189,10 @@ if (!function_exists('stmt_list_accounts')) {
                 $stmt->execute($bind);
                 return ['rows' => $stmt->fetchAll(), 'error' => null, 'sql' => $sql];
             } catch (PDOException $e) {
-                // @vuln-start: [L0] raw DB error returned to the client (statements.g2)
-                // A broken query leaks schema and powers error-based extraction. At L1/L2
+                // @vuln-start: [L0-1] raw DB error returned to the client (statements.g2)
+                // A broken query leaks schema and powers error-based extraction. At L2
                 // only a generic message shows — no error oracle — which forces boolean-blind.
-                $err = $level === 0 ? $e->getMessage() : 'Query failed.';
+                $err = $level <= 1 ? $e->getMessage() : 'Query failed.';
                 // @vuln-end
                 return ['rows' => [], 'error' => $err, 'sql' => $sql];
             }
@@ -304,13 +307,36 @@ if (!function_exists('stmt_list_accounts')) {
         $userId = $user ? (int) $user['id'] : 33;
         $flagFile = null;
         if ($user && $engine->isVulnerable('statements', 'g9')) {
-            $flagFile = $tmpDir . DIRECTORY_SEPARATOR . "flag_g9_{$userId}.txt";
+            // Seed into the honeypot's dedicated /tmp (Sandbox::sandboxRoot), so
+            // `cat /tmp/flag_g9_{userId}.txt` resolves there and `ls /tmp` reveals it.
+            $flagFile = Sandbox::sandboxRoot() . DIRECTORY_SEPARATOR . "flag_g9_{$userId}.txt";
             @file_put_contents($flagFile, Flags::generate('statements.g9', $userId) . "\n");
         }
 
         if ($engine->isVulnerable('statements', 'g9')) {
             // @vuln-start: command injection — unescaped filename in exec() (statements.g9)
-            $cmd = "wkhtmltopdf $src {$tmpDir}" . DIRECTORY_SEPARATOR . "$filename 2>&1";
+            // Graduated ladder: each vuln level hardens the filename blacklist,
+            // but every blacklist is incomplete and falls to the right
+            // metacharacter — the lesson is that blacklisting is not a fix.
+            //   L0  no filter             -> stmt.pdf;cat /tmp/flag_g9_<uid>.txt;
+            //   L1  strip ; and &         -> stmt.pdf|cat /tmp/flag_g9_<uid>.txt      (pipe)
+            //   L2  strip ; & | and spaces-> stmt.pdf%0acat$IFS/tmp/flag_g9_<uid>.txt (newline + $IFS)
+            //       (tab survives the filter, so cat<TAB>/tmp/... and {cat,/tmp/...} also work)
+            // L3 (below) escapes every argument — the only real fix.
+            // Presented with /tmp paths so the echoed command matches the Linux
+            // honeypot persona (the real $src host path is only used by the L3
+            // secure branch below, which runs an actual converter).
+            $fn = $filename;
+            $level = $engine->getVulnLevel('statements', 'g9');
+            if ($level === 1) {
+                $fn = str_replace([';', '&'], '', $fn);
+            } elseif ($level === 2) {
+                // Strips the obvious separators and the space — but not the tab,
+                // newline, $IFS, positional params or brace expansion, each of
+                // which still smuggles a space/separator past the blacklist.
+                $fn = str_replace([';', '&', '|', ' '], '', $fn);
+            }
+            $cmd = 'wkhtmltopdf /tmp/' . basename($src) . ' /tmp/' . $fn . ' 2>&1';
             // @vuln-end
         } else {
             // @fix-start: command injection — escapeshellarg() on all inputs (statements.g9)
@@ -320,19 +346,27 @@ if (!function_exists('stmt_list_accounts')) {
         }
 
         if ($engine->isVulnerable('statements', 'g9')) {
-            // Sandboxed execution: fake shell interprets commands within /tmp only.
-            // The exploit still works (cat /tmp/flag_g9_{userId}.txt) but cannot
-            // access source files, env secrets, or other users' flag files.
-            $sandbox = new Sandbox(null, $userId);
+            // Emulated honeypot shell: parses the command and answers from a
+            // virtual filesystem + the real tmp only. Nothing executes, no
+            // socket opens. The exploit still works (cat /tmp/flag_g9_{userId}.txt)
+            // but source files, env secrets, other users' flags, and network
+            // egress are all unreachable. The cwd is persisted per user so
+            // navigation (cd/ls) feels continuous across requests.
+            $cwd = (session_status() === PHP_SESSION_ACTIVE)
+                ? ($_SESSION['g9_cwd'][$userId] ?? null)
+                : null;
+            $sandbox = new Sandbox(null, $userId, $cwd);
             $output  = $sandbox->exec($cmd);
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                $_SESSION['g9_cwd'][$userId] = $sandbox->getCwd();
+            }
         } else {
             $output = (string) shell_exec($cmd);
         }
 
-        // Clean up: remove flag file after execution (ephemeral lifecycle)
-        if ($flagFile !== null) {
-            @unlink($flagFile);
-        }
+        // The per-user flag file is left in place (not unlinked) so the honeypot
+        // `ls /tmp` reliably reveals flag_g9_{userId}.txt for discovery; it is
+        // rewritten on each export and scoped per user, so there is no race.
         @unlink($src);
         return ['ok' => true, 'cmd' => $cmd, 'output' => $output];
     }

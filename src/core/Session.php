@@ -5,10 +5,14 @@ declare(strict_types=1);
 /**
  * Session — thin wrapper over PHP sessions with level-aware hardening.
  *
- * Governed by auth.l14 (session fixation):
- *   level 0  -> start() does NOT regenerate the id on login; cookie has no
- *               httponly/secure flags (fixation possible).
- *   level 3  -> regenerate id on login, httponly + secure + SameSite cookie.
+ * Session fixation is governed by auth.l14:
+ *   level 0  -> start() does NOT regenerate the id on login (fixation possible).
+ *   level 3  -> regenerate id on login + SameSite cookie.
+ *
+ * The session cookie's HttpOnly flag is governed SEPARATELY by the reflected-XSS
+ * lab (statements.g4): off at g4 L0 so an XSS payload can steal the cookie via
+ * document.cookie; on at g4 L1+ so cookie theft fails and the learner must
+ * escalate (e.g. session-riding). auth.l14 does not touch HttpOnly.
  *
  * All methods are static so modules can call Session::get(...) freely.
  */
@@ -30,9 +34,15 @@ final class Session
             'lifetime' => 0,
             'path'     => '/',
             'domain'   => '',
-            // At level 0 these protections are deliberately off.
             'secure'   => false,                       // app is plain HTTP in training
-            'httponly' => $secure,
+            // @vuln-start: [L0] session cookie left JS-readable so reflected XSS can steal it (statements.g4)
+            // @fix-start: [L1-3] session cookie marked HttpOnly — document.cookie can't read it (statements.g4)
+            // HttpOnly follows the reflected-XSS lab: g4 L0 -> readable (cookie
+            // theft works); g4 L1+ -> HttpOnly (forces escalation). This is
+            // independent of auth.l14, which owns id regeneration + SameSite.
+            'httponly' => !self::xssCookieReadable(),
+            // @vuln-end
+            // @fix-end
             // SameSite=None REQUIRES Secure, and browsers SILENTLY DROP a
             // None cookie over plain HTTP — which kills the session on
             // localhost. Vulnerable state = no SameSite attr (''); L3 = Lax.
@@ -51,6 +61,20 @@ final class Session
             return false;
         }
         return !TrainingEngine::getInstance()->isVulnerable('auth', 'l14');
+    }
+
+    /**
+     * Whether the reflected-XSS lab (statements.g4) is at its fully-vulnerable
+     * level, where the session cookie is deliberately left JS-readable (no
+     * HttpOnly) so an XSS payload can steal it. True only at g4 L0; at L1+ the
+     * cookie is HttpOnly. Governs HttpOnly independently of auth.l14.
+     */
+    private static function xssCookieReadable(): bool
+    {
+        if (!class_exists('TrainingEngine')) {
+            return false;
+        }
+        return TrainingEngine::getInstance()->getVulnLevel('statements', 'g4') === 0;
     }
 
     /**

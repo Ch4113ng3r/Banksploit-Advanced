@@ -25,7 +25,7 @@ is out of date for auth.l25 and statements.g2.)
 | ✅ Done | auth.l12 — JWT forgery | |
 | ✅ Done | statements.g2 — SQLi data extraction | Verified live vs MySQL, 12/12 |
 | ◐ In progress | auth.l25 — Session puzzling | L0+L1 verified live. Open: L2 needs its own technique (currently mirrors L1); full flag-submit loop run; live re-check of L1/L3 |
-| ☐ Remaining | statements.g4 — Reflected XSS | |
+| ✅ Done (training-only) | statements.g4 — Reflected XSS | Removed from the CTF (`ctf_eligible=false`): L0–L3 reflection levels kept for training/pentest, but not scored, no flag delivery, no flag submission. Admin-bot flag path retired (the exploit was too unreliable for a flag). |
 | ☐ Remaining | statements.g9 — Command injection | |
 | ☐ Remaining | transfer.l1 — IDOR (transfer from other account) | |
 | ☐ Remaining | loans.g10 — XXE | |
@@ -34,7 +34,7 @@ is out of date for auth.l25 and statements.g2.)
 | ☐ Remaining | admin.l4 — Broken function-level authz | |
 | ☐ Remaining | beneficiary.g3 — Stored XSS | |
 
-4 done · 1 in progress · 8 not started.
+5 done · 1 in progress · 7 not started.
 
 ## Checklist summary (per vulnerability change)
 Full detail in VULN_REWORK_CHECKLIST.md.

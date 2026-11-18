@@ -180,7 +180,8 @@ function vuln_out(string $value, string $module, string $vuln): string
  *            case-insensitive pass, but quotes pass through and the single pass
  *            lets split/nested keywords survive (e.g. "UNIunionON" collapses to
  *            "UNION", and inline-comment splitting also rebuilds the keyword).
- *            Demonstrates "we filtered bad words".
+ *            Raw SQL errors are still shown, so error-based extraction works too once
+ *            the filter is bypassed. Demonstrates "we filtered bad words".
  *   level 2: UNION is stripped repeatedly (in-band extraction closed) and the
  *            call site hides SQL errors, but boolean logic + sub-selects still
  *            reach the query, so the flag must be read one character at a time
@@ -233,6 +234,70 @@ function g2_term(string $term): string
 function g2_is_secure(): bool
 {
     return !engine()->isVulnerable('statements', 'g2');
+}
+
+/**
+ * statements.g4 — GRADUATED reflected-XSS reflection for the TEXT context
+ * (the "Results for: …" line). The search term is folded into HTML body text:
+ *
+ *   level 0: raw — any tag/handler fires (<script>…, <img src=x onerror=…>).
+ *   level 1: single-pass, case-insensitive strip of the <script>/</script>
+ *            tag only. A naive <script>alert(1)</script> is neutralised, but a
+ *            nested <scr<script>ipt> collapses back to <script> and survives,
+ *            and event-handler tags (<img onerror=…>, <svg onload=…>) are not
+ *            touched. Demonstrates "we blocked <script>".
+ *   level 2: HTML-encoded here (this text sink is safe) — the intended L2
+ *            vector is the ATTRIBUTE sink below, not this one.
+ *   level 3: HTML-encoded (secure); a CSP is also sent by the page.
+ *
+ * Only the TEXT context. The attribute context uses g4_attr().
+ */
+function g4_text(string $term): string
+{
+    $level = engine()->getVulnLevel('statements', 'g4');
+
+    // @vuln-start: [L0] raw reflection into HTML text — any payload fires (statements.g4)
+    if ($level === 0) {
+        return $term;
+    }
+    // @vuln-end
+    // @vuln-start: [L1] single-pass <script></script> strip — nest it or use an event handler (statements.g4)
+    if ($level === 1) {
+        // Removes the literal <script>/</script> tags once, without re-scanning the
+        // result — so a nested <scr<script>ipt> collapses back to <script> and
+        // survives, and event-handler tags (<img onerror=…>, <svg onload=…>) and
+        // <script src=…> are not touched at all.
+        return (string) str_ireplace(['<script>', '</script>'], '', $term);
+    }
+    // @vuln-end
+    // @fix-start: [L2-3] text context HTML-encoded (statements.g4)
+    return htmlspecialchars($term, ENT_QUOTES);
+    // @fix-end
+}
+
+/**
+ * statements.g4 — GRADUATED reflected-XSS reflection for the ATTRIBUTE context
+ * (the search box value="…"). This is the level-2 vector: at L2 the <> text
+ * sink is encoded, but the attribute is reflected unescaped, so a double quote
+ * breaks out of value="…" and an auto-firing element runs:
+ *   "><svg/onload=…>   or   "><img src=x onerror=…>
+ *
+ *   level 0/1: encoded here (the text sink is the intended vector at those levels).
+ *   level 2:   raw — the quote breaks out of the attribute.
+ *   level 3:   encoded (secure).
+ */
+function g4_attr(string $term): string
+{
+    $level = engine()->getVulnLevel('statements', 'g4');
+
+    // @vuln-start: [L2] attribute reflected unescaped — break out of value="…" (statements.g4)
+    if ($level === 2) {
+        return $term;
+    }
+    // @vuln-end
+    // @fix-start: [L0-1,L3] attribute context HTML-encoded (statements.g4)
+    return htmlspecialchars($term, ENT_QUOTES);
+    // @fix-end
 }
 
 /**

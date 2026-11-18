@@ -3,3 +3,5 @@
 - [Level-aware hints](level-aware-hints.md) — hints per selected level, progressively guide building the payload
 - [Vuln rework checklist](vuln-rework-checklist.md) — the standard to apply/verify per vulnerability; full list in docs/VULN_REWORK_CHECKLIST.md
 - [Verification storage in DB](verification-storage-in-db.md) — verify status moving from file to a seeded DB table; batch plan in docs/VULN_LEVEL_PLAN.md
+- [Work in Banksploit-Advanced](work-in-banksploit-advanced.md) — use this repo as the codebase and run from it, not banksploit-ctf
+- [G4 reflected XSS training-only](g4-reflected-xss-admin-bot.md) — statements.g4 removed from CTF (ctf_eligible=false); admin-bot flag path built then reverted

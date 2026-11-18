@@ -14,7 +14,7 @@
 | G9 | Command Injection | 300 | ✅ DONE | PDF filename: `x.pdf;ls;` discover → `x.pdf;cat flag_g9_1.txt;` extract. |
 | L16 | Account Enumeration | — | ❌ REMOVED | Zero skill with known usernames. |
 | L13 | Password Reset Token | — | ❌ REMOVED | Allows other user account compromise. |
-| G4 | Reflected XSS | — | ❌ REMOVED | No reliable automated flag delivery; removed from CTF. Vuln kept for training. |
+| G4 | Reflected XSS | — | 🎓 TRAINING ONLY (2026-11-12) | Removed from the CTF (`ctf_eligible=false`). The admin/victim bot flag-delivery path was built and verified but then **retired** — the exploit was too unreliable to hinge a flag on. The L0–L3 reflection ladder stays in the labs for training/pentest: not scored, no flag delivery, no flag submission. See docs/VULN_LEVEL_PLAN.md §3. |
 
 ---
 
@@ -268,5 +268,5 @@ This is the ONLY challenge that touches an API endpoint, but it's done via brows
 
 **Potential future work:**
 - Make `/vault` an HTML page so even L12 works purely via URL navigation (optional)
-- Re-add G4 (XSS) if a reliable server-side detection method is agreed upon
+- ~~Re-add G4 (XSS) if a reliable server-side detection method is agreed upon~~ — Built an admin/victim bot (real browser execution) 2026-11-12, then **reverted 2026-11-12**: the exploit path was too unreliable to earn a flag. G4 is now **training/pentest-only** (`ctf_eligible=false`), levels L0–L3 kept, bot subsystem removed.
 - Provisioning script for new users (accounts + beneficiaries + seed transactions)

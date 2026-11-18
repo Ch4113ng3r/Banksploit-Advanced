@@ -469,6 +469,15 @@ if (!function_exists('tr_session_name')) {
             // vuln pane next to the concatenated sink. The fix is "use a bound parameter",
             // shown by the @fix block in the sink file, so there is no secure-pane extra.
             'statements.g2' => ['vuln' => ['../core/helpers.php'], 'secure' => []],
+            // g4's per-level reflection ladder lives in g4_text()/g4_attr()
+            // (core/helpers.php); show it on BOTH panes next to the sink so the
+            // vuln filtering and the L3 encoding are both visible.
+            'statements.g4' => ['vuln' => ['../core/helpers.php'], 'secure' => ['../core/helpers.php']],
+            // l1's graduated "from account" reference ladder (plain -> base64 -> opaque
+            // handle) lives in xfer_resolve_from_ref()/xfer_from_field_html()
+            // (transfer/_shared.php); show it on the vuln pane next to the no-ownership
+            // load. The fix is the ownership check in transfer_secure.php (primary).
+            'transfer.l1' => ['vuln' => ['transfer/_shared.php'], 'secure' => []],
         ];
         $resolve = static function (array $files) use ($m): array {
             $out = [];

@@ -112,6 +112,38 @@ function sa_render(string $title, string $content, string $active = ''): void
     exit;
 }
 
+// --- Planning groups (shared by Vuln Config and CTF Vulnerabilities) ----------
+// Instructor-defined, ordered sets of vulns. Stored once; both pages read them.
+function vuln_groups_path(): string
+{
+    return dirname(__DIR__) . '/src/config/vuln_groups.json';
+}
+function vuln_groups_load(): array
+{
+    $path = vuln_groups_path();
+    if (!is_file($path)) {
+        return [];
+    }
+    $d = json_decode((string) file_get_contents($path), true);
+    $groups = is_array($d['groups'] ?? null) ? array_values($d['groups']) : [];
+    // Normalise legacy {targets:{key:level}} groups to ordered {members:[{key,level}]}.
+    foreach ($groups as &$g) {
+        if (!isset($g['members']) && is_array($g['targets'] ?? null)) {
+            $members = [];
+            foreach ($g['targets'] as $k => $lv) {
+                $members[] = ['key' => (string) $k, 'level' => max(0, min(3, (int) $lv))];
+            }
+            $g['members'] = $members;
+        }
+        unset($g['targets']);
+        if (!is_array($g['members'] ?? null)) {
+            $g['members'] = [];
+        }
+    }
+    unset($g);
+    return $groups;
+}
+
 // --- Routing -----------------------------------------------------------------
 $path   = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';

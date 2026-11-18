@@ -140,8 +140,10 @@ if (!function_exists('xfer_execute_vuln')) {
             'cashback'    => $cashback,
         ];
 
-        // CTF (transfer.l1): flag when from_account doesn't belong to the user (IDOR proved)
-        if ($engine->isVulnerable('transfer', 'l1') && (int) $from['user_id'] !== $userId) {
+        // CTF (transfer.l1): flag when from_account doesn't belong to the user
+        // (IDOR proved) AND transfer.l1 is the active CTF challenge
+        // (isCtfActive = ctf_eligible AND ctf_active), keyed to the submitter.
+        if ($engine->isCtfActive('transfer', 'l1') && (int) $from['user_id'] !== $userId) {
             $result['ctf_flag'] = Flags::generate('transfer.l1', $userId);
         }
 
