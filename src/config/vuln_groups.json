@@ -6,35 +6,35 @@
             "members": [
                 {
                     "key": "auth.g1",
-                    "level": 2
+                    "level": 1
                 },
                 {
                     "key": "auth.l11",
-                    "level": 1
+                    "level": 0
                 },
                 {
                     "key": "auth.l12",
-                    "level": 2
+                    "level": 0
                 },
                 {
                     "key": "transfer.l1",
-                    "level": 2
+                    "level": 0
                 },
                 {
                     "key": "statements.g2",
-                    "level": 2
+                    "level": 0
                 },
                 {
                     "key": "auth.l25",
-                    "level": 1
+                    "level": 0
                 },
                 {
                     "key": "statements.g4",
-                    "level": 2
+                    "level": 0
                 },
                 {
                     "key": "statements.g9",
-                    "level": 2
+                    "level": 0
                 }
             ]
         }

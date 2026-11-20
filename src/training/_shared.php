@@ -203,6 +203,34 @@ if (!function_exists('tr_session_name')) {
     // -------------------------------------------------- flags --------------
 
     /**
+     * The identity a flag submission scores for.
+     *
+     * Normally the fully-authenticated session user. But auth.g1 (SQLi login
+     * bypass) delivers its flag on the OTP screen: the exploit is already
+     * complete there, yet the login is only half-done — `pending_login` is set
+     * and `user` is not. Falling back to the pending identity lets that capture
+     * be claimed from the flag modal without first clearing the OTP step.
+     *
+     * This is safe to allow: flags are per-user HMACs, so a half-authenticated
+     * submitter can only ever submit the flag of the account they just broke
+     * into, and that is the account the capture is recorded against.
+     *
+     * Returns 0 when there is no identity at all.
+     */
+    function tr_submitting_user_id(): int
+    {
+        $user = auth()->getCurrentUser();
+        if (is_array($user) && isset($user['id'])) {
+            return (int) $user['id'];
+        }
+        $pending = Session::get('pending_login');
+        if (is_array($pending) && isset($pending['id'])) {
+            return (int) $pending['id'];
+        }
+        return 0;
+    }
+
+    /**
      * Submit a CTF flag. Per-user HMAC flags — computed on the fly, never stored.
      * On a correct match, marks the vuln 'exploited'.
      *
@@ -215,12 +243,11 @@ if (!function_exists('tr_session_name')) {
     function tr_submit_flag(PDO $pdo, string $flag): array
     {
         $flag = trim($flag);
-        $user = auth()->getCurrentUser();
-        if (!$user) {
+        $userId = tr_submitting_user_id();
+        if ($userId <= 0) {
             return ['ok' => true, 'correct' => false, 'message' => 'You must be logged in.', 'vuln_id' => null];
         }
 
-        $userId = (int) $user['id'];
         $result = Flags::validate($flag, $userId);
 
         if ($result['valid']) {
@@ -249,23 +276,50 @@ if (!function_exists('tr_session_name')) {
             $points = Flags::points($result['vuln_key'], $curLevel);
             tr_set_status($pdo, $result['vuln_key'], 'exploited');
 
-            // Log to ctf_submissions for leaderboard (INSERT IGNORE = no dupes).
-            // rowCount() tells us whether this was the FIRST capture, so a repeat
-            // submission is reported honestly instead of claiming points again.
-            $ins = $pdo->prepare(
-                'INSERT IGNORE INTO ctf_submissions (user_id, vuln_key, points)
-                 VALUES (:uid, :vk, :pts)'
-            );
-            $ins->execute([':uid' => $userId, ':vk' => $result['vuln_key'], ':pts' => $points]);
-            $firstCapture = $ins->rowCount() > 0;
+            // Log to ctf_submissions for the leaderboard. One row per
+            // (user, vuln) — the flag string has no level in it, so re-solving
+            // the same vuln at a harder level resubmits the IDENTICAL flag.
+            // Rather than ignoring that, top the row up: your BEST level counts,
+            // and only the difference is awarded now. Re-submitting at the same
+            // or an easier level changes nothing.
+            //
+            // submitted_at is deliberately left alone, so the dashboard timeline
+            // keeps showing when the vuln was first captured.
+            $prev = $pdo->prepare('SELECT points FROM ctf_submissions WHERE user_id = :uid AND vuln_key = :vk');
+            $prev->execute([':uid' => $userId, ':vk' => $result['vuln_key']]);
+            $prevRow    = $prev->fetchColumn();
+            $hadRow     = $prevRow !== false;
+            $prevPoints = $hadRow ? (int) $prevRow : 0;
+
+            // GREATEST() in the upsert makes this safe against a concurrent
+            // submission racing between the SELECT above and this write.
+            $pdo->prepare(
+                'INSERT INTO ctf_submissions (user_id, vuln_key, points)
+                 VALUES (:uid, :vk, :pts)
+                 ON DUPLICATE KEY UPDATE points = GREATEST(points, VALUES(points))'
+            )->execute([':uid' => $userId, ':vk' => $result['vuln_key'], ':pts' => $points]);
+
+            $banked  = max($prevPoints, $points);
+            $awarded = $banked - $prevPoints;
+
+            if (!$hadRow) {
+                $message = "🚩 Correct! {$title} — +{$points} pts";
+            } elseif ($awarded > 0) {
+                $message = "🚩 Level up! {$title} — L{$curLevel} is worth {$points}, "
+                         . "beating your banked {$prevPoints} — +{$awarded} pts (total {$banked}).";
+            } else {
+                $message = "✓ {$title} — already captured for {$prevPoints} pts. "
+                         . "L{$curLevel} is worth {$points}, so no additional points.";
+            }
 
             return ['ok' => true, 'correct' => true,
-                    'message' => $firstCapture
-                        ? "🚩 Correct! {$title} — +{$points} pts"
-                        : "✓ {$title} — already captured, no additional points.",
+                    'message'   => $message,
                     'vuln_id'   => $result['vuln_key'],
-                    'points'    => $firstCapture ? $points : 0,
-                    'duplicate' => !$firstCapture];
+                    'points'    => $awarded,
+                    'banked'    => $banked,
+                    'level'     => $curLevel,
+                    'upgraded'  => $hadRow && $awarded > 0,
+                    'duplicate' => $hadRow];
         }
 
         return ['ok' => true, 'correct' => false, 'message' => 'Incorrect flag.', 'vuln_id' => null];

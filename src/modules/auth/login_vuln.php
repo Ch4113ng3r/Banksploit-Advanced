@@ -58,12 +58,36 @@ if (!function_exists('auth_login_vuln')) {
         //   L0  raw query, DB error returned verbatim (error-based).
         //   L1  same query + blacklist above; DB error still returned.
         //   L2  customer_id wrapped in parentheses with the password check
-        //       OUTSIDE them, and the DB error hidden (blind). A naive
-        //       BS100234' --  leaves an unbalanced ")" (fails), and
-        //       BS100234' OR '1'='1  still hits the password check outside the
-        //       parens — so the attacker must close the bracket AND comment out
-        //       the rest:  BS100234') --
+        //       OUTSIDE them, and the DB error hidden (blind). Comment tokens
+        //       are also blacklisted (generic rejection), so BS100234') --  is
+        //       refused and the attacker cannot comment the tail away. The
+        //       bracket must be broken WITHOUT a comment, e.g.
+        //       BS100234') OR ('1'='1  — proving comment-blacklisting is not a
+        //       SQLi defence.
         // --------------------------------------------------------------------
+
+        // --------------------------------------------------------------------
+        // LEVEL 2: comment-token blacklist. Blocks --, # and /* so the
+        // "close the bracket and comment out the rest" payload (BS100234') -- )
+        // no longer works. Unlike L1, the rejection is a GENERIC
+        // "Invalid credentials." — consistent with L2 being blind, it does not
+        // reveal that a filter tripped. This still does NOT stop SQLi: a
+        // comment-free bracket break such as  BS100234') OR ('1'='1
+        // authenticates — which is the point L2 teaches.
+        // --------------------------------------------------------------------
+        if ($level >= 2) {
+            // @vuln-start: [L2] comment-token blacklist, generic blind rejection — bypass with comment-free OR (auth.g1)
+            $lower = strtolower($cid);
+            foreach (['--', '#', '/*'] as $bad) {
+                if (str_contains($lower, $bad)) {
+                    // Rejected, but the message is indistinguishable from a
+                    // normal failed login — the filter stays invisible (blind).
+                    return ['ok' => false, 'user' => null, 'error' => 'Invalid credentials.'];
+                }
+            }
+            // @vuln-end
+        }
+
         if ($level >= 2) {
             // @vuln-start: [L2] bracketed concat, password check outside parens; error hidden (blind SQLi) (auth.g1)
             $sql = "SELECT id, customer_id, name, role FROM users "

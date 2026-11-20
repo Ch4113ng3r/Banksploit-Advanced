@@ -27,11 +27,11 @@
           ]
         },
         {
-          "subtitle": "Level 2 · blind + brackets",
+          "subtitle": "Level 2 · blind, brackets, comments filtered",
           "steps": [
-            "No error is shown now (blind). The query also wraps the ID check in parentheses, with the password check OUTSIDE the brackets.",
-            "A plain comment leaves an unbalanced <code>)</code> and silently fails; a bare <code>OR</code> cannot get past the password check outside the parentheses. You must close the bracket first.",
-            "Close the parenthesis, then comment out the rest: <code>&lt;yourID&gt;&#39;) -- </code> (trailing space)"
+            "No error is shown now (blind). The ID check is wrapped in parentheses with the password check OUTSIDE the brackets, and comment tokens (<code>--</code>, <code>#</code>, <code>/*</code>) are rejected with a generic <code>Invalid credentials</code> — the same message as a wrong password, so you can&#39;t even tell the filter tripped.",
+            "You can&#39;t comment the password check away any more, and a bare <code>OR</code> stays trapped inside the parentheses. Supply the closing <code>)</code> yourself to escape the brackets, then <code>OR</code> an always-true test at the top level — the query&#39;s own trailing <code>&#39;)</code> balances your quote, so no comment is needed.",
+            "Close the bracket and OR outside it: <code>&lt;yourID&gt;&#39;) OR (&#39;1&#39;=&#39;1</code>"
           ]
         }
       ]

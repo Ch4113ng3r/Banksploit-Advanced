@@ -93,22 +93,40 @@ foreach ($ctfVulns as $v) {
         $codeLink = '<a href="' . $cvHref . '" class="text-xs text-indigo-300 hover:text-indigo-200">View code →</a>';
     }
     $captured = isset($capturedMap[$v['key']]);
+    // What you have BANKED for this vuln, versus what the live level is worth.
+    // They differ once a vuln is re-levelled after capture — show the banked
+    // figure (that is what the total is built from) and offer the top-up.
+    $banked   = $captured ? (int) $capturedMap[$v['key']]['points'] : 0;
+    $topUp    = $captured ? max(0, $pts - $banked) : 0;
     $badge = $captured
         ? 'bg-emerald-500/20 text-emerald-300'
         : 'bg-red-500/20 text-red-300';
     $statusHtml = $captured
         ? '<span class="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-300">captured</span>'
         : '<span class="px-2 py-0.5 rounded text-xs bg-slate-700 text-slate-300">pending</span>';
-    $flagCell = $captured
-        ? '<span class="text-xs text-emerald-300 font-medium">✓ Captured</span>'
-        : '<div class="flex gap-1.5 justify-end"><input id="flag-' . $key . '" placeholder="BANKSPLOIT{...}" class="w-40 rounded-md bg-slate-950 ring-1 ring-slate-700 px-2 py-1 text-slate-100 font-mono text-xs focus:ring-amber-500 focus:outline-none"><button onclick="submitVulnFlag(\'' . $key . '\')" class="rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-2.5 py-1 text-xs">Submit</button></div>';
-    $ptsColor = $tierColor($pts);
+
+    $submitBox = '<div class="flex gap-1.5 justify-end"><input id="flag-' . $key . '" placeholder="BANKSPLOIT{...}" class="w-40 rounded-md bg-slate-950 ring-1 ring-slate-700 px-2 py-1 text-slate-100 font-mono text-xs focus:ring-amber-500 focus:outline-none"><button onclick="submitVulnFlag(\'' . $key . '\')" class="rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-2.5 py-1 text-xs">Submit</button></div>';
+    if (!$captured) {
+        $flagCell = $submitBox;
+    } elseif ($topUp > 0) {
+        // Re-solving at the harder level is worth more than what is banked, so
+        // keep the box open — resubmitting the same flag claims the difference.
+        $flagCell = '<div class="text-[11px] text-amber-300 mb-1">✓ Captured — re-submit at L' . (int) $v['level'] . ' for +' . $topUp . '</div>' . $submitBox;
+    } else {
+        $flagCell = '<span class="text-xs text-emerald-300 font-medium">✓ Captured</span>';
+    }
+
+    // Points column: banked value for a captured vuln, live price otherwise.
+    $shownPts = $captured ? $banked : $pts;
+    $ptsColor = $tierColor($shownPts);
+    $ptsCell  = (string) $shownPts
+        . ($topUp > 0 ? '<div class="text-[11px] font-normal text-amber-400">↑ ' . $pts . ' at L' . (int) $v['level'] . '</div>' : '');
 
     $rows .= <<<HTML
         <tr class="border-t border-slate-800 hover:bg-slate-800/40">
             <td class="py-2.5"><span class="font-mono text-xs px-1.5 py-0.5 rounded {$badge}">{$v['id']}</span></td>
             <td class="py-2.5 text-slate-200 text-sm">{$v['title']}<div class="text-xs text-slate-500">{$v['category']}</div>{$codeLink}</td>
-            <td class="py-2.5 font-mono text-sm {$ptsColor} font-bold">{$pts}</td>
+            <td class="py-2.5 font-mono text-sm {$ptsColor} font-bold">{$ptsCell}</td>
             <td class="py-2.5">{$statusHtml}</td>
             <td class="py-2.5 text-right" id="fc-{$key}">{$flagCell}</td>
         </tr>
@@ -188,8 +206,13 @@ $content = <<<HTML
         const d = await r.json();
         const cell = document.getElementById('fc-' + vulnKey);
         if (d.correct) {
-            cell.innerHTML = '<span class="text-xs text-emerald-300 font-medium">✓ Captured</span>';
-            setTimeout(()=>location.reload(), 1200);
+            // d.correct is true for a repeat submission too. Report what was
+            // actually awarded, so a no-op re-submit can't look like a capture.
+            const note = d.points
+                ? ((d.upgraded ? '✓ Levelled up +' : '✓ Captured +') + d.points + ' pts')
+                : '✓ Already captured — no additional points';
+            cell.innerHTML = '<span class="text-xs text-emerald-300 font-medium">' + note + '</span>';
+            setTimeout(()=>location.reload(), 1800);
         } else {
             cell.insertAdjacentHTML('beforeend', '<div class="text-xs text-red-300 mt-1">' + (d.message || 'Incorrect flag') + '</div>');
             setTimeout(() => { const err = cell.querySelector('.text-red-300'); if (err) err.remove(); }, 3000);

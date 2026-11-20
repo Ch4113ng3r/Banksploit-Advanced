@@ -51,6 +51,18 @@ if ($path === '/api/v1/training/set-level' && $method === 'POST') {
     json_response(['ok' => true, 'level' => $level, 'applied' => $applied]);
 }
 
+// ---- submit flag -----------------------------------------------------------
+// Handled BEFORE requireAuth(): auth.g1 (SQLi login bypass) delivers its flag on
+// the OTP screen, where the login is only half-complete. requireAuth() would 302
+// that POST to /login, and the flag modal's claim button — which expects JSON —
+// would read the login page's HTML as a rejection. tr_submit_flag() does its own
+// identity check (tr_submitting_user_id) and always answers in JSON.
+if ($path === '/api/v1/training/submit-flag' && $method === 'POST') {
+    $flag = (string) ($in['flag'] ?? '');
+    $res = tr_submit_flag($pdo, $flag);
+    json_response($res + ['stats' => tr_stats($pdo)]);
+}
+
 auth()->requireAuth();
 
 // ---- hints (admin-only in CTF mode) ----------------------------------------
@@ -94,14 +106,8 @@ if ($path === '/api/v1/training/reset' && $method === 'POST') {
     json_response(['ok' => true, 'stats' => tr_stats($pdo)]);
 }
 
-// ---- submit flag -----------------------------------------------------------
-if ($path === '/api/v1/training/submit-flag' && $method === 'POST') {
-    $flag = (string) ($in['flag'] ?? '');
-    $res = tr_submit_flag($pdo, $flag);
-    json_response($res + ['stats' => tr_stats($pdo)]);
-}
-
-// (set-level is handled above, before requireAuth, so it works pre-login too.)
+// (submit-flag and set-level are handled above, before requireAuth, so they
+//  work pre-login too.)
 
 // ---- inspector: recent requests -------------------------------------------
 if ($path === '/api/v1/training/requests' && $method === 'GET') {

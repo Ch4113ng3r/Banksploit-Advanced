@@ -432,8 +432,10 @@ HTML;
                         return;
                     }
                     if (d && d.correct) {
-                        btn.textContent = d.duplicate ? '\u2705 Already captured'
-                                        : (d.points ? ('\u2705 Captured  +' + d.points + ' pts') : '\u2705 Captured');
+                        // Points first: a re-capture at a harder level IS a
+                        // duplicate row, but it still awards the difference.
+                        btn.textContent = d.points ? ((d.upgraded ? '\u2705 Levelled up  +' : '\u2705 Captured  +') + d.points + ' pts')
+                                        : (d.duplicate ? '\u2705 Already captured' : '\u2705 Captured');
                         btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
                         btn.style.opacity = '1';
                         show(d.message || 'Flag accepted.', 'ok');

