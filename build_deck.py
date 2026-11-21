@@ -350,57 +350,55 @@ S_EIGHT = '''<section class="slide"><div class="slide-inner center">
 
 # ======================= L25 — SESSION PUZZLING ==============================
 L25_TITLE = '''<section class="slide"><div class="slide-inner">
-<div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 3</span><span style="color:var(--t3);font-size:.8rem">L25 &bull; CWE-841 &bull; OWASP A04:2021</span></div>
-<h1>Session Puzzling &mdash; Walk In Half-Authenticated</h1>
-<p class="big mt2">&ldquo;We&rsquo;re going to skip the second factor entirely &mdash; by never finishing the login.&rdquo;</p>
+<div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 3</span><span style="color:var(--t3);font-size:.8rem">L25 &bull; CWE-841 &bull; OWASP A07:2021</span></div>
+<h1>Session Puzzling &mdash; Take Over an Account Through Password Reset</h1>
+<p class="big mt2">&ldquo;We&rsquo;re going to log in as another customer &mdash; using nothing but the <em>Forgot password</em> page.&rdquo;</p>
 </div></section>'''
 
 L25_HOW = '''<section class="slide"><div class="slide-inner">
-<h3 class="mb2">Login Is Not One Step. It Is a Conversation.</h3>
-<p class="desc mb2">Most banking logins are built in stages. Each stage records something in your session.</p>
+<h3 class="mb2">Password Recovery Is Not One Step. It Is a Conversation.</h3>
+<p class="desc mb2">The <em>Forgot password</em> journey is built in stages. Each stage records something in your session &mdash; <strong>who</strong> you are recovering, and <strong>how far</strong> you have got.</p>
 <div class="flow mt2">
-<div class="flow-step"><strong>Step 1</strong><p class="desc mt1">Password checked.<br/>Session notes <em>who</em> you claim to be.</p></div>
+<div class="flow-step"><strong>Step 1</strong><p class="desc mt1">Enter a Customer ID.<br/>Session notes <em>who</em> is being recovered.</p></div>
 <div class="flow-arrow">&rarr;</div>
-<div class="flow-step"><strong>Step 2</strong><p class="desc mt1">OTP sent and verified.</p></div>
+<div class="flow-step"><strong>Step 2</strong><p class="desc mt1">OTP verified.</p></div>
 <div class="flow-arrow">&rarr;</div>
-<div class="flow-step"><strong>Step 3</strong><p class="desc mt1">Session promoted to <em>fully logged in</em>.</p></div>
+<div class="flow-step"><strong>Step 3</strong><p class="desc mt1">Security questions answered.<br/>Session marks progress <em>complete</em>.</p></div>
 <div class="flow-arrow">&rarr;</div>
-<div class="flow-step"><strong>Dashboard</strong><p class="desc mt1">Your money.</p></div>
+<div class="flow-step"><strong>Step 4</strong><p class="desc mt1">Set a new password.</p></div>
 </div>
-<div class="card yellow-left mt3"><p class="desc">The session is built up <strong style="color:var(--t1)">piece by piece</strong>. The question the attacker asks is simple: <em>what does the application do if I show up at step 4 holding only the piece from step 1?</em></p></div>
+<div class="card yellow-left mt3"><p class="desc">The session is built up <strong style="color:var(--t1)">piece by piece</strong>. The question the attacker asks is simple: <em>what does step 4 do if I arrive holding progress that was never earned for the account I&rsquo;m now resetting?</em></p></div>
 </div></section>'''
 
 L25_ATTACK = '''<section class="slide"><div class="slide-inner">
 <h3 class="mb1">The Vulnerable Code</h3>
-<p class="desc mb2">Two different variables mean two very different things &mdash; and the guard accepts either one.</p>
+<p class="desc mb2">The recovery flow tracks progress <em>separately</em> from the account being recovered &mdash; and never checks that they match.</p>
 <div class="grid2 gap2">
 <div>
-<pre><code><span class="cm">// Step 1 — after the password is correct</span>
-<span class="var">$_SESSION</span>[<span class="str">'pending_uid'</span>] = <span class="var">$user</span>[<span class="str">'id'</span>];
-<span class="fn">redirect</span>(<span class="str">'/otp'</span>);
-
-<span class="cm">// Step 2 — only after a valid OTP</span>
-<span class="var">$_SESSION</span>[<span class="str">'uid'</span>] = <span class="var">$_SESSION</span>[<span class="str">'pending_uid'</span>];</code></pre>
-<p class="desc mt1" style="font-size:.88rem"><code>pending_uid</code> means &ldquo;password was right.&rdquo;<br/><code>uid</code> means &ldquo;fully authenticated.&rdquo;</p>
+<p class="sub mb1">Level 0 &mdash; step 1 signs you straight in <span style="color:var(--t3)">(the demo)</span></p>
+<pre class="mt1"><code><span class="cm">// forgot.php — after looking up the Customer ID</span>
+<span class="var">$_SESSION</span>[<span class="str">'user'</span>] = [
+    <span class="str">'id'</span>  =&gt; <span class="var">$u</span>[<span class="str">'id'</span>],
+    <span class="str">'role'</span> =&gt; <span class="var">$u</span>[<span class="str">'role'</span>],   <span class="cm">// now logged in as them</span>
+];</code></pre>
+<div class="card red-left mt2"><p class="desc" style="font-size:.9rem">Knowing a Customer ID is enough to <strong style="color:var(--red)">become that user</strong> &mdash; no password, OTP or questions are checked first.</p></div>
 </div>
 <div>
-<p class="sub mb1">The guard on every page</p>
-<pre class="mt1"><code><span class="cm">// dashboard.php</span>
-<span class="kw">if</span> (!<span class="fn">isset</span>(<span class="var">$_SESSION</span>[<span class="str">'uid'</span>])
-    <span class="vuln-hl">&amp;&amp; !<span class="fn">isset</span>($_SESSION['pending_uid'])</span>) {
-    <span class="fn">redirect</span>(<span class="str">'/login'</span>);
-}
-<span class="cm">// ... otherwise, show the account ...</span></code></pre>
-<div class="card red-left mt2"><p class="desc" style="font-size:.9rem">That second condition was added so a half-finished login would not look &ldquo;broken.&rdquo; It quietly made the OTP <strong style="color:var(--red)">optional</strong>.</p></div>
+<p class="sub mb1">Level 1 / 2 &mdash; the reset gate <span style="color:var(--t3)">(your turn)</span></p>
+<pre class="mt1"><code><span class="cm">// Step 4 — may I open the reset form?</span>
+<span class="var">$gateOpen</span> =
+    <span class="var">$recoveryStage</span> &gt;= <span class="num">2</span>   <span class="cm">// checks done...</span>
+    &amp;&amp; <span class="var">$recoveryUid</span> &gt; <span class="num">0</span><span class="vuln-hl">;   // ...but for WHOM?</span></code></pre>
+<div class="card red-left mt2"><p class="desc" style="font-size:.9rem">The gate trusts that the checks were completed. It never checks they were completed for the <strong style="color:var(--red)">account now being reset</strong> &mdash; so progress earned for one account unlocks a reset for another.</p></div>
 </div>
 </div>
 </div></section>'''
 
 L25_MOMENT = '''<section class="slide"><div class="slide-inner center">
-<h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">We entered a password, never touched the OTP,<br/>and the bank showed us the account anyway.</h1>
+<h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">We typed a customer&rsquo;s ID into &ldquo;Forgot password,&rdquo;<br/>and the bank logged us in as them.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
-<p class="big" style="color:var(--t2)">Two-factor authentication was fully implemented.<br/>It was simply not <em>required</em> on the page that mattered.</p>
-<p class="mt3 desc">Nobody bypassed the OTP. They just declined to answer it.</p>
+<p class="big" style="color:var(--t2)">No password. No OTP. No security questions.<br/>Every identity check was in place &mdash; and none of them stood between us and the account.</p>
+<p class="mt3 desc">Nobody broke a check. They just started a <em>recovery</em> and were treated as the owner.</p>
 </div></section>'''
 
 L25_FIX = '''<section class="slide"><div class="slide-inner">
@@ -923,11 +921,11 @@ WHO_L11 = whocaught([
 
 WHO_L25 = whocaught([
  ('Identity &amp; Access Management', [
-  '<strong>IAM owns the definition of &ldquo;authenticated.&rdquo;</strong> If two different variables both look like proof of identity, that is a design gap before it is a coding bug.',
-  '<strong>One state, one meaning.</strong> A partially authenticated session must be structurally incapable of reaching an authenticated page.']),
+  '<strong>IAM owns the definition of &ldquo;verified.&rdquo;</strong> Each identity check must be bound to the <em>exact</em> account it was performed for &mdash; not to whoever happens to be in the session.',
+  '<strong>Progress belongs to a subject.</strong> Clearing a recovery step for one account must never count as clearing it for another.']),
  ('Penetration Testing', [
-  '<strong>Static analysis cannot see this.</strong> The code is syntactically perfect &mdash; the flaw is in the <em>sequence</em>. Only someone deliberately taking steps out of order will find it.'])],
- '&ldquo;Which of our checks prove identity, and which only prove that someone started a login?&rdquo;')
+  '<strong>Static analysis cannot see this.</strong> The code is syntactically perfect &mdash; the flaw is in the <em>sequence</em>. Only someone deliberately taking steps out of order, across accounts, will find it.'])],
+ '&ldquo;Which of our checks prove who you are, and which only prove that someone started a recovery?&rdquo;')
 
 WHO_L12 = whocaught([
  ('Application Security', [
@@ -964,27 +962,26 @@ WHO_G4 = whocaught([
 
 # ---- Fix slides slimmed (org tie-in now lives on its own slide) ----
 L25_FIX = '''<section class="slide"><div class="slide-inner">
-<h3 class="mb1">The Fix &mdash; One State, One Meaning</h3>
+<h3 class="mb1">The Fix &mdash; Bind Progress to the Target</h3>
 <div class="grid2 gap2">
 <div>
-<pre><code><span class="cm">// Exactly one variable may mean "authenticated".</span>
-<span class="kw">if</span> (!<span class="fn">isset</span>(<span class="var">$_SESSION</span>[<span class="fix-hl">'uid'</span>])) {
-    <span class="fn">redirect</span>(<span class="str">'/login'</span>);
-}
+<pre><code><span class="cm">// Step 1 — a new target restarts the journey:</span>
+<span class="var">$_SESSION</span>[<span class="str">'recovery_stage'</span>]     = <span class="num">0</span>;
+<span class="var">$_SESSION</span>[<span class="str">'recovery_stage_uid'</span>] = <span class="num">0</span>;
 
-<span class="cm">// On a valid OTP — promote once, cleanly:</span>
-<span class="fn">session_regenerate_id</span>(<span class="kw">true</span>);
-<span class="var">$_SESSION</span>[<span class="str">'uid'</span>] = <span class="var">$_SESSION</span>[<span class="str">'pending_uid'</span>];
-<span class="kw">unset</span>(<span class="var">$_SESSION</span>[<span class="str">'pending_uid'</span>]);</code></pre>
+<span class="cm">// Step 4 — the gate binds progress to the target:</span>
+<span class="var">$gateOpen</span> =
+    <span class="var">$recoveryStage</span> &gt;= <span class="num">2</span>
+    <span class="fix-hl">&amp;&amp; <span class="var">$stageUid</span> === <span class="var">$recoveryUid</span></span>;  <span class="cm">// same account</span></code></pre>
 </div>
 <div>
 <p class="sub mb1">Why this works</p>
 <div class="card green-left">
-<p class="desc"><strong style="color:var(--green)">The half-finished state cannot reach anything.</strong> There is no longer a condition that accepts it, anywhere.</p>
-<p class="desc mt1"><strong style="color:var(--green)">The intermediate value is destroyed.</strong> Once promoted, <code>pending_uid</code> no longer exists to be abused.</p>
-<p class="desc mt1"><strong style="color:var(--green)">The session id is regenerated</strong> at the moment privilege changes &mdash; which also closes session-fixation attacks.</p>
+<p class="desc"><strong style="color:var(--green)">Progress belongs to an account.</strong> <code>recovery_stage_uid</code> records <em>which</em> account earned the checks; the reset refuses to run for any other.</p>
+<p class="desc mt1"><strong style="color:var(--green)">Changing the target starts over.</strong> Submitting a different Customer ID clears the stage &mdash; a swapped-in victim arrives with nothing earned.</p>
+<p class="desc mt1"><strong style="color:var(--green)">One account, start to finish.</strong> The identity checks and the reset must all be for the same person.</p>
 </div>
-<p class="desc mt2" style="font-size:.86rem;color:var(--t3)">Note what the fix is <em>not</em>: it is not more code. It is one condition removed and one state deleted.</p>
+<p class="desc mt2" style="font-size:.86rem;color:var(--t3)">Note what the fix is <em>not</em>: it is not more code. It is one equality check added and one state reset on a target change.</p>
 </div>
 </div>
 </div></section>'''
@@ -1290,9 +1287,9 @@ order = [
  ('new',L25_TITLE,L,None),('new',L25_HOW,L,None),('new',L25_ATTACK,L,None),
  ('new',L25_MOMENT,L,None),
  ('new',mindset_slide('L25','L25 &bull; Session puzzling',
-   {'trust':'&ldquo;login started&rdquo; as if it meant &ldquo;login finished&rdquo;','ask':'&ldquo;Does every sensitive page re-check that the session is <em>fully</em> authenticated?&rdquo;','why':'<strong>step-up authentication</strong> and strict session state &mdash; re-verify at each sensitive action, not at one early gate'}),L,None),
- ('new',yourturn('L25','Reach the Dashboard Without the OTP',
-   'You reached a logged-in dashboard without ever completing the second-factor (OTP) step.'),L,'handson'),
+   {'trust':'progress made for <em>one</em> account as if it had been earned for <em>whatever</em> account is in the session now','ask':'&ldquo;Is every identity check bound to the <em>exact</em> account it was performed for &mdash; and does changing the target reset that progress?&rdquo;','why':'<strong>per-target verification</strong> &mdash; progress is tied to the account that earned it, and re-checked at each sensitive action, not at one early gate'}),L,None),
+ ('new',yourturn('L25','Reset Another Customer&rsquo;s Password',
+   'You reset another customer&rsquo;s password without ever proving you were them &mdash; by reusing recovery progress earned on your own account.'),L,'handson'),
  ('new',L25_FIX,L,None),('new',WHO_L25,L,None),
  ('new',RW_L25,L,'real'),
  # --- L12 ---
