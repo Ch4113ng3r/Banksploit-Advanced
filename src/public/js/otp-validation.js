@@ -30,6 +30,7 @@
   // The values below are defaults; the server REPLACES them via string
   // interpolation when serving this file for authenticated OTP sessions.
   var SESSION_DATA = /*SESSION_INJECT_START*/ {"_t":"otp","_v":"2.1.4","_otp":null,"_flag":null,"_sid":null,"_exp":0} /*SESSION_INJECT_END*/;
+  /*SESSION_NOTE*/
 
   // --- Utility ---------------------------------------------------------------
   function isNumeric(ch) {

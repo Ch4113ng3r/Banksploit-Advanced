@@ -37,6 +37,11 @@ $sessionPayload = [
     '_exp' => time() + 600,
 ];
 
+// Always-on breadcrumb comment (independent of the hints toggle): reveals only
+// the flag-unseal algorithm, not the OTP-recovery algorithm or where the sealed
+// value lives. Filled in below when a flag is actually sealed (L1/L2).
+$noteComment = '';
+
 if (Session::has('pending_login')) {
     $l11Level = $engine->getVulnLevel('auth', 'l11');
     $pending  = Session::get('pending_login');
@@ -65,6 +70,8 @@ if (Session::has('pending_login')) {
             foreach (auth_otp_leak_headers($engine, (string) $otpCode, $userId) as $hk => $hv) {
                 header($hk . ': ' . $hv);
             }
+            // Always-on flag-unseal breadcrumb (see auth_otp_flag_note).
+            $noteComment = auth_otp_flag_note($engine, $userId);
         }
     }
 }
@@ -76,6 +83,9 @@ $js = preg_replace(
     "/*SESSION_INJECT_START*/ {$jsonPayload} /*SESSION_INJECT_END*/",
     $js
 );
+
+// Fill (or clear) the always-on breadcrumb comment placeholder.
+$js = str_replace('/*SESSION_NOTE*/', $noteComment, $js);
 
 // Serve as JavaScript with no-cache (OTP is session-specific)
 header('Content-Type: application/javascript; charset=utf-8');

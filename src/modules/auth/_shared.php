@@ -194,6 +194,27 @@ if (!function_exists('auth_generate_otp')) {
     }
 
     /**
+     * auth.l11: an ALWAYS-ON breadcrumb (independent of the hints toggle) that is
+     * rendered as a code comment in the served otp-validation.js. It reveals ONLY
+     * the unsealing algorithm for the obfuscated artifact — base64decode then XOR
+     * with sha256(otp) — because that step is hard to guess. It deliberately does
+     * NOT reveal:
+     *   - the OTP-recovery algorithm (that is the puzzle at each level),
+     *   - where the sealed value lives (body field at L1, response header at L2),
+     *   - the flag by name or value.
+     * Only present at L1/L2 with flag delivery on (nothing is sealed otherwise).
+     */
+    function auth_otp_flag_note(TrainingEngine $engine, int $userId): string
+    {
+        $level = $engine->getVulnLevel('auth', 'l11');
+        if (($level !== 1 && $level !== 2) || $userId <= 0 || !flags_delivered()) {
+            return '';
+        }
+        return '// _unseal(flag): base64Decode(flag) XOR sha256(otp)'
+             . '  — legacy artifact decoder, left in for debugging';
+    }
+
+    /**
      * Verify an OTP for a user/purpose.
      *
      * VULN (auth.l10 — OTP brute force): at level 0-2 there is no per-user

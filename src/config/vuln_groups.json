@@ -10,6 +10,10 @@
                 },
                 {
                     "key": "auth.l11",
+                    "level": 2
+                },
+                {
+                    "key": "auth.l25",
                     "level": 0
                 },
                 {
@@ -22,10 +26,6 @@
                 },
                 {
                     "key": "statements.g2",
-                    "level": 0
-                },
-                {
-                    "key": "auth.l25",
                     "level": 0
                 },
                 {

