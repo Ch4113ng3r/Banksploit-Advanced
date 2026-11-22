@@ -74,7 +74,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ->execute([':id' => $userId]);
                 echo json_encode(['ok' => true, 'message' => 'User unlocked.']);
             } elseif ($action === 'reset-password') {
-                $temp = 'Temp@' . random_int(1000, 9999);
+                // Reset to the standard generated password: {customer_id}B4rc@123
+                // (same convention as bulk import / replace).
+                $cidStmt = $pdo->prepare('SELECT customer_id FROM users WHERE id = :id');
+                $cidStmt->execute([':id' => $userId]);
+                $customerId = $cidStmt->fetchColumn();
+                if ($customerId === false) {
+                    echo json_encode(['ok' => false, 'error' => 'User not found.']);
+                    exit;
+                }
+                $temp = $customerId . 'B4rc@123';
                 $pdo->prepare('UPDATE users SET password_hash = :ph, password_md5 = :md5 WHERE id = :id')
                     ->execute([
                         ':ph'  => password_hash($temp, PASSWORD_BCRYPT),
@@ -210,7 +219,7 @@ $content = <<<HTML
                     <td class="py-2 text-right whitespace-nowrap">
                         <button onclick="userAction(\${u.id},'suspend',{\${suspendVal}})" class="text-xs rounded bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 ring-1 ring-gray-200 dark:ring-0 px-2 py-1 text-gray-700 dark:text-slate-200">\${suspendLabel}</button>
                         <button onclick="userAction(\${u.id},'unlock',{})" class="text-xs rounded bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 ring-1 ring-gray-200 dark:ring-0 px-2 py-1 text-gray-700 dark:text-slate-200">Unlock</button>
-                        <button onclick="userAction(\${u.id},'reset-password',{})" class="text-xs rounded bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 ring-1 ring-gray-200 dark:ring-0 px-2 py-1 text-gray-700 dark:text-slate-200">Reset PW</button>
+                        <button onclick="userAction(\${u.id},'reset-password',{},this)" class="text-xs rounded bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 ring-1 ring-gray-200 dark:ring-0 px-2 py-1 text-gray-700 dark:text-slate-200">Reset PW</button>
                     </td>
                 </tr>
             `;
@@ -306,7 +315,7 @@ $content = <<<HTML
     });
 
     // Manage user actions
-    async function userAction(uid, action, extra) {
+    async function userAction(uid, action, extra, btn) {
         const r = await fetch('/users', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -314,7 +323,12 @@ $content = <<<HTML
         });
         const d = await r.json();
         document.getElementById('action-out').textContent = d.message || JSON.stringify(d);
-        if (action !== 'reset-password') setTimeout(() => loadUserPage(userCurrentPage, userCurrentSearch), 800);
+        if (action === 'reset-password') {
+            // Inline confirmation on the user's own row.
+            if (btn && d.ok) { btn.textContent = 'Done ✓'; btn.disabled = true; btn.classList.add('text-emerald-600', 'dark:text-emerald-300'); }
+        } else {
+            setTimeout(() => loadUserPage(userCurrentPage, userCurrentSearch), 800);
+        }
     }
 
     // Initial load

