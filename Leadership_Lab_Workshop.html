@@ -949,7 +949,7 @@ $_SESSION['user'] = [
 <div>
 <p class="sub mb1">The finding you reported</p>
 <p class="desc">You moved money out of an account that was not yours.</p>
-<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">The developers shipped a fix.</strong> The <em>From account</em> is no longer a plain number &mdash; it now rides as a <strong>signed, tamper-proof token</strong>, so the value looks locked. But did they add the missing <strong>server-side ownership check</strong>, or just wrap the same client-supplied reference in a fancier envelope? Whatever the browser can produce, you can reproduce. You have about <strong>5 minutes</strong>.</p></div>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">The developers shipped a fix.</strong> The <em>From account</em> is no longer a plain number &mdash; it now travels as a signed token, so the value looks locked down. But is that enough to close the hole, or is the implementation still not bug-free? <strong>Check for yourself.</strong> You have about <strong>5 minutes</strong>.</p></div>
 </div>
 <div>
 <p class="sub mb1">When it works</p>
@@ -993,9 +993,28 @@ $_SESSION['user'] = [
 </div>
 </div></section>
 <section id="s55" data-phase="Live Labs" class="slide"><div class="slide-inner">
-<h3 class="mb2">Who Should Have Caught This?</h3>
-<div class="card accent-left"><h3 style="color:var(--indigo);font-size:1.02rem">Identity &amp; Access Management</h3><p class="desc mt1" style="font-size:.9rem"><strong>IAM designs the authorisation model</strong> &mdash; who may act on which record. If that model only exists in a document, it does not exist.</p><p class="desc mt1" style="font-size:.9rem"><strong>Authentication is not authorisation.</strong> Logging someone in says who they are. It says nothing about whose account they may touch.</p></div><div class="card accent-left mt2"><h3 style="color:var(--indigo);font-size:1.02rem">Application Security &amp; Penetration Testing</h3><p class="desc mt1" style="font-size:.9rem"><strong>This is the single most common serious finding in banking applications</strong>, and the hardest to automate. A scanner does not know that account 4471 should not belong to this customer &mdash; only a tester with two accounts does.</p></div>
-<p class="mt2 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Do we test every endpoint with two different customers, or only with one?&rdquo;</p>
+<p class="sub mb1" style="color:var(--t3)">CWE-639 &bull; IDOR / BOLA &bull; Leadership accountability</p>
+<h2 class="mb2">Who should have caught this?</h2>
+<p class="desc mb2">The transfer endpoint accepted a client-supplied &ldquo;from account&rdquo; reference without verifying that the authenticated customer owned &mdash; or was authorised to debit &mdash; that account.</p>
+<div class="grid2 gap2">
+<div class="card accent-left" style="border-left-color:var(--sky)">
+<p class="sub mb1" style="color:var(--sky)">IAM &amp; Security Architecture</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">Put the ownership check on the server.</p>
+<p class="desc" style="font-size:.9rem;margin:.4em 0">On every transfer the server must confirm the authenticated customer owns the <em>specific</em> source account &mdash; deriving who they are from the session, never from a value the browser sends.</p>
+<p class="desc" style="font-size:.9rem;margin:.4em 0"><strong style="color:var(--t1)">Signing or encrypting the account reference is not authorisation.</strong> A harder-to-read reference (a token, a ciphertext) changes nothing if the server still never checks ownership &mdash; and &ldquo;logged in&rdquo; must never mean &ldquo;may debit any account.&rdquo;</p>
+</div>
+<div class="card accent-left" style="border-left-color:var(--amber)">
+<p class="sub mb1" style="color:var(--amber)">Application Security &amp; Pen Testing</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">Test across identities &mdash; and re-test after every &ldquo;fix&rdquo;.</p>
+<p class="desc" style="font-size:.9rem;margin:.4em 0">Run the two-account <strong>swap test</strong>: authenticate as Customer A, substitute Customer B&rsquo;s source-account reference, and see whether the debit succeeds &mdash; across every endpoint and HTTP method. A scanner doesn&rsquo;t know whose account this should be; only a tester with two accounts does.</p>
+<p class="desc" style="font-size:.9rem;margin:.4em 0"><strong style="color:var(--t1)">Repeat it after each change.</strong> Wrapping the reference in a signature, then in encryption, looks like progress &mdash; but the same swap test keeps passing until the server-side ownership check is actually added.</p>
+</div>
+</div>
+<div class="card mt3" style="border-left:3px solid var(--amber)">
+<p class="sub mb1" style="color:var(--amber)">The process that should catch it</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0">Requirements &rarr; authorisation design &rarr; backend implementation &rarr; two-customer negative testing &rarr; independent security testing</p>
+</div>
+<p class="mt3 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Do we test every endpoint with two different customers &mdash; or only confirm that it works for the account we are logged in as?&rdquo;</p>
 </div></section>
 <section id="s56" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L1</span><div><div class="sol-cwe">CWE-639 · A01:2021</div><h2 style="margin:.06em 0">IDOR — Transfer From Another Account</h2><div class="sol-where">&#128205; /transfer wizard (“From” account)</div></div></div><div class="grid2 mt2"><div><p class="sub mb1">Goal</p><p class="desc">Debit an account that <b>isn't yours</b>.</p><p class="sub mb1 mt3">Root cause</p><p class="desc">The “From” account is chosen by a value the <b>client sends</b> (<code>from_account_ref</code>), and the server debits it <b>without checking you own it</b>. Each level just wraps that reference in a fancier envelope — none of them add the missing ownership check.</p></div><div><p class="sub mb1">Level ladder</p><div class="sol-ladder"><div class="sol-lrow"><span class="sol-lk">L0</span><span class="sol-lv">raw account number, no check</span></div><div class="sol-lrow"><span class="sol-lk">L1</span><span class="sol-lv">number + HMAC signature</span></div><div class="sol-lrow"><span class="sol-lk">L2</span><span class="sol-lv">client-side AES ciphertext</span></div><div class="sol-lrow"><span class="sol-lk">L3</span><span class="sol-lv">server scopes to WHERE user_id = you</span></div></div><div class="card green-left mt3"><p class="desc" style="font-size:1rem"><b>L3 — secure:</b> the execute path scopes the source account — <code>WHERE id = :id AND user_id = :current_user</code>. Every forged number, signature or ciphertext simply matches no row.</p></div></div></div></div></section>
 <section id="s57" data-phase="Live Labs" class="slide"><div class="slide-inner"><div class="sol-head"><span class="sol-tag">L1</span><h2 class="sol-lvlbadge l1" style="margin:0">L1 &mdash; Number + HMAC signature</h2><span class="sol-where" style="margin-left:auto">IDOR — Transfer From Another Account</span></div><div class="grid2 mt2"><div><p class="sub mb1">The mitigation at this level</p><p class="desc">The form now submits the number <b>and</b> a signature — <code>from_account_sig = hmac(number)</code>. Editing only the number leaves the signature wrong, so it's rejected.</p></div><div><p class="sub mb1">How to solve it</p><p class="desc">You don't need to forge the HMAC — you just need a valid <b>pair</b>. The page leaks a signed number+sig pair in the Network request; reuse a leaked victim pair.</p></div></div><p class="sub mb1 mt3">Payload</p><div class="sol-pay">from_account_ref=&lt;number&gt; &amp; from_account_sig=&lt;64-hex&gt;</div><div class="sol-paynote">replay a leaked valid pair</div></div></section>
@@ -1034,7 +1053,7 @@ shell_exec("wkhtmltopdf page.html " . <span class="inj">$filename</span>);</pre>
 <p class="desc">Put a <code>;</code> in the filename to chain your own command:</p>
 <div class="sol-pay">statement.pdf;cat /tmp/flag_g9&hellip;</div>
 <div class="sol-paynote">the server runs <code>cat</code> for you</div>
-<div class="card red-left mt3"><p class="desc" style="font-size:.9rem">Blocking a few characters (<code>;</code>, then <code>&amp;</code>, then <code>|</code>) never closes this &mdash; there is always another separator. Safety is passing input as <strong>data, never shell syntax</strong> (<code>escapeshellarg()</code>).</p></div>
+<div class="card red-left mt3"><p class="desc" style="font-size:.9rem">Blocking the separators the team can think of never closes this &mdash; the shell always offers another one. Safety is passing input as <strong>data, never shell syntax</strong> (<code>escapeshellarg()</code>).</p></div>
 </div>
 </div>
 </div></section>
@@ -1085,7 +1104,7 @@ shell_exec("wkhtmltopdf page.html " . <span class="inj">$filename</span>);</pre>
 <div>
 <p class="sub mb1">The finding you reported</p>
 <p class="desc">You ran a command of your own on the bank&rsquo;s server.</p>
-<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">The developers added a blocklist.</strong> The obvious separators &mdash; <code>;</code> and <code>&amp;</code> &mdash; are now stripped before your filename reaches the shell, and they believe the command line is safe. But a blocklist only names the characters it remembers; the shell knows more ways to join two commands than any list does. <strong>Which separator did they forget?</strong> You have about <strong>5 minutes</strong>.</p></div>
+<div class="card red-left mt2" style="padding:.6rem .9rem"><p class="desc" style="font-size:.9rem"><strong style="color:var(--t1)">The developers shipped a fix.</strong> They added a blocklist that filters your input before it reaches the shell, and they&rsquo;re confident the command line is now closed. Your task: work out how the filter behaves, and whether anything still slips past it. You have about <strong>5 minutes</strong>.</p></div>
 </div>
 <div>
 <p class="sub mb1">When it works</p>

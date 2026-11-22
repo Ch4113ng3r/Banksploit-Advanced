@@ -1060,13 +1060,30 @@ WHO_L12 = whocaught([
   '<strong>Anything carrying role or entitlement is a crown-jewel asset.</strong> It must be signed, short-lived, revocable, and validated server-side on every request &mdash; never trusted because it arrived in a cookie.'])],
  '&ldquo;Where in our stack does a user-supplied token decide what that user is allowed to do?&rdquo;')
 
-WHO_L1 = whocaught([
- ('Identity &amp; Access Management', [
-  '<strong>IAM designs the authorisation model</strong> &mdash; who may act on which record. If that model only exists in a document, it does not exist.',
-  '<strong>Authentication is not authorisation.</strong> Logging someone in says who they are. It says nothing about whose account they may touch.']),
- ('Application Security &amp; Penetration Testing', [
-  '<strong>This is the single most common serious finding in banking applications</strong>, and the hardest to automate. A scanner does not know that account 4471 should not belong to this customer &mdash; only a tester with two accounts does.'])],
- '&ldquo;Do we test every endpoint with two different customers, or only with one?&rdquo;')
+WHO_L1 = '''<section class="slide"><div class="slide-inner">
+<p class="sub mb1" style="color:var(--t3)">CWE-639 &bull; IDOR / BOLA &bull; Leadership accountability</p>
+<h2 class="mb2">Who should have caught this?</h2>
+<p class="desc mb2">The transfer endpoint accepted a client-supplied &ldquo;from account&rdquo; reference without verifying that the authenticated customer owned &mdash; or was authorised to debit &mdash; that account.</p>
+<div class="grid2 gap2">
+<div class="card accent-left" style="border-left-color:var(--sky)">
+<p class="sub mb1" style="color:var(--sky)">IAM &amp; Security Architecture</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">Put the ownership check on the server.</p>
+<p class="desc" style="font-size:.9rem;margin:.4em 0">On every transfer the server must confirm the authenticated customer owns the <em>specific</em> source account &mdash; deriving who they are from the session, never from a value the browser sends.</p>
+<p class="desc" style="font-size:.9rem;margin:.4em 0"><strong style="color:var(--t1)">Signing or encrypting the account reference is not authorisation.</strong> A harder-to-read reference (a token, a ciphertext) changes nothing if the server still never checks ownership &mdash; and &ldquo;logged in&rdquo; must never mean &ldquo;may debit any account.&rdquo;</p>
+</div>
+<div class="card accent-left" style="border-left-color:var(--amber)">
+<p class="sub mb1" style="color:var(--amber)">Application Security &amp; Pen Testing</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">Test across identities &mdash; and re-test after every &ldquo;fix&rdquo;.</p>
+<p class="desc" style="font-size:.9rem;margin:.4em 0">Run the two-account <strong>swap test</strong>: authenticate as Customer A, substitute Customer B&rsquo;s source-account reference, and see whether the debit succeeds &mdash; across every endpoint and HTTP method. A scanner doesn&rsquo;t know whose account this should be; only a tester with two accounts does.</p>
+<p class="desc" style="font-size:.9rem;margin:.4em 0"><strong style="color:var(--t1)">Repeat it after each change.</strong> Wrapping the reference in a signature, then in encryption, looks like progress &mdash; but the same swap test keeps passing until the server-side ownership check is actually added.</p>
+</div>
+</div>
+<div class="card mt3" style="border-left:3px solid var(--amber)">
+<p class="sub mb1" style="color:var(--amber)">The process that should catch it</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0">Requirements &rarr; authorisation design &rarr; backend implementation &rarr; two-customer negative testing &rarr; independent security testing</p>
+</div>
+<p class="mt3 big center" style="font-size:clamp(.95rem,1.6vw,1.2rem)">&ldquo;Do we test every endpoint with two different customers &mdash; or only confirm that it works for the account we are logged in as?&rdquo;</p>
+</div></section>'''
 
 WHO_G2 = whocaught([
  ('Application Security', [
@@ -1426,7 +1443,7 @@ shell_exec("wkhtmltopdf page.html " . <span class="inj">$filename</span>);</pre>
 <p class="desc">Put a <code>;</code> in the filename to chain your own command:</p>
 <div class="sol-pay">statement.pdf;cat /tmp/flag_g9&hellip;</div>
 <div class="sol-paynote">the server runs <code>cat</code> for you</div>
-<div class="card red-left mt3"><p class="desc" style="font-size:.9rem">Blocking a few characters (<code>;</code>, then <code>&amp;</code>, then <code>|</code>) never closes this &mdash; there is always another separator. Safety is passing input as <strong>data, never shell syntax</strong> (<code>escapeshellarg()</code>).</p></div>
+<div class="card red-left mt3"><p class="desc" style="font-size:.9rem">Blocking the separators the team can think of never closes this &mdash; the shell always offers another one. Safety is passing input as <strong>data, never shell syntax</strong> (<code>escapeshellarg()</code>).</p></div>
 </div>
 </div>
 </div></section>'''
@@ -1662,7 +1679,7 @@ order = [
  ('new',L1_MINDSET,L,None),
  ('new',yourturn('L1','Move Money From an Account That Is Not Yours',
    'You moved money out of an account that was not yours.',
-   retest='<strong style="color:var(--t1)">The developers shipped a fix.</strong> The <em>From account</em> is no longer a plain number &mdash; it now rides as a <strong>signed, tamper-proof token</strong>, so the value looks locked. But did they add the missing <strong>server-side ownership check</strong>, or just wrap the same client-supplied reference in a fancier envelope? Whatever the browser can produce, you can reproduce. You have about <strong>5 minutes</strong>.'),L,'handson'),
+   retest='<strong style="color:var(--t1)">The developers shipped a fix.</strong> The <em>From account</em> is no longer a plain number &mdash; it now travels as a signed token, so the value looks locked down. But is that enough to close the hole, or is the implementation still not bug-free? <strong>Check for yourself.</strong> You have about <strong>5 minutes</strong>.'),L,'handson'),
  ('new',L1_FIX,L,None),('new',WHO_L1,L,None),
  ('new',RW_L1,L,'real'),
  # --- G9 (command injection) --- ALIGNED: head + sol-style demo + moment + 01/02/03 mindset
@@ -1671,7 +1688,7 @@ order = [
  ('new',G9_MINDSET,L,None),
  ('new',yourturn('G9','Run a Command on the Server',
    'You ran a command of your own on the bank&rsquo;s server.',
-   retest='<strong style="color:var(--t1)">The developers added a blocklist.</strong> The obvious separators &mdash; <code>;</code> and <code>&amp;</code> &mdash; are now stripped before your filename reaches the shell, and they believe the command line is safe. But a blocklist only names the characters it remembers; the shell knows more ways to join two commands than any list does. <strong>Which separator did they forget?</strong> You have about <strong>5 minutes</strong>.'),L,'handson'),
+   retest='<strong style="color:var(--t1)">The developers shipped a fix.</strong> They added a blocklist that filters your input before it reaches the shell, and they&rsquo;re confident the command line is now closed. Your task: work out how the filter behaves, and whether anything still slips past it. You have about <strong>5 minutes</strong>.'),L,'handson'),
  ('orig',36,L,None),('orig',37,L,None),
  ('new',RW_G9,L,'real'),
  # --- L12 (JWT forgery) --- ALIGNED: head + sol-style demo + moment + 01/02/03 mindset
