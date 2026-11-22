@@ -14,14 +14,18 @@
                 },
                 {
                     "key": "auth.l25",
+                    "level": 2
+                },
+                {
+                    "key": "transfer.l1",
+                    "level": 0
+                },
+                {
+                    "key": "statements.g9",
                     "level": 0
                 },
                 {
                     "key": "auth.l12",
-                    "level": 0
-                },
-                {
-                    "key": "transfer.l1",
                     "level": 0
                 },
                 {
@@ -30,10 +34,6 @@
                 },
                 {
                     "key": "statements.g4",
-                    "level": 0
-                },
-                {
-                    "key": "statements.g9",
                     "level": 0
                 }
             ]

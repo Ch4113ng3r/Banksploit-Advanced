@@ -365,6 +365,111 @@ L25_MOMENT = '''<section class="slide"><div class="slide-inner center">
 <p class="mt3 desc">Nobody broke a check. They just started a <em>recovery</em> and were treated as the owner.</p>
 </div></section>'''
 
+# L25 Security-Mindset slide — richer, leader-facing layout (bulleted columns +
+# closing banner). Custom for L25; does NOT use the shared mindset_slide().
+L25_MINDSET = '''<section class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">L25 &bull; Session puzzling</span></div>
+<h2 class="mb2">The feature worked. <span style="color:var(--amber)">The trust model didn&rsquo;t.</span></h2>
+<p class="desc mb2">A forgot-password flow can contain valid controls&mdash;and still be exploitable when the application trusts workflow progress more than verified identity.</p>
+<div class="grid3 gap2">
+<div class="card red-left">
+<p class="sub mb1" style="color:var(--red)">01&nbsp;&nbsp;The assumption</p>
+<p class="desc" style="margin:.45em 0">&bull; A completed step is treated as proof that the right person completed it for the right account.</p>
+<p class="desc" style="margin:.45em 0">&bull; Users are expected to follow the intended sequence; session progress is trusted without enough re-validation.</p>
+<p class="desc" style="margin:.45em 0">&bull; Secure components (passwords, OTPs, sessions) are mistaken for a secure end-to-end process.</p>
+</div>
+<div class="card accent-left">
+<p class="sub mb1" style="color:var(--indigo)">02&nbsp;&nbsp;The attacker&rsquo;s question</p>
+<p class="desc" style="margin:.45em 0">&bull; Can I skip, repeat, reorder or manipulate a step?</p>
+<p class="desc" style="margin:.45em 0">&bull; Can I change the account being recovered while retaining progress earned elsewhere?</p>
+<p class="desc" style="margin:.45em 0">&bull; Can I reach a sensitive action without proving the required identity and authority again?</p>
+</div>
+<div class="card green-left">
+<p class="sub mb1" style="color:var(--green)">03&nbsp;&nbsp;The leadership response</p>
+<p class="desc" style="margin:.45em 0">&bull; Bind every verification step to the exact account and re-check it at each sensitive action.</p>
+<p class="desc" style="margin:.45em 0">&bull; Test complete business journeys&mdash;not just individual controls or happy paths.</p>
+<p class="desc" style="margin:.45em 0">&bull; Ask teams to challenge assumptions and explore misuse, abuse and unintended behaviour.</p>
+</div>
+</div>
+<div class="card mt3">
+<p class="sub mb1" style="color:var(--amber)">Why leaders should care</p>
+<p class="desc" style="color:var(--t1);font-weight:700;font-size:1.05rem;margin:0 0 .5em">One weakness in a recovery workflow can become account takeover&mdash;putting customer trust, data, financial assets and reputation at risk.</p>
+<p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;Does it work as intended?&rdquo; &rarr; &ldquo;How could someone make it work in a way we never intended?&rdquo;</p>
+</div>
+</div></section>'''
+
+# L11 Security-Mindset slide — same custom leader-facing layout as L25_MINDSET
+# (01/02/03 columns + "Why leaders should care" banner). Custom for L11.
+L11_MINDSET = '''<section class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">L11 &bull; OTP in the response body</span></div>
+<h2 class="mb2">If the browser can see it, it isn&rsquo;t a secret.</h2>
+<p class="desc mb2">A private OTP was included in data sent to the browser &mdash; where users can inspect responses, scripts and client-side logic.</p>
+<div class="grid3 gap2">
+<div class="card red-left">
+<p class="sub mb1" style="color:var(--red)">01&nbsp;&nbsp;The assumption</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">Debugging data was safe to leave in the client.</p>
+<p class="desc" style="margin:.45em 0">&bull; A value added for development or testing, not removed before production.</p>
+<p class="desc" style="margin:.45em 0">&bull; The team assumed hiding, encoding or hashing it made it safe to ship.</p>
+<p class="desc" style="margin:.45em 0">&bull; The browser was treated as trusted, though its contents are visible to the user.</p>
+</div>
+<div class="card accent-left">
+<p class="sub mb1" style="color:var(--indigo)">02&nbsp;&nbsp;Ask your team</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">What are we exposing&mdash;and why?</p>
+<p class="desc" style="margin:.45em 0">&bull; Is any debug data, test logic, OTP, token or secret reaching production browsers?</p>
+<p class="desc" style="margin:.45em 0">&bull; Are we using hashing or encoding to protect a value that should never leave the server?</p>
+<p class="desc" style="margin:.45em 0">&bull; If a user can inspect or guess the value, can they recover, replay or use it to bypass verification?</p>
+</div>
+<div class="card green-left">
+<p class="sub mb1" style="color:var(--green)">03&nbsp;&nbsp;The leadership response</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">Make production exposure difficult to miss.</p>
+<p class="desc" style="margin:.45em 0">&bull; Keep OTPs and security-critical secrets server-side; send the browser only what it needs.</p>
+<p class="desc" style="margin:.45em 0">&bull; Use production-build controls, code review and scans to catch debug artefacts and sensitive data.</p>
+<p class="desc" style="margin:.45em 0">&bull; Treat hashes of low-entropy values (e.g. short OTPs) as guessable &mdash; not automatically secret.</p>
+</div>
+</div>
+<div class="card mt3">
+<p class="sub mb1" style="color:var(--amber)">Why leaders should care</p>
+<p class="desc" style="color:var(--t1);font-weight:700;font-size:1.05rem;margin:0 0 .5em">A debug oversight or false sense of protection can undermine OTP verification and risk unauthorised account access.</p>
+<p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;We hid or hashed it&rdquo; &rarr; &ldquo;Why is this secret reaching the client at all?&rdquo;</p>
+</div>
+</div></section>'''
+
+# G1 Security-Mindset slide — same custom leader-facing layout (01/02/03 columns
+# + "Why leaders should care" banner). Custom for G1.
+G1_MINDSET = '''<section class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G1 &bull; SQL injection &mdash; login bypass</span></div>
+<h2 class="mb2">User input should never become part of the query.</h2>
+<p class="desc mb2">A user-supplied value is concatenated into SQL. The failure is trusting assumptions about where input goes and what filtering will stop.</p>
+<div class="grid3 gap2">
+<div class="card red-left">
+<p class="sub mb1" style="color:var(--red)">01&nbsp;&nbsp;The assumptions</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Our input can&rsquo;t affect the database.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Customer ID is treated as a harmless form value that never changes query logic.</p>
+<p class="desc" style="margin:.45em 0">&bull; A character filter creates false confidence that malicious input is already neutralised.</p>
+<p class="desc" style="margin:.45em 0">&bull; But the value lands directly in SQL &mdash; filtering a few characters doesn&rsquo;t separate data from instructions.</p>
+</div>
+<div class="card accent-left">
+<p class="sub mb1" style="color:var(--indigo)">02&nbsp;&nbsp;Ask your team</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;What actually happens to this input?&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Can we trace user input from the form or API to the database query?</p>
+<p class="desc" style="margin:.45em 0">&bull; Are we denylisting characters instead of always treating input as data?</p>
+<p class="desc" style="margin:.45em 0">&bull; Can crafted input alter conditions, bypass authentication or reach other accounts&rsquo; records?</p>
+</div>
+<div class="card green-left">
+<p class="sub mb1" style="color:var(--green)">03&nbsp;&nbsp;The leadership response</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Make the safe path the default.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Require parameterised queries so input can&rsquo;t change SQL structure.</p>
+<p class="desc" style="margin:.45em 0">&bull; Use input validation for business rules, not as the primary SQL-injection defence.</p>
+<p class="desc" style="margin:.45em 0">&bull; Add code review, automated checks and adversarial testing for database-bound inputs; limit database privileges.</p>
+</div>
+</div>
+<div class="card mt3">
+<p class="sub mb1" style="color:var(--amber)">Why leaders should care</p>
+<p class="desc" style="color:var(--t1);font-weight:700;font-size:1.05rem;margin:0 0 .5em">A single unsafe input path can turn a login field into a way to bypass authentication and alter data the user should never reach.</p>
+<p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;We filter suspicious characters&rdquo; &rarr; &ldquo;We ensure user input can never become executable instructions.&rdquo;</p>
+</div>
+</div></section>'''
+
 L25_FIX = '''<section class="slide"><div class="slide-inner">
 <h3 class="mb1">The Fix &mdash; And Who Should Have Caught It</h3>
 <div class="grid2 gap2">
@@ -671,6 +776,62 @@ IDOR_MOMENT = '''<section class="slide"><div class="slide-inner center">
 <p class="mt2 desc">Authentication without authorisation is a doorman who checks your ID at the entrance,<br/>then lets you into every room in the building.</p>
 </div></section>'''
 
+# L1 Level-0 live demo (IDOR transfer), sol-style like G1/L11/L25 (folds the old
+# plain "Instructions" + "The Answer" slides into one).
+L1_DEMO_L0 = '''<section class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">L1</span><div><div class="sol-cwe">CWE-639 &middot; A01:2021 &middot; Level 0 &mdash; live demo</div><h2 style="margin:.06em 0">IDOR &mdash; Move Money From Another Account</h2><div class="sol-where">&#128205; /transfer &mdash; the &ldquo;From account&rdquo; field</div></div></div>
+<div class="grid2 mt2">
+<div>
+<p class="sub mb1">The vulnerable code</p>
+<pre class="sol-code">&lt;select <span class="inj">disabled</span>&gt;&hellip;&lt;/select&gt;            <span class="cmt">&larr; UI only</span>
+&lt;input hidden name="<span class="inj">from_account_ref</span>" value="1"&gt; <span class="cmt">&larr; what the server debits</span></pre>
+<p class="desc">The server debits whatever reference it is sent &mdash; it never checks you <em>own</em> that account.</p>
+</div>
+<div>
+<p class="sub mb1">The attack</p>
+<p class="desc">Inspect the greyed field and point the reference at a victim&rsquo;s account:</p>
+<div class="sol-pay">from_account_ref = 4</div>
+<div class="sol-paynote">finish the wizard &mdash; the money moves</div>
+<div class="card red-left mt3"><p class="desc" style="font-size:.9rem">Signing or encrypting that reference <em>on the client</em> changes nothing. While the <strong>server accepts and debits it without an ownership check</strong>, the account stays open &mdash; the fix has to live on the server.</p></div>
+</div>
+</div>
+</div></section>'''
+
+# L1 Security-Mindset slide (01/02/03 leader format), drafted to match G1/L11.
+L1_MINDSET = '''<section class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">L1 &bull; IDOR &mdash; transfer from another account</span></div>
+<h2 class="mb2">Who you are is not the same as what you may touch.</h2>
+<p class="desc mb2">The app authenticated the user but trusted the account number the browser sent &mdash; so changing one hidden value moved money from an account that was never theirs.</p>
+<div class="grid3 gap2">
+<div class="card red-left">
+<p class="sub mb1" style="color:var(--red)">01&nbsp;&nbsp;The assumptions</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;The field is disabled, so it can&rsquo;t be changed.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; A greyed-out or hidden form field is treated as a security control.</p>
+<p class="desc" style="margin:.45em 0">&bull; The account a request acts on is trusted because the UI only offered the user their own.</p>
+<p class="desc" style="margin:.45em 0">&bull; Client-side validation (UX) is mistaken for server-side authorisation (security).</p>
+</div>
+<div class="card accent-left">
+<p class="sub mb1" style="color:var(--indigo)">02&nbsp;&nbsp;Ask your team</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;What stops a user acting on someone else&rsquo;s record?&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; For every record a request touches, do we check the logged-in user actually owns it?</p>
+<p class="desc" style="margin:.45em 0">&bull; Can a user change an id in the request &mdash; hidden field, URL or API body &mdash; and reach another account?</p>
+<p class="desc" style="margin:.45em 0">&bull; Are money movements reconciled, or do we trust whatever the client submitted?</p>
+</div>
+<div class="card green-left">
+<p class="sub mb1" style="color:var(--green)">03&nbsp;&nbsp;The leadership response</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Authorise every object, not just the login.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Enforce object-level ownership checks server-side on every sensitive action.</p>
+<p class="desc" style="margin:.45em 0">&bull; Treat client-side controls (disabled fields, hidden inputs) as UX only &mdash; never as security.</p>
+<p class="desc" style="margin:.45em 0">&bull; Reconcile every money movement and alert on cross-account access.</p>
+</div>
+</div>
+<div class="card mt3">
+<p class="sub mb1" style="color:var(--amber)">Why leaders should care</p>
+<p class="desc" style="color:var(--t1);font-weight:700;font-size:1.05rem;margin:0 0 .5em">One changed number can move money out of any customer&rsquo;s account &mdash; no credentials stolen, no malware, no alarm.</p>
+<p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;We checked they&rsquo;re logged in&rdquo; &rarr; &ldquo;Did we check they own what they&rsquo;re touching?&rdquo;</p>
+</div>
+</div></section>'''
+
 # =========================== ATTACK CHAINING =================================
 def cstep(i, vid, t, d):
     return '<div class="chain-step"><div class="cs-id">%s &nbsp;&bull;&nbsp; STEP %d</div><div class="cs-t">%s</div><div class="cs-d">%s</div></div>' % (vid, i, t, d)
@@ -753,13 +914,13 @@ RW_L11 = realworld(
   'yellow-left'))
 
 RW_L25 = realworld(
- 'Change Healthcare, 2024 &mdash; one remote-access portal without MFA',
- 'Attackers logged into a remote-access portal using stolen credentials. That portal had <strong>no multi-factor authentication</strong> &mdash; the second factor existed elsewhere in the organisation but was not enforced on that door. From there came the largest healthcare data breach in US history and weeks of nationwide pharmacy and claims disruption.',
- [('190M','people affected'),('~$2.87B','cost to the parent company'),('0','MFA on the entry point'),('Weeks','of national disruption')],
- 'where in our estate is strong authentication <em>implemented but not enforced</em> &mdash; and who would know?',
- ('Closer to home &mdash; AIIMS Delhi, 2022',
-  'India&rsquo;s flagship public hospital lost its core systems to ransomware. Patient registration, billing, lab reports and appointments ran on paper for roughly <strong>two weeks</strong>, with around <strong>40 million</strong> patient records implicated. Clinical operations, not just data, were the casualty.',
-  'red-left'))
+ 'PaperCut MF/NG, 2023 &mdash; a setup page that logged attackers in as admin',
+ 'PaperCut&rsquo;s install wizard had a &ldquo;setup complete&rdquo; page meant to run only once. It stayed reachable after installation &mdash; and visiting it with a crafted URL re-ran the completion logic, which <strong>signed the anonymous visitor in as the built-in administrator</strong>. No password, no OTP: the session created for the <em>setup</em> flow was simply trusted by the <em>admin console</em>. From there attackers switched on print scripting and <strong>ran code on the server</strong> &mdash; exploited in the wild within days of disclosure (CVE-2023-27350).',
+ [('9.8','CVSS &mdash; critical'),('0','passwords needed'),('Admin&rarr;RCE','via one setup page'),('Clop','+ Iranian state actors')],
+ 'which of our own internal flows &mdash; setup, onboarding, password recovery &mdash; can quietly mint a trusted session, and does every privileged action re-check <em>who</em> actually earned it?',
+ ('Why this is session puzzling',
+  'A session minted for one flow &mdash; the one-time <em>setup wizard</em> &mdash; was accepted as valid by a completely different flow: the admin console. That is exactly the pattern in this lab, where <em>recovery</em> progress is accepted as <em>login</em>. The fix rhymes too &mdash; stop honouring the privileged logic once that context no longer applies.',
+  'accent-left'))
 
 RW_L12 = realworld(
  'Microsoft, 2023 &mdash; forged tokens opened government mailboxes',
@@ -1249,6 +1410,219 @@ $_SESSION['user'] = [
 </div>
 </div></section>'''
 
+# ============ Aligned L0 demos + 01/02/03 mindsets for G9 / L12 / G2 / G4 ============
+
+G9_DEMO_L0 = '''<section class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">G9</span><div><div class="sol-cwe">CWE-78 &middot; A03:2021 &middot; Level 0 &mdash; live demo</div><h2 style="margin:.06em 0">Command Injection &mdash; From a PDF Button to the Server</h2><div class="sol-where">&#128205; Statement &rarr; Download PDF</div></div></div>
+<div class="grid2 mt2">
+<div>
+<p class="sub mb1">The vulnerable code</p>
+<pre class="sol-code"><span class="cmt">// build the PDF &mdash; filename comes from you</span>
+shell_exec("wkhtmltopdf page.html " . <span class="inj">$filename</span>);</pre>
+<p class="desc">Your filename lands straight on the shell command line &mdash; so a shell metacharacter stops being a name and starts a <em>new command</em>.</p>
+</div>
+<div>
+<p class="sub mb1">The attack</p>
+<p class="desc">Put a <code>;</code> in the filename to chain your own command:</p>
+<div class="sol-pay">statement.pdf;cat /tmp/flag_g9&hellip;</div>
+<div class="sol-paynote">the server runs <code>cat</code> for you</div>
+<div class="card red-left mt3"><p class="desc" style="font-size:.9rem">Blocking a few characters (<code>;</code>, then <code>&amp;</code>, then <code>|</code>) never closes this &mdash; there is always another separator. Safety is passing input as <strong>data, never shell syntax</strong> (<code>escapeshellarg()</code>).</p></div>
+</div>
+</div>
+</div></section>'''
+
+G9_MINDSET = '''<section class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G9 &bull; Command injection</span></div>
+<h2 class="mb2">Input that reaches a shell is a command, not a filename.</h2>
+<p class="desc mb2">A download button built a shell command line out of a user-supplied filename &mdash; so a single <code>;</code> turned a report into remote code execution.</p>
+<div class="grid3 gap2">
+<div class="card red-left">
+<p class="sub mb1" style="color:var(--red)">01&nbsp;&nbsp;The assumptions</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;A blacklist of bad characters is enough.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Input is assumed to stay data once it has passed a filter.</p>
+<p class="desc" style="margin:.45em 0">&bull; Removing a few special characters is treated as making it safe to run.</p>
+<p class="desc" style="margin:.45em 0">&bull; The shell is trusted to tell a filename from a command.</p>
+</div>
+<div class="card accent-left">
+<p class="sub mb1" style="color:var(--indigo)">02&nbsp;&nbsp;Ask your team</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Does any user input ever reach a shell?&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Do we build command strings from user input &mdash; filenames, exports, conversions?</p>
+<p class="desc" style="margin:.45em 0">&bull; Are we blocking characters, or passing arguments as a list the shell can&rsquo;t reinterpret?</p>
+<p class="desc" style="margin:.45em 0">&bull; If one slipped through, how far could that process reach?</p>
+</div>
+<div class="card green-left">
+<p class="sub mb1" style="color:var(--green)">03&nbsp;&nbsp;The leadership response</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Never build shell strings from input.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Use APIs that pass arguments as a list (<code>escapeshellarg()</code>, exec arrays) &mdash; input can&rsquo;t become syntax.</p>
+<p class="desc" style="margin:.45em 0">&bull; Run these jobs with least privilege, sandboxed or containerised.</p>
+<p class="desc" style="margin:.45em 0">&bull; Detect unusual process execution &mdash; a web process spawning <code>cat</code>/<code>ls</code>/<code>whoami</code>.</p>
+</div>
+</div>
+<div class="card mt3">
+<p class="sub mb1" style="color:var(--amber)">Why leaders should care</p>
+<p class="desc" style="color:var(--t1);font-weight:700;font-size:1.05rem;margin:0 0 .5em">One unescaped filename can hand an attacker the server &mdash; and everything that server can reach.</p>
+<p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;We filter dangerous characters&rdquo; &rarr; &ldquo;We never let input become a command.&rdquo;</p>
+</div>
+</div></section>'''
+
+L12_DEMO_L0 = '''<section class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">L12</span><div><div class="sol-cwe">CWE-347 &middot; A02:2021 &middot; Level 0 &mdash; live demo</div><h2 style="margin:.06em 0">JWT Forgery &rarr; Administrator</h2><div class="sol-where">&#128205; the <code>access_token</code> cookie</div></div></div>
+<div class="grid2 mt2">
+<div>
+<p class="sub mb1">The vulnerable code</p>
+<pre class="sol-code"><span class="cmt">// decode the token, trust what it claims</span>
+$claims = jwt_decode($cookie); <span class="cmt">&larr; signature NOT verified</span>
+if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
+<p class="desc">The token rides in a <b>browser-readable</b> cookie, and the server never checks its signature.</p>
+</div>
+<div>
+<p class="sub mb1">The attack</p>
+<p class="desc">Decode the cookie, flip the role, re-encode &mdash; leave any signature string in place:</p>
+<div class="sol-pay">"role":"customer" &rarr; "role":"admin"</div>
+<div class="sol-paynote">reload &mdash; you are an admin</div>
+<div class="card red-left mt3"><p class="desc" style="font-size:.9rem">A JWT is only as good as the server&rsquo;s signature check. If the server doesn&rsquo;t <strong>verify</strong> it, every claim in the token is yours to rewrite.</p></div>
+</div>
+</div>
+</div></section>'''
+
+L12_MINDSET = '''<section class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">L12 &bull; JWT forgery</span></div>
+<h2 class="mb2">A token is only as trustworthy as the signature you actually check.</h2>
+<p class="desc mb2">The app trusted a browser-readable JWT for identity and role, and never verified its signature &mdash; so a customer could rewrite themselves into an administrator.</p>
+<div class="grid3 gap2">
+<div class="card red-left">
+<p class="sub mb1" style="color:var(--red)">01&nbsp;&nbsp;The assumptions</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;If the request carries a token, it must be genuine.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; A JWT is treated as proof of identity because it is present and well-formed.</p>
+<p class="desc" style="margin:.45em 0">&bull; The signature is assumed to be verified somewhere.</p>
+<p class="desc" style="margin:.45em 0">&bull; A browser-held token is trusted as if the client could not read or rewrite it.</p>
+</div>
+<div class="card accent-left">
+<p class="sub mb1" style="color:var(--indigo)">02&nbsp;&nbsp;Ask your team</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Do we actually verify every token we trust?&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Do we verify the signature with our secret, or only that a signature segment exists?</p>
+<p class="desc" style="margin:.45em 0">&bull; Is the algorithm pinned &mdash; are <code>none</code> and swapped algorithms rejected?</p>
+<p class="desc" style="margin:.45em 0">&bull; Do we check expiry, and can we revoke a leaked signing key?</p>
+</div>
+<div class="card green-left">
+<p class="sub mb1" style="color:var(--green)">03&nbsp;&nbsp;The leadership response</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Pin the algorithm, verify, protect the key.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Pin the algorithm (e.g. HS256), verify the HMAC in constant time, check <code>exp</code>.</p>
+<p class="desc" style="margin:.45em 0">&bull; Reject <code>alg:none</code> and any tampered token by default.</p>
+<p class="desc" style="margin:.45em 0">&bull; Keep signing keys in an HSM/KMS, rotate them, keep lifetimes short.</p>
+</div>
+</div>
+<div class="card mt3">
+<p class="sub mb1" style="color:var(--amber)">Why leaders should care</p>
+<p class="desc" style="color:var(--t1);font-weight:700;font-size:1.05rem;margin:0 0 .5em">An unverified token lets any customer promote themselves to administrator &mdash; no password, no exploit, just a rewritten claim.</p>
+<p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;The token says they&rsquo;re an admin&rdquo; &rarr; &ldquo;Did we verify who signed it?&rdquo;</p>
+</div>
+</div></section>'''
+
+G2_DEMO_L0 = '''<section class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">G2</span><div><div class="sol-cwe">CWE-89 &middot; A03:2021 &middot; Level 0 &mdash; live demo</div><h2 style="margin:.06em 0">SQL Injection &mdash; Read a Hidden Table</h2><div class="sol-where">&#128205; statement search</div></div></div>
+<div class="grid2 mt2">
+<div>
+<p class="sub mb1">The vulnerable code</p>
+<pre class="sol-code">$sql = "&hellip; WHERE remarks LIKE '%" . <span class="inj">$term</span> . "%'";</pre>
+<p class="desc">Your search text is spliced into the query &mdash; so it can stop <em>matching</em> and start <em>commanding</em>.</p>
+</div>
+<div>
+<p class="sub mb1">The attack</p>
+<p class="desc">Close the string and <code>UNION</code> in another table:</p>
+<div class="sol-pay">%' UNION SELECT username,flag,&hellip; FROM ctf_flags#</div>
+<div class="sol-paynote">the hidden flag lands in a results cell</div>
+<div class="card red-left mt3"><p class="desc" style="font-size:.9rem">Filtering the term (stripping keywords or quotes) never fully works &mdash; there is always another encoding. A <strong>bound parameter</strong> (<code>LIKE :q</code>) matches it as text, never as SQL.</p></div>
+</div>
+</div>
+</div></section>'''
+
+G2_MINDSET = '''<section class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G2 &bull; SQL injection &mdash; data extraction</span></div>
+<h2 class="mb2">A filtered query is still a built query.</h2>
+<p class="desc mb2">A crafted search term was spliced into the database query &mdash; so it stopped being text to match and started reading tables it was never meant to touch.</p>
+<div class="grid3 gap2">
+<div class="card red-left">
+<p class="sub mb1" style="color:var(--red)">01&nbsp;&nbsp;The assumptions</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Stripping dangerous words makes the input safe.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; The search term is trusted once a filter has removed &lsquo;bad&rsquo; keywords.</p>
+<p class="desc" style="margin:.45em 0">&bull; Blocking a few patterns is treated as stopping injection.</p>
+<p class="desc" style="margin:.45em 0">&bull; The data is assumed safe because this one query &lsquo;looks&rsquo; clean.</p>
+</div>
+<div class="card accent-left">
+<p class="sub mb1" style="color:var(--indigo)">02&nbsp;&nbsp;Ask your team</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Is user input ever concatenated into a query?&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Do we build any SQL by joining strings, or always bind parameters?</p>
+<p class="desc" style="margin:.45em 0">&bull; Are we relying on filtering keywords instead of treating input as data?</p>
+<p class="desc" style="margin:.45em 0">&bull; If this database were dumped tomorrow, is it stored so the dump is useless?</p>
+</div>
+<div class="card green-left">
+<p class="sub mb1" style="color:var(--green)">03&nbsp;&nbsp;The leadership response</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Bind the input; harden the data.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Use bound parameters everywhere (<code>LIKE :q</code>) &mdash; input is matched, never parsed.</p>
+<p class="desc" style="margin:.45em 0">&bull; Defence in depth: salted+peppered password hashing, least-privilege DB accounts, query monitoring.</p>
+<p class="desc" style="margin:.45em 0">&bull; Validate input for business rules, not as the anti-injection defence.</p>
+</div>
+</div>
+<div class="card mt3">
+<p class="sub mb1" style="color:var(--amber)">Why leaders should care</p>
+<p class="desc" style="color:var(--t1);font-weight:700;font-size:1.05rem;margin:0 0 .5em">One search box can leak the whole database &mdash; customer records, secrets and all &mdash; without a single login.</p>
+<p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;We filter dangerous keywords&rdquo; &rarr; &ldquo;We never let input be parsed as SQL.&rdquo;</p>
+</div>
+</div></section>'''
+
+G4_DEMO_L0 = '''<section class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">G4</span><div><div class="sol-cwe">CWE-79 &middot; A03:2021 &middot; Level 0 &mdash; live demo</div><h2 style="margin:.06em 0">Reflected XSS &mdash; Run Code on the Bank&rsquo;s Page</h2><div class="sol-where">&#128205; statement search results</div></div></div>
+<div class="grid2 mt2">
+<div>
+<p class="sub mb1">The vulnerable code</p>
+<pre class="sol-code">echo "Results for: " . <span class="inj">$term</span>; <span class="cmt">&larr; not encoded</span></pre>
+<p class="desc">Whatever you search is written back into the page as-is &mdash; so markup you send becomes part of the page and runs.</p>
+</div>
+<div>
+<p class="sub mb1">The attack</p>
+<p class="desc">Send a tag that fires without a visible element:</p>
+<div class="sol-pay">&lt;img src=x onerror=alert(document.domain)&gt;</div>
+<div class="sol-paynote">runs on the bank&rsquo;s own domain</div>
+<div class="card red-left mt3"><p class="desc" style="font-size:.9rem">Stripping <code>&lt;script&gt;</code> doesn&rsquo;t help &mdash; events fire from other tags, and an attribute context needs different encoding. Safety is <strong>encoding output in every context</strong> (<code>htmlspecialchars()</code>).</p></div>
+</div>
+</div>
+</div></section>'''
+
+G4_MINDSET = '''<section class="slide"><div class="slide-inner">
+<div class="flex-row mb2"><span class="badge badge-yellow">&#128161; Security Mindset</span><span style="color:var(--t3);font-size:.8rem">G4 &bull; Reflected XSS</span></div>
+<h2 class="mb2">Reflected input is code unless you encode it.</h2>
+<p class="desc mb2">A search term was written back into the page without encoding &mdash; so a crafted value became live code running in a visitor&rsquo;s browser, on the bank&rsquo;s own domain.</p>
+<div class="grid3 gap2">
+<div class="card red-left">
+<p class="sub mb1" style="color:var(--red)">01&nbsp;&nbsp;The assumptions</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;We removed the &lt;script&gt; tag, so it&rsquo;s safe.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Reflected input is treated as text once an obvious tag is stripped.</p>
+<p class="desc" style="margin:.45em 0">&bull; Blocking one pattern is mistaken for output encoding.</p>
+<p class="desc" style="margin:.45em 0">&bull; The reflection is assumed safe without asking where on the page it lands.</p>
+</div>
+<div class="card accent-left">
+<p class="sub mb1" style="color:var(--indigo)">02&nbsp;&nbsp;Ask your team</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Is everything we echo back encoded for its context?&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Is every value written to a page encoded &mdash; in text and in attributes?</p>
+<p class="desc" style="margin:.45em 0">&bull; Are we blocking tags, or encoding output so nothing can break out?</p>
+<p class="desc" style="margin:.45em 0">&bull; If a session cookie is reachable from script, what stops it being stolen?</p>
+</div>
+<div class="card green-left">
+<p class="sub mb1" style="color:var(--green)">03&nbsp;&nbsp;The leadership response</p>
+<p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Encode output; defend in depth.&rdquo;</p>
+<p class="desc" style="margin:.45em 0">&bull; Encode on output for the exact context (<code>htmlspecialchars()</code> for text and attributes).</p>
+<p class="desc" style="margin:.45em 0">&bull; Add a Content-Security-Policy, <code>HttpOnly</code> cookies and framework auto-escaping.</p>
+<p class="desc" style="margin:.45em 0">&bull; This is why we warn against unexpected links &mdash; one click can hand over a session.</p>
+</div>
+</div>
+<div class="card mt3">
+<p class="sub mb1" style="color:var(--amber)">Why leaders should care</p>
+<p class="desc" style="color:var(--t1);font-weight:700;font-size:1.05rem;margin:0 0 .5em">One crafted link can make the bank&rsquo;s own page run an attacker&rsquo;s code in a customer&rsquo;s browser &mdash; and hand over their session.</p>
+<p class="desc" style="font-size:.9rem;margin:0"><span class="sub" style="color:var(--t2)">Mindset shift</span>&nbsp;&nbsp;&ldquo;We stripped the script tag&rdquo; &rarr; &ldquo;Is everything we echo encoded for where it lands?&rdquo;</p>
+</div>
+</div></section>'''
+
 order = [
  ('orig',1,C,None),
  ('new',S_INTRO,C,None), ('new',S_WHY_HERE,C,None), ('new',S_OPENING_INCIDENT,C,None),
@@ -1260,16 +1634,14 @@ order = [
  # --- G1 --- (L0 demo folded into one sol-style slide; plain 18/19/20 replaced)
  ('orig',17,L,None),('new',G1_DEMO_L0,L,None),
  ('orig',21,L,None),
- ('new',mindset_slide('G1','G1 &bull; SQL injection',
-   {'trust':'the text you typed, as part of the login query','ask':'&ldquo;Is user input ever built into a query, or always kept as data?&rdquo;','why':'<strong>IAM &amp; federated SSO</strong> (Okta, Entra, Google) &mdash; so the app never owns the password or builds the login query itself'}),L,None),
+ ('new',G1_MINDSET,L,None),
  ('new',yourturn('G1','Log In Without Any Password',
    'You logged in to another customer&rsquo;s account without ever knowing their password.'),L,'handson'),
  ('orig',22,L,None),('orig',23,L,None),
  ('new',RW_G1,L,'real'),
  # --- L11 --- (orig 41 "Hints (if you're stuck)" dropped: hands-on is now the clean Your Turn)
  ('orig',39,L,None),('new',L11_DEMO_L0,L,None),('orig',43,L,None),
- ('new',mindset_slide('L11','L11 &bull; OTP exposure',
-   {'trust':'the browser with the very answer it was meant to check','ask':'&ldquo;Does the client ever receive what it is supposed to be checked against?&rdquo;','why':'<strong>MFA that evolved</strong> &mdash; Meta and Google lived through codes being read and replayed, so it moved to push-approval, passkeys/FIDO2 and short-lived RSA/TOTP tokens'}),L,None),
+ ('new',L11_MINDSET,L,None),
  ('new',yourturn('L11','Defeat 2FA on a Harder Setting',
    'You got past the one-time-code (2FA) step without ever having the customer&rsquo;s phone.',
    retest='<strong style="color:var(--t1)">They didn&rsquo;t know it was there.</strong> The OTP was in the shipped JavaScript as a by-product of how the feature was built &mdash; left-over debug data, or a value the page genuinely used &mdash; and no one realised the browser was downloading a secret. They <strong>can&rsquo;t simply delete it</strong>: the page still depends on it. So instead of taking the secret off the client, they tried to <strong>hide it better</strong>. You don&rsquo;t know how &mdash; find out whether it is still reachable.'),L,'handson'),
@@ -1278,58 +1650,58 @@ order = [
  # --- L25 --- (head slide + L0 demo folded into one sol-style slide; plain HOW/ATTACK replaced)
  ('new',L25_TITLE,L,None),('new',L25_DEMO_L0,L,None),
  ('new',L25_MOMENT,L,None),
- ('new',mindset_slide('L25','L25 &bull; Session puzzling',
-   {'trust':'progress made for <em>one</em> account as if it had been earned for <em>whatever</em> account is in the session now','ask':'&ldquo;Is every identity check bound to the <em>exact</em> account it was performed for &mdash; and does changing the target reset that progress?&rdquo;','why':'<strong>per-target verification</strong> &mdash; progress is tied to the account that earned it, and re-checked at each sensitive action, not at one early gate'}),L,None),
+ ('new',L25_MINDSET,L,None),
  ('new',yourturn('L25','Reset Another Customer&rsquo;s Password',
-   'You reset another customer&rsquo;s password without ever proving you were them &mdash; by reusing recovery progress earned on your own account.'),L,'handson'),
+   'You reset another customer&rsquo;s password without ever proving you were them &mdash; by reusing recovery progress earned on your own account.',
+   retest='<strong style="color:var(--t1)">The developers agreed with your finding.</strong> Rather than tweak a single check, they <strong>separated the recovery session state from the login session completely</strong> &mdash; the <em>Forgot password</em> flow no longer writes the account you are signed in as, and recovery progress is now bound to the account that earned it. Retest whether you can still carry progress from your own recovery onto another customer&rsquo;s reset. You have about <strong>5 minutes</strong>.'),L,'handson'),
  ('new',L25_FIX,L,None),('new',WHO_L25,L,None),
  ('new',RW_L25,L,'real'),
- # --- L12 ---
- ('new',L12_TITLE,L,None),('new',L12_HOW,L,None),('new',L12_ATTACK,L,None),
- ('new',L12_MOMENT,L,None),
- ('new',mindset_slide('L12','L12 &bull; JWT forgery',
-   {'trust':'the token&rsquo;s own claim about how it was signed &mdash; even &ldquo;signed with nothing&rdquo;','ask':'&ldquo;Do we enforce the exact algorithm and actually verify the signature?&rdquo;','why':'<strong>hardened tokens</strong> &mdash; <code>alg:none</code> rejected by default, the algorithm pinned, signing keys in an HSM/KMS, short lifetimes'}),L,None),
- ('new',yourturn('L12','Promote Yourself to Administrator',
-   'You turned your ordinary customer session into an administrator&rsquo;s.'),L,'handson'),
- ('new',L12_FIX,L,None),('new',WHO_L12,L,None),
- ('new',RW_L12,L,'real'),
- # --- L1 (IDOR transfer, stronger message) ---
- ('orig',44,L,None),('orig',45,L,None),('orig',46,L,None),('orig',47,L,None),
+ # --- L1 (IDOR transfer) --- ALIGNED to the flow: head + sol-style demo + moment + 01/02/03 mindset
+ ('orig',44,L,None),('new',L1_DEMO_L0,L,None),
  ('new',IDOR_MOMENT,L,None),
- ('new',mindset_slide('L1','L1 &bull; IDOR (broken object-level authorization)',
-   {'trust':'that the account number you send is one you actually own','ask':'&ldquo;We checked <em>who you are</em> &mdash; did we check <em>what you may touch</em>?&rdquo;','why':'<strong>authorization, not just authentication</strong> &mdash; object-level ownership checks, and reconciliation on every money movement'}),L,None),
+ ('new',L1_MINDSET,L,None),
  ('new',yourturn('L1','Move Money From an Account That Is Not Yours',
-   'You moved money out of an account that was not yours.'),L,'handson'),
+   'You moved money out of an account that was not yours.',
+   retest='<strong style="color:var(--t1)">The developers shipped a fix.</strong> The <em>From account</em> is no longer a plain number &mdash; it now rides as a <strong>signed, tamper-proof token</strong>, so the value looks locked. But did they add the missing <strong>server-side ownership check</strong>, or just wrap the same client-supplied reference in a fancier envelope? Whatever the browser can produce, you can reproduce. You have about <strong>5 minutes</strong>.'),L,'handson'),
  ('new',L1_FIX,L,None),('new',WHO_L1,L,None),
  ('new',RW_L1,L,'real'),
- # --- G2 ---
- ('new',G2_TITLE,L,None),('new',G2_HOW,L,None),('new',G2_ATTACK,L,None),
+ # --- G9 (command injection) --- ALIGNED: head + sol-style demo + moment + 01/02/03 mindset
+ ('orig',31,L,None),('new',G9_DEMO_L0,L,None),
+ ('new',G9_MOMENT,L,None),
+ ('new',G9_MINDSET,L,None),
+ ('new',yourturn('G9','Run a Command on the Server',
+   'You ran a command of your own on the bank&rsquo;s server.',
+   retest='<strong style="color:var(--t1)">The developers added a blocklist.</strong> The obvious separators &mdash; <code>;</code> and <code>&amp;</code> &mdash; are now stripped before your filename reaches the shell, and they believe the command line is safe. But a blocklist only names the characters it remembers; the shell knows more ways to join two commands than any list does. <strong>Which separator did they forget?</strong> You have about <strong>5 minutes</strong>.'),L,'handson'),
+ ('orig',36,L,None),('orig',37,L,None),
+ ('new',RW_G9,L,'real'),
+ # --- L12 (JWT forgery) --- ALIGNED: head + sol-style demo + moment + 01/02/03 mindset
+ ('new',L12_TITLE,L,None),('new',L12_DEMO_L0,L,None),
+ ('new',L12_MOMENT,L,None),
+ ('new',L12_MINDSET,L,None),
+ ('new',yourturn('L12','Promote Yourself to Administrator',
+   'You turned your ordinary customer session into an administrator&rsquo;s.',
+   retest='<strong style="color:var(--t1)">The developers heard &ldquo;reject none&rdquo;.</strong> A token whose algorithm says <code>none</code> is now refused &mdash; the unsigned forgery is closed. But they matched the <em>word</em>, not the intent: the check looks for one exact spelling, and a token carries whatever algorithm string you write. <strong>If <code>none</code> is blocked, what isn&rsquo;t?</strong> You have about <strong>5 minutes</strong>.'),L,'handson'),
+ ('new',L12_FIX,L,None),('new',WHO_L12,L,None),
+ ('new',RW_L12,L,'real'),
+ # --- G2 (SQLi data extraction) --- ALIGNED: head + sol-style demo + moment + 01/02/03 mindset
+ ('new',G2_TITLE,L,None),('new',G2_DEMO_L0,L,None),
  ('new',G2_MOMENT,L,None),
- ('new',mindset_slide('G2','G2 &bull; SQL injection (data extraction)',
-   {'trust':'your search text, as part of the database query','ask':'&ldquo;If this database leaked tomorrow, is it stored so the dump is useless?&rdquo;','why':'<strong>defence in depth</strong> &mdash; passwords hashed with salt &amp; pepper so a dump is not a takeover, least-privilege DB accounts, minimal functions/plugins, query monitoring'}),L,None),
+ ('new',G2_MINDSET,L,None),
  ('new',yourturn('G2','Read a Table You Were Never Shown',
-   'You read data out of a table the application never meant to show you.'),L,'handson'),
+   'You read data out of a table the application never meant to show you.',
+   retest='<strong style="color:var(--t1)">The developers added a filter</strong> that strips the dangerous SQL keywords out of your search. Run it once and the query looks clean. But it passes over your text a <strong>single time</strong> &mdash; and a keyword can be hidden <em>inside</em> another keyword, so removing it once can leave a valid one behind. <strong>Can you still reach the hidden table?</strong> You have about <strong>5 minutes</strong>.'),L,'handson'),
  ('new',G2_FIX,L,None),('new',WHO_G2,L,None),
  ('new',RW_G2,L,'real'),
- # --- G4 (demo only) ---
- ('new',G4_TITLE,L,None),('new',G4_HOW,L,None),('new',G4_ATTACK,L,None),
+ # --- G4 (reflected XSS, demo only) --- ALIGNED: head + sol-style demo + moment + 01/02/03 mindset
+ ('new',G4_TITLE,L,None),('new',G4_DEMO_L0,L,None),
  ('new',G4_MOMENT,L,None),
- ('new',mindset_slide('G4','G4 &bull; Reflected XSS',
-   {'trust':'your input as text to display &mdash; not as live code','ask':'&ldquo;Is everything we echo back to the page treated as text, never as code?&rdquo;','why':'the reason you are told <strong>not to click unexpected links</strong> &mdash; one click can hand over a session. Defences: framework auto-escaping, <strong>CSP</strong>, <strong>HttpOnly</strong> cookies and the <strong>Same-Origin Policy</strong>'}),L,None),
+ ('new',G4_MINDSET,L,None),
  ('new',yourturn('G4','Make the Bank&rsquo;s Own Page Run Your Code',
    'You made the bank&rsquo;s own page run code of your choosing in a visitor&rsquo;s browser.',
+   retest='<strong style="color:var(--t1)">The developers now strip <code>&lt;script&gt;</code> tags</strong> from your search before echoing it back, so the obvious payload is gone. But a tag is not the only thing that runs code, and <code>&lt;script&gt;</code> is not the only place your text lands on the page. <strong>Find the context they didn&rsquo;t encode.</strong> You have about <strong>5 minutes</strong>.',
    note='Note: G4 is configured as training-only in the lab, so it will not award points until you enable scoring for it in the instructor panel.'),L,'handson'),
  ('new',G4_FIX,L,None),('new',WHO_G4,L,None),
  ('new',RW_G4,L,'real'),
- # --- G9 ---
- ('orig',31,L,None),('orig',32,L,None),('orig',33,L,None),('orig',34,L,None),
- ('orig',35,L,None),('new',G9_MOMENT,L,None),
- ('new',mindset_slide('G9','G9 &bull; Command injection',
-   {'trust':'your input as part of the shell command line','ask':'&ldquo;Does user input ever reach a shell &mdash; and if it did, how far could it go?&rdquo;','why':'frameworks that <strong>never build shell strings</strong> &mdash; arguments passed as a list, so input cannot become a command &mdash; plus least-privilege, sandboxed/containerised runtimes'}),L,None),
- ('new',yourturn('G9','Run a Command on the Server',
-   'You ran a command of your own on the bank&rsquo;s server.'),L,'handson'),
- ('orig',36,L,None),('orig',37,L,None),
- ('new',RW_G9,L,'real'),
  # --- The chain ---
  ('new',S_REFLECT1,CH,None),
  ('new',S_CHAIN,CH,None), ('new',S_BREAK_CHAIN,CH,None), ('orig',52,CH,None),
