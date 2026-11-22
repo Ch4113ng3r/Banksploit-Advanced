@@ -333,17 +333,15 @@ S_HOW = '''<section class="slide"><div class="slide-inner">
 </div></section>'''
 
 S_EIGHT = '''<section class="slide"><div class="slide-inner center">
-<h1 class="gradient" style="font-size:clamp(1.8rem,3.8vw,2.9rem)">This bank has 8 critical vulnerabilities.</h1>
-<p class="big mt2">None of them are visible from the user interface.</p>
-<p class="big">Every one is exploitable with just a browser.</p>
+<h1 class="gradient" style="font-size:clamp(1.8rem,3.8vw,2.9rem)">This bank has few critical vulnerabilities.</h1>
+<p class="big mt2">Every one of them can be exploited with just a browser and no additional tools.</p>
 <div class="grid3 mt3" style="gap:.6rem;text-align:left">
 <div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">G1 &mdash; SQL injection</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Log in as anyone, without a password</p></div>
 <div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">L11 &mdash; OTP exposure</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Defeat two-factor without a phone</p></div>
 <div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">L25 &mdash; Session puzzling</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Walk in half-authenticated</p></div>
-<div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">L12 &mdash; JWT alg:none</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Forge your own identity card</p></div>
+<div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">L12 &mdash; JWT Flaw</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Forge your own identity card</p></div>
 <div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">L1 &mdash; IDOR</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Move money out of another account</p></div>
 <div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">G2 &mdash; SQL injection</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Extract the whole customer database</p></div>
-<div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">G4 &mdash; Reflected XSS</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Turn the bank&rsquo;s page against its users</p></div>
 <div class="card" style="padding:.75rem 1rem"><strong style="color:var(--t1);font-size:.88rem">G9 &mdash; Command injection</strong><p class="desc" style="font-size:.76rem;margin-top:.15rem">Take over the server itself</p></div>
 </div>
 </div></section>'''
@@ -444,23 +442,14 @@ G1_MINDSET = '''<section class="slide"><div class="slide-inner">
 <div class="card red-left">
 <p class="sub mb1" style="color:var(--red)">01&nbsp;&nbsp;The assumptions</p>
 <p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Our input can&rsquo;t affect the database.&rdquo;</p>
-<p class="desc" style="margin:.45em 0">&bull; Customer ID is treated as a harmless form value that never changes query logic.</p>
-<p class="desc" style="margin:.45em 0">&bull; A character filter creates false confidence that malicious input is already neutralised.</p>
-<p class="desc" style="margin:.45em 0">&bull; But the value lands directly in SQL &mdash; filtering a few characters doesn&rsquo;t separate data from instructions.</p>
 </div>
 <div class="card accent-left">
 <p class="sub mb1" style="color:var(--indigo)">02&nbsp;&nbsp;Ask your team</p>
 <p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;What actually happens to this input?&rdquo;</p>
-<p class="desc" style="margin:.45em 0">&bull; Can we trace user input from the form or API to the database query?</p>
-<p class="desc" style="margin:.45em 0">&bull; Are we denylisting characters instead of always treating input as data?</p>
-<p class="desc" style="margin:.45em 0">&bull; Can crafted input alter conditions, bypass authentication or reach other accounts&rsquo; records?</p>
 </div>
 <div class="card green-left">
 <p class="sub mb1" style="color:var(--green)">03&nbsp;&nbsp;The leadership response</p>
 <p class="desc" style="color:var(--t1);font-weight:700;margin:0 0 .5em">&ldquo;Make the safe path the default.&rdquo;</p>
-<p class="desc" style="margin:.45em 0">&bull; Require parameterised queries so input can&rsquo;t change SQL structure.</p>
-<p class="desc" style="margin:.45em 0">&bull; Use input validation for business rules, not as the primary SQL-injection defence.</p>
-<p class="desc" style="margin:.45em 0">&bull; Add code review, automated checks and adversarial testing for database-bound inputs; limit database privileges.</p>
 </div>
 </div>
 <div class="card mt3">
@@ -1337,8 +1326,8 @@ S_REFLECT1 = '''<section class="slide"><div class="slide-inner center">
 
 S_CLOSE = '''<section class="slide"><div class="slide-inner center">
 <p class="sub mb1">Where we leave it</p>
-<h1 class="gradient" style="font-size:clamp(1.7rem,3.4vw,2.6rem)">You will not leave a penetration tester.</h1>
-<p class="big mt2">You will leave able to tell the difference between<br/><em>&ldquo;we are secure&rdquo;</em> and <em>&ldquo;no one has checked.&rdquo;</em></p>
+<h1 class="gradient" style="font-size:clamp(1.7rem,3.4vw,2.6rem)">You will not be a penetration tester.</h1>
+<p class="big mt2">But you will be able to tell the difference between<br/><em>&ldquo;we are secure&rdquo;</em> and <em>&ldquo;no one has checked.&rdquo;</em></p>
 <div class="card accent-left mt3" style="text-align:left;max-width:760px;margin-left:auto;margin-right:auto">
 <p class="desc"><strong style="color:var(--t1)">The one habit to keep:</strong> when someone tells you a system is safe, ask the quiet question &mdash; <em>&ldquo;safe because we checked, or safe because nothing has gone wrong yet?&rdquo;</em> Everything today was the second kind &mdash; right up until someone looked.</p>
 </div>
