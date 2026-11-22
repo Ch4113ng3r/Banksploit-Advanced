@@ -128,6 +128,25 @@ if (!function_exists('db')) {
     }
 }
 
+if (!function_exists('config_int')) {
+    /**
+     * Read a tunable integer from system_config (the instructor System Config
+     * panel — e.g. otp_expiry_seconds). Falls back to $default when the key is
+     * missing, non-numeric, or the lookup fails.
+     */
+    function config_int(string $key, int $default): int
+    {
+        try {
+            $st = db()->prepare('SELECT config_value FROM system_config WHERE config_key = :k LIMIT 1');
+            $st->execute([':k' => $key]);
+            $v = $st->fetchColumn();
+            return ($v !== false && is_numeric($v)) ? (int) $v : $default;
+        } catch (\Throwable $e) {
+            return $default;
+        }
+    }
+}
+
 /**
  * Whether the request carries a spoofable, client-controlled "admin" signal
  * (an `X-Admin` header, an `is_admin` cookie, or an `is_admin` param). This

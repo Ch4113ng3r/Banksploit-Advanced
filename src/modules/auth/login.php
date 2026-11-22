@@ -25,17 +25,19 @@ $otpLeak = null;                       // shown on-page at vuln levels (l11)
 $phase  = Session::has('pending_login') ? 'otp' : 'credentials';
 
 // OTP-stage timeout: the half-authenticated "pending_login" state must not live
-// forever. Expire it after 24 hours — or immediately if it predates this
-// timestamping (a stale session from before the change has no 'ts') — and send
-// the user back to sign in. This runs before POST handling so an expired OTP
-// submission is rejected too. (Matches the 24h OTP token lifetime so the whole
-// verification flow stays open for the full window — see auth_generate_otp.)
-const PENDING_LOGIN_TTL = 86400; // seconds (24 hours)
+// forever. The window is instructor-tunable via System Config
+// (otp_expiry_seconds); it expires on that window — or immediately if the state
+// predates this timestamping (a stale session has no 'ts'). Runs before POST
+// handling so an expired OTP submission is rejected too. On expiry the WHOLE
+// session is destroyed (like logout), not just the pending_login key.
+$otpTtl = config_int('otp_expiry_seconds', 300);
 if (Session::has('pending_login')) {
     $pl  = Session::get('pending_login');
     $ts  = (int) ($pl['ts'] ?? 0);
-    if ($ts === 0 || (time() - $ts) > PENDING_LOGIN_TTL) {
-        Session::remove('pending_login');
+    if ($ts === 0 || (time() - $ts) > $otpTtl) {
+        Session::destroy();    // tear down every session variable
+        Session::start();      // fresh session...
+        Session::regenerate(); // ...with a new id/cookie, to carry the notice
         flash('error', 'Your verification session timed out. Please sign in again.');
         redirect('/login');
     }
@@ -172,7 +174,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'customer_id' => $user['customer_id'],
                 'name'        => $user['name'],
                 'role'        => $user['role'],
-                'ts'          => time(),   // OTP-stage timeout anchor (10 min)
+                'ts'          => time(),   // OTP-stage timeout anchor (System Config: otp_expiry_seconds)
             ]);
             // auth.l11: at vuln levels the OTP leaks to the client. On the HTML
             // page we surface the leaked value in a banner (mirrors the API).

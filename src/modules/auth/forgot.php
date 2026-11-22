@@ -65,19 +65,20 @@ $recoveryUid   = (int) Session::get('recovery_uid', 0);
 $recoveryStage = (int) Session::get('recovery_stage', 0);
 $stageUid      = (int) Session::get('recovery_stage_uid', 0);  // who earned the stage
 
-// Idle timeout: a recovery journey must not live forever. Expire the whole
-// recovery state after 10 minutes with no request in the flow, then send the
-// user back to the start. Runs before POST handling so a stale submission is
-// rejected too. Any request within the flow (below) refreshes the activity clock.
-const RECOVERY_IDLE_TTL = 600; // seconds (10 minutes)
+// Idle timeout: a recovery journey must not live forever. The idle window is
+// instructor-tunable via System Config (otp_expiry_seconds); after that long
+// with no request in the flow the WHOLE session is destroyed (like logout) and
+// the user is sent back to the start. Runs before POST handling so a stale
+// submission is rejected too. Any request within the flow (below) refreshes the
+// activity clock.
+$recoveryTtl = config_int('otp_expiry_seconds', 300);
 if ($recoveryUid > 0) {
     $rts = (int) Session::get('recovery_ts', 0);
-    if ($rts > 0 && (time() - $rts) > RECOVERY_IDLE_TTL) {
-        Session::remove('recovery_uid');
-        Session::remove('recovery_stage');
-        Session::remove('recovery_stage_uid');
-        Session::remove('recovery_ts');
-        flash('error', 'Your password-recovery session timed out after 10 minutes of inactivity. Please start again.');
+    if ($rts > 0 && (time() - $rts) > $recoveryTtl) {
+        Session::destroy();    // tear down every session variable
+        Session::start();      // fresh session...
+        Session::regenerate(); // ...with a new id/cookie, to carry the notice
+        flash('error', 'Your password-recovery session timed out after inactivity. Please start again.');
         redirect('/forgot-password');
     }
     Session::set('recovery_ts', time()); // mark activity

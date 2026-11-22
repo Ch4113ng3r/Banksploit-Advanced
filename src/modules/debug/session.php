@@ -33,28 +33,13 @@ if (class_exists('Session') && method_exists('Session', 'start')) {
 
 $sid     = session_id();
 $session = $_SESSION ?? [];
-$hasUser = isset($session['user']) && is_array($session['user']);
-$hasReset = isset($session['recovery_uid']);
 
 $pretty = htmlspecialchars(
     json_encode($session, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}',
     ENT_QUOTES
 );
 
-$who = $hasUser
-    ? htmlspecialchars((string) ($session['user']['customer_id'] ?? '?')
-        . ' / role=' . ($session['user']['role'] ?? '?'))
-    : '';
-
 $url = htmlspecialchars(defined('APP_URL') ? APP_URL : '');
-
-$banner = $hasUser
-    ? '<div class="card warn"><b>&#9888; An authenticated <code>user</code> object is present in this session ('
-        . $who . ').</b><br>Any page that calls <code>requireAuth()</code> — e.g. <a href="' . $url . '/dashboard">/dashboard</a> — '
-        . 'will treat this browser as logged in. If you reached here via the <b>forgot-password</b> flow without logging in, '
-        . 'that is <b>session puzzling (auth.l25)</b>: the reset journey reused the login session variable.</div>'
-    : '<div class="card ok">No authenticated <code>user</code> object in this session. '
-        . ($hasReset ? 'A forgot-password flow is in progress — see <code>recovery_uid</code> / <code>recovery_stage</code> above. Watch how they change when you submit a different Customer ID.' : 'Start the forgot-password flow and reload to watch the session change.') . '</div>';
 
 header('Content-Type: text/html; charset=utf-8');
 ?><!DOCTYPE html>
@@ -80,16 +65,12 @@ header('Content-Type: text/html; charset=utf-8');
 </style></head>
 <body><div class="wrap">
   <h1>&#128270; Session Viewer <span class="mut">(unauthenticated)</span></h1>
-  <div class="sub">Live dump of the current browser session. Teaching aid for <b>session puzzling (auth.l25)</b>.</div>
+  <div class="sub">Live dump of the current browser session.</div>
 
   <div class="row">
     <span class="kv">PHPSESSID = <?= htmlspecialchars($sid !== '' ? $sid : '(none)') ?></span>
     <a class="btn" href="<?= $url ?>/debug/session">&#8635; Refresh</a>
-    <a class="btn" href="<?= $url ?>/forgot-password" style="background:#f0b867">Forgot-password flow</a>
-    <a class="btn" href="<?= $url ?>/dashboard" style="background:#5fd29a">Try /dashboard</a>
   </div>
-
-  <?= $banner ?>
 
   <h3>$_SESSION</h3>
   <pre><?= $pretty ?></pre>

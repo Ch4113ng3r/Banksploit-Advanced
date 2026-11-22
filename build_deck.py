@@ -349,49 +349,13 @@ S_EIGHT = '''<section class="slide"><div class="slide-inner center">
 </div></section>'''
 
 # ======================= L25 — SESSION PUZZLING ==============================
+# L25 head slide — the "Demo 3" hook card shown BEFORE the live demo, mirroring
+# the L11 head slide (s28). Kept as its own slide (not folded) so L25 has the
+# same head + demo pairing as the other labs.
 L25_TITLE = '''<section class="slide"><div class="slide-inner">
 <div class="flex-row mb2"><span class="badge badge-red">&#128308; Demo 3</span><span style="color:var(--t3);font-size:.8rem">L25 &bull; CWE-841 &bull; OWASP A07:2021</span></div>
 <h1>Session Puzzling &mdash; Take Over an Account Through Password Reset</h1>
 <p class="big mt2">&ldquo;We&rsquo;re going to log in as another customer &mdash; using nothing but the <em>Forgot password</em> page.&rdquo;</p>
-</div></section>'''
-
-L25_HOW = '''<section class="slide"><div class="slide-inner">
-<h3 class="mb2">Password Recovery Is Not One Step. It Is a Conversation.</h3>
-<p class="desc mb2">The <em>Forgot password</em> journey is built in stages. Each stage records something in your session &mdash; <strong>who</strong> you are recovering, and <strong>how far</strong> you have got.</p>
-<div class="flow mt2">
-<div class="flow-step"><strong>Step 1</strong><p class="desc mt1">Enter a Customer ID.<br/>Session notes <em>who</em> is being recovered.</p></div>
-<div class="flow-arrow">&rarr;</div>
-<div class="flow-step"><strong>Step 2</strong><p class="desc mt1">OTP verified.</p></div>
-<div class="flow-arrow">&rarr;</div>
-<div class="flow-step"><strong>Step 3</strong><p class="desc mt1">Security questions answered.<br/>Session marks progress <em>complete</em>.</p></div>
-<div class="flow-arrow">&rarr;</div>
-<div class="flow-step"><strong>Step 4</strong><p class="desc mt1">Set a new password.</p></div>
-</div>
-<div class="card yellow-left mt3"><p class="desc">The session is built up <strong style="color:var(--t1)">piece by piece</strong>. The question the attacker asks is simple: <em>what does step 4 do if I arrive holding progress that was never earned for the account I&rsquo;m now resetting?</em></p></div>
-</div></section>'''
-
-L25_ATTACK = '''<section class="slide"><div class="slide-inner">
-<h3 class="mb1">The Vulnerable Code</h3>
-<p class="desc mb2">The recovery flow tracks progress <em>separately</em> from the account being recovered &mdash; and never checks that they match.</p>
-<div class="grid2 gap2">
-<div>
-<p class="sub mb1">Level 0 &mdash; step 1 signs you straight in <span style="color:var(--t3)">(the demo)</span></p>
-<pre class="mt1"><code><span class="cm">// forgot.php — after looking up the Customer ID</span>
-<span class="var">$_SESSION</span>[<span class="str">'user'</span>] = [
-    <span class="str">'id'</span>  =&gt; <span class="var">$u</span>[<span class="str">'id'</span>],
-    <span class="str">'role'</span> =&gt; <span class="var">$u</span>[<span class="str">'role'</span>],   <span class="cm">// now logged in as them</span>
-];</code></pre>
-<div class="card red-left mt2"><p class="desc" style="font-size:.9rem">Knowing a Customer ID is enough to <strong style="color:var(--red)">become that user</strong> &mdash; no password, OTP or questions are checked first.</p></div>
-</div>
-<div>
-<p class="sub mb1">Level 1 / 2 &mdash; the reset gate <span style="color:var(--t3)">(your turn)</span></p>
-<pre class="mt1"><code><span class="cm">// Step 4 — may I open the reset form?</span>
-<span class="var">$gateOpen</span> =
-    <span class="var">$recoveryStage</span> &gt;= <span class="num">2</span>   <span class="cm">// checks done...</span>
-    &amp;&amp; <span class="var">$recoveryUid</span> &gt; <span class="num">0</span><span class="vuln-hl">;   // ...but for WHOM?</span></code></pre>
-<div class="card red-left mt2"><p class="desc" style="font-size:.9rem">The gate trusts that the checks were completed. It never checks they were completed for the <strong style="color:var(--red)">account now being reset</strong> &mdash; so progress earned for one account unlocks a reset for another.</p></div>
-</div>
-</div>
 </div></section>'''
 
 L25_MOMENT = '''<section class="slide"><div class="slide-inner center">
@@ -1257,6 +1221,34 @@ var SESSION_DATA = {
 </div>
 </div></section>'''
 
+# L25 Level-0 live demo, in the same sol-style as G1/L11 (folds the old plain
+# "Title", "How it works" and "The Vulnerable Code" slides into one). The L0
+# demo is the forgot-password step that writes $_SESSION['user'] directly.
+L25_DEMO_L0 = '''<section class="slide"><div class="slide-inner">
+<div class="sol-head"><span class="sol-tag">L25</span><div><div class="sol-cwe">CWE-841 &middot; A07:2021 &middot; Level 0 &mdash; live demo</div><h2 style="margin:.06em 0">Session Puzzling &mdash; Log In via Password Reset</h2><div class="sol-where">&#128205; /forgot-password &mdash; Customer ID box</div></div></div>
+<div class="grid2 mt2">
+<div>
+<p class="sub mb1">How recovery normally works</p>
+<p class="desc">The <em>Forgot password</em> journey runs in stages &mdash; Customer ID &rarr; OTP &rarr; security questions &rarr; new password &mdash; and each stage records progress in your session.</p>
+<p class="sub mb1 mt3">The vulnerable code</p>
+<pre class="sol-code"><span class="cmt">// forgot.php &mdash; Level 0, right after the ID lookup</span>
+$_SESSION['user'] = [
+  <span class="inj">'id'   =&gt; $u['id'],</span>    <span class="cmt">&larr; now logged in as them</span>
+  'role' =&gt; $u['role'],
+];</pre>
+<p class="desc">Step 1 writes the <b>same</b> session object a real login creates &mdash; before any password, OTP or security question is checked.</p>
+</div>
+<div>
+<p class="sub mb1">The attack</p>
+<p class="desc">On the <em>Forgot password</em> page, enter a <b>victim&rsquo;s</b> Customer ID &mdash; not your own:</p>
+<div class="sol-pay">BS100234</div>
+<div class="sol-paynote">any customer&rsquo;s ID &mdash; nothing else</div>
+<pre class="sol-code mt3">$_SESSION['user'] = { <span class="inj">id: 2, role: 'customer'</span> } <span class="cmt">&larr; the victim</span></pre>
+<p class="desc">Reload <code>/debug/session</code> and the <code>user</code> object is already populated. Open <code>/dashboard</code> &mdash; you&rsquo;re in. No password, no OTP, no questions.</p>
+</div>
+</div>
+</div></section>'''
+
 order = [
  ('orig',1,C,None),
  ('new',S_INTRO,C,None), ('new',S_WHY_HERE,C,None), ('new',S_OPENING_INCIDENT,C,None),
@@ -1283,8 +1275,8 @@ order = [
    retest='<strong style="color:var(--t1)">They didn&rsquo;t know it was there.</strong> The OTP was in the shipped JavaScript as a by-product of how the feature was built &mdash; left-over debug data, or a value the page genuinely used &mdash; and no one realised the browser was downloading a secret. They <strong>can&rsquo;t simply delete it</strong>: the page still depends on it. So instead of taking the secret off the client, they tried to <strong>hide it better</strong>. You don&rsquo;t know how &mdash; find out whether it is still reachable.'),L,'handson'),
  ('new',L11_FIX,L,None),('new',WHO_L11,L,None),
  ('new',RW_L11,L,'real'),
- # --- L25 ---
- ('new',L25_TITLE,L,None),('new',L25_HOW,L,None),('new',L25_ATTACK,L,None),
+ # --- L25 --- (head slide + L0 demo folded into one sol-style slide; plain HOW/ATTACK replaced)
+ ('new',L25_TITLE,L,None),('new',L25_DEMO_L0,L,None),
  ('new',L25_MOMENT,L,None),
  ('new',mindset_slide('L25','L25 &bull; Session puzzling',
    {'trust':'progress made for <em>one</em> account as if it had been earned for <em>whatever</em> account is in the session now','ask':'&ldquo;Is every identity check bound to the <em>exact</em> account it was performed for &mdash; and does changing the target reset that progress?&rdquo;','why':'<strong>per-target verification</strong> &mdash; progress is tied to the account that earned it, and re-checked at each sensitive action, not at one early gate'}),L,None),
@@ -1371,6 +1363,14 @@ for _item in order:
         _expanded.append(_item)
 order = _expanded
 
+# 1-based slide index of the restored L25 head slide, emitted to the viewer so a
+# one-shot migration can shift a previously-saved arrangement past the inserted
+# slide (see JS_BLOCK / migrateInsertedSlide). Identity match on the constant.
+L25_HEAD_INSERT_AT = next(
+    i for i, (typ, ref, ph, kind) in enumerate(order, start=1)
+    if typ == 'new' and ref is L25_TITLE
+)
+
 def prep2(html, num, phase, kind):
     html = re.sub(r'\s+id="s\d+"', '', html, count=1)
     attrs = ' id="s%d" data-phase="%s"' % (num, phase)
@@ -1395,6 +1395,33 @@ JS_BLOCK = r'''
   var byId = {}; all.forEach(function(s){ byId[s.id] = s; });
   var defaultOrder = all.map(function(s){ return s.id; });
   var ORDER_KEY = 'bs_ws_order_v2', HIDE_KEY = 'bs_ws_hidden_v2';
+
+  /* One-shot migration: the L25 head slide was re-inserted at position P. A
+     saved arrangement from just before that (one slide shorter) is shifted so
+     every id >= P moves up by one, and the head id (sP) is slotted in right
+     before its demo (now s(P+1)). Keeps a custom order/hidden set intact across
+     the insertion instead of the length guard discarding it. Runs once. */
+  (function migrateInsertedSlide(){
+    var MIG_KEY = 'bs_ws_mig_l25head_v1', P = __L25_HEAD_INSERT_AT__;
+    try{
+      if(localStorage.getItem(MIG_KEY)) return;
+      var shift = function(id){ var k = parseInt(id.slice(1),10); return (k>=P) ? ('s'+(k+1)) : id; };
+      var rawO = localStorage.getItem(ORDER_KEY);
+      if(rawO){
+        var o = JSON.parse(rawO);
+        if(o.length === defaultOrder.length - 1){     /* the pre-insert arrangement */
+          var no = o.map(shift);
+          var di = no.indexOf('s'+(P+1));             /* the demo's new id */
+          no.splice(di<0 ? no.length : di, 0, 's'+P); /* head goes just before it */
+          localStorage.setItem(ORDER_KEY, JSON.stringify(no));
+          var rawH = localStorage.getItem(HIDE_KEY);
+          if(rawH){ localStorage.setItem(HIDE_KEY, JSON.stringify(JSON.parse(rawH).map(shift))); }
+        }
+      }
+      localStorage.setItem(MIG_KEY, '1');
+    }catch(e){}
+  })();
+
   var progress = document.getElementById('progress');
   var counter  = document.getElementById('counter');
   var fsHint   = document.getElementById('fs-hint');
@@ -1702,6 +1729,9 @@ JS_BLOCK = r'''
 
 # Extra CSS for the hidden state
 head = head.replace('</style>', '.slide.slide-hidden{display:none!important}\n</style>')
+
+JS_BLOCK = JS_BLOCK.replace('__L25_HEAD_INSERT_AT__', str(L25_HEAD_INSERT_AT))
+assert '__L25_HEAD_INSERT_AT__' not in JS_BLOCK, 'migration placeholder not substituted'
 
 final = head + '\n<div id="deck">\n' + '\n'.join(slides_html) + '\n</div>\n' + JS_BLOCK + '\n</body>\n</html>\n'
 open(OUT,'w',encoding='utf-8').write(final)
