@@ -11,6 +11,42 @@ $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $root = __DIR__ . '/src';
 $path = $root . $uri;
 
+// Participant deck (read-only, published subset). Served here so standard users
+// or anonymous visitors can view it; the instructor publishes it from port 8888.
+// /deck            -> view the published deck
+// /deck?download=1 -> download a standalone HTML copy of the published deck
+if ($uri === '/deck') {
+    require __DIR__ . '/deck_config.php';
+    $html = @file_get_contents(deck_html_path());
+    if ($html === false) {
+        http_response_code(503);
+        echo 'The presentation is not available yet.';
+        return true;
+    }
+    $cfg      = deck_config_read();
+    $published = (isset($cfg['published']) && is_array($cfg['published']))
+        ? deck_sanitize_ids($cfg['published']['order'] ?? [])
+        : null;
+    $download = isset($_GET['download']);
+
+    $server = [
+        'mode'    => 'published',
+        'config'  => ['order' => $published],   // null when nothing published yet
+        'offline' => $download,                 // baked-in copy makes no network calls
+    ];
+    $inject = '<script>window.DECK_SERVER='
+        . json_encode($server, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        . ';</script>';
+    $html = str_replace('</head>', $inject . "\n</head>", $html);
+
+    header('Content-Type: text/html; charset=utf-8');
+    if ($download) {
+        header('Content-Disposition: attachment; filename="BankSploit_Workshop.html"');
+    }
+    echo $html;
+    return true;
+}
+
 // Dynamic JS route: otp-validation.js is served via PHP so the OTP can be
 // injected per-session (auth.l11 challenge — OTP leaked in JS file).
 if ($uri === '/public/js/otp-validation.js') {

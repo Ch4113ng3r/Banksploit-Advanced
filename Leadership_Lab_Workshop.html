@@ -215,6 +215,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 .obj4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
 @media(max-width:900px){.obj4{grid-template-columns:1fr 1fr}}
 
+#creds-note{position:fixed;top:.5rem;left:.9rem;z-index:98;font-size:.72rem;color:var(--t3);background:rgba(11,17,32,.72);border:1px solid rgba(99,102,241,.25);border-radius:7px;padding:.25rem .65rem;pointer-events:none;font-family:var(--sans);line-height:1.3;white-space:nowrap}#creds-note b{color:var(--t2);font-weight:700}
 .slide.slide-hidden{display:none!important}
 </style>
 </head>
@@ -250,6 +251,7 @@ tr:nth-child(even){background:rgba(15,23,42,.3)}
 </div>
 <!-- ===== FEEDBACK BUTTON — replace the href below with your real form/QR link ===== -->
 <a id="feedback-btn" href="https://forms.example.com/REPLACE-ME" target="_blank" rel="noopener"><span class="fb-dot"></span> Share your feedback</a>
+<div id="creds-note">&#128273; <b>Username:</b> your BRID&nbsp;&middot;&nbsp;<b>Password:</b> &lt;your BRID&gt;B4rc@123</div>
 
 <div id="deck">
 <section id="s1" data-phase="Context" class="slide">
@@ -1857,7 +1859,15 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
   var all = Array.prototype.slice.call(deck.querySelectorAll('.slide'));
   var byId = {}; all.forEach(function(s){ byId[s.id] = s; });
   var defaultOrder = all.map(function(s){ return s.id; });
-  var ORDER_KEY = 'bs_ws_order_v2', HIDE_KEY = 'bs_ws_hidden_v2';
+  var ORDER_KEY = 'bs_ws_order_v2', HIDE_KEY = 'bs_ws_hidden_v2', PART_KEY = 'bs_ws_partonly_v2';
+
+  /* Dual-portal wiring. window.DECK_SERVER is injected by the PHP that serves
+     the deck: on 8888 (instructor) it carries the saved arrangement + save/publish
+     URLs; on 9443 (participant) it carries only the published slide list. When
+     absent (deck opened as a plain file) everything falls back to localStorage. */
+  var SRV  = window.DECK_SERVER || null;
+  var MODE = (SRV && SRV.mode === 'published') ? 'published' : 'instructor';
+  var SRVCFG = (SRV && SRV.config) ? SRV.config : null;
 
   /* One-shot migration: the L25 head slide was re-inserted at position P. A
      saved arrangement from just before that (one slide shorter) is shifted so
@@ -1919,24 +1929,64 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
   var current = 0;
 
   /* ── Persisted order + hidden set ── */
+  function validFull(o){ return Array.isArray(o) && o.length === defaultOrder.length && o.every(function(id){ return byId[id]; }); }
+  function pubList(){ return (SRVCFG && Array.isArray(SRVCFG.order)) ? SRVCFG.order.filter(function(id){ return byId[id]; }) : null; }
   function loadOrder(){
+    /* Participant: published slides first (in order), the rest appended + hidden. */
+    if(MODE === 'published'){
+      var pub = pubList();
+      if(pub && pub.length){
+        var rest = defaultOrder.filter(function(id){ return pub.indexOf(id) < 0; });
+        return pub.concat(rest);
+      }
+      return defaultOrder.slice();
+    }
+    /* Instructor: prefer the saved server arrangement, then local, then default. */
+    if(SRVCFG && validFull(SRVCFG.order)) return SRVCFG.order.slice();
     try{
       var raw = localStorage.getItem(ORDER_KEY);
-      if(raw){
-        var o = JSON.parse(raw);
-        if(o.length === defaultOrder.length && o.every(function(id){ return byId[id]; })) return o;
-      }
+      if(raw){ var o = JSON.parse(raw); if(validFull(o)) return o; }
     }catch(e){}
     return defaultOrder.slice();
   }
   function loadHidden(){
+    if(MODE === 'published'){
+      var pub = pubList(), h = new Set();
+      if(pub && pub.length){ defaultOrder.forEach(function(id){ if(pub.indexOf(id) < 0) h.add(id); }); }
+      return h;
+    }
+    if(SRVCFG && Array.isArray(SRVCFG.instructorHidden)) return new Set(SRVCFG.instructorHidden.filter(function(id){ return byId[id]; }));
     try{ var raw = localStorage.getItem(HIDE_KEY); if(raw) return new Set(JSON.parse(raw)); }catch(e){}
+    return new Set();
+  }
+  function loadPartOnly(){
+    if(SRVCFG && Array.isArray(SRVCFG.participantHidden)) return new Set(SRVCFG.participantHidden.filter(function(id){ return byId[id]; }));
+    try{ var raw = localStorage.getItem(PART_KEY); if(raw) return new Set(JSON.parse(raw)); }catch(e){}
     return new Set();
   }
   var order = loadOrder();
   var hiddenSet = loadHidden();
-  function saveOrder(){ try{ localStorage.setItem(ORDER_KEY, JSON.stringify(order)); }catch(e){} }
-  function saveHidden(){ try{ localStorage.setItem(HIDE_KEY, JSON.stringify(Array.from(hiddenSet))); }catch(e){} }
+  var partOnly = loadPartOnly();   /* slides marked instructor-only (not for participants) */
+
+  /* Push the instructor's working state to the server (debounced). No-op for a
+     plain file or the participant deck. */
+  var _syncT = null;
+  function syncServer(){
+    if(!(SRV && SRV.saveUrl) || MODE !== 'instructor') return;
+    if(_syncT) clearTimeout(_syncT);
+    _syncT = setTimeout(function(){
+      try{
+        fetch(SRV.saveUrl, {method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({order:order, instructorHidden:Array.from(hiddenSet), participantHidden:Array.from(partOnly)})})
+          .then(function(r){ return r.json(); })
+          .then(function(j){ flashSaved(!!(j && j.ok)); })
+          .catch(function(){ flashSaved(false); });
+      }catch(e){}
+    }, 400);
+  }
+  function saveOrder(){ try{ localStorage.setItem(ORDER_KEY, JSON.stringify(order)); }catch(e){} syncServer(); }
+  function saveHidden(){ try{ localStorage.setItem(HIDE_KEY, JSON.stringify(Array.from(hiddenSet))); }catch(e){} syncServer(); }
+  function savePartOnly(){ try{ localStorage.setItem(PART_KEY, JSON.stringify(Array.from(partOnly))); }catch(e){} syncServer(); }
 
   function applyOrder(){
     var curId = slides[current] ? slides[current].id : order[0];
@@ -2028,6 +2078,7 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
     history.replaceState(null,null,'#'+slides[current].id);
     if(feedbackBtn) feedbackBtn.classList.toggle('show', (pos+1) >= FEEDBACK_AFTER);
     updatePhase();
+    updateNonUserBtn();
   }
   function next(){ var n = nextVisible(current+1,1); if(n>=0) goTo(n); }
   function prev(){ var n = nextVisible(current-1,-1); if(n>=0) goTo(n); }
@@ -2042,8 +2093,9 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
       case 'ArrowLeft': case 'Backspace': case 'PageUp': e.preventDefault(); prev(); break;
       case 'Home': e.preventDefault(); goTo(nextVisible(0,1)); break;
       case 'End': e.preventDefault(); goTo(nextVisible(slides.length-1,-1)); break;
-      case 'm': case 'M': e.preventDefault(); mgrOpen(); break;
+      case 'm': case 'M': if(MODE==='published') break; e.preventDefault(); mgrOpen(); break;
       case 'x': case 'X':
+        if(MODE==='published') break;
         e.preventDefault();
         hiddenSet.add(slides[current].id); saveHidden(); applyHidden();
         var v = nextVisible(current,1); if(v<0) v = nextVisible(current,-1);
@@ -2099,22 +2151,27 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
       var off = hiddenSet.has(id);
       var ln = liveNumber(id);
       var row = document.createElement('div');
-      row.className='mgr-row'+(off?' off':'')+(slides[current] && slides[current].id===id ? ' cur':'');
+      var ponly = partOnly.has(id);
+      row.className='mgr-row'+(off?' off':'')+(ponly?' instonly':'')+(slides[current] && slides[current].id===id ? ' cur':'');
       row.setAttribute('data-id', id);
       var kind = s.getAttribute('data-kind');
       var kb = kind==='handson' ? '<span class="mk mk-handson">Your Turn</span>'
              : kind==='real'    ? '<span class="mk mk-real">Real case</span>' : '';
+      var pm = ponly ? '<span class="mk mk-inst">Non-user</span>' : '';
       row.innerHTML =
         '<span class="mn">'+(ln===null?'&ndash;':ln)+'</span>'+
-        '<span class="mt">'+slideLabel(s).replace(/</g,'&lt;')+'</span>'+kb+
+        '<span class="mt">'+slideLabel(s).replace(/</g,'&lt;')+'</span>'+kb+pm+
+        '<button class="pvb'+(ponly?' on':'')+'" title="'+(ponly?'Non-user — click to include in user view':'In user view — click to mark Non-user')+'">'+(ponly?'🚫':'👥')+'</button>'+
         '<span class="mmove">'+
           '<button class="mvb" data-dir="-1" title="Move earlier"'+(pos===0?' disabled':'')+'>&#9650;</button>'+
           '<button class="mvb" data-dir="1" title="Move later"'+(pos===order.length-1?' disabled':'')+'>&#9660;</button>'+
         '</span>';
       row.addEventListener('click', function(e){
-        if(e.target.closest('.mvb')) return;
+        if(e.target.closest('.mvb,.pvb')) return;
         toggleSlide(id); renderList();
       });
+      var pvb = row.querySelector('.pvb');
+      if(pvb) pvb.addEventListener('click', function(ev){ ev.stopPropagation(); toggleParticipant(id); renderList(); });
       row.addEventListener('dblclick', function(e){
         if(e.target.closest('.mvb')) return;
         mgrClose(); goTo(order.indexOf(id));
@@ -2142,11 +2199,17 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
     if(hiddenSet.has(id)) hiddenSet.delete(id); else hiddenSet.add(id);
     saveHidden(); applyHidden();
   }
-  function updateCount(){
-    document.getElementById('mgr-count').textContent =
-      '('+(order.length-hiddenSet.size)+' shown of '+order.length+')';
+  function toggleParticipant(id){
+    if(partOnly.has(id)) partOnly.delete(id); else partOnly.add(id);
+    savePartOnly();
   }
-  window.mgrOpen = function(){ renderList(); mgr.classList.add('open'); };
+  function updateCount(){
+    var shown = order.length - hiddenSet.size;
+    var forPart = order.filter(function(id){ return !hiddenSet.has(id) && !partOnly.has(id); }).length;
+    document.getElementById('mgr-count').textContent =
+      '('+shown+' shown of '+order.length+' · '+forPart+' to participants)';
+  }
+  window.mgrOpen = function(){ if(MODE==='published') return; renderList(); mgr.classList.add('open'); };
   window.mgrClose = function(){
     mgr.classList.remove('open');
     applyHidden();
@@ -2209,6 +2272,162 @@ if (<span class="inj">$claims->role === 'admin'</span>) { &hellip; }</pre>
     if(timerInterval) clearInterval(timerInterval); timerInterval=null; timerRunning=false;
     timerWidget.classList.remove('visible');
   };
+
+  /* ── Dual-portal: mode controls, publish, preview, download, import bridge ── */
+  var savedToast=null, publishedInfo=null;
+  function flashSaved(ok){
+    if(!savedToast) return;
+    savedToast.textContent = ok ? 'Saved ✓' : 'Save failed';
+    savedToast.style.color = ok ? 'var(--green)' : 'var(--red)';
+    savedToast.classList.add('show');
+    clearTimeout(flashSaved._t);
+    flashSaved._t = setTimeout(function(){ savedToast.classList.remove('show'); }, 1400);
+  }
+  function setPublishedInfo(txt){ if(publishedInfo) publishedInfo.textContent = txt; }
+  function fmtWhen(iso){ try{ return new Date(iso).toLocaleString(); }catch(e){ return iso||''; } }
+  function updateNonUserBtn(){
+    var b=document.getElementById('nonuser-btn'); if(!b) return;
+    var id = slides[current] ? slides[current].id : null;
+    var on = !!(id && partOnly.has(id));
+    b.textContent = on ? '✓ Non-user (users won’t see this)' : '🚫 Mark as Non-user';
+    b.classList.toggle('on', on);
+  }
+
+  var previewing=false, _savedHidden=null;
+  function setPreview(on){
+    if(on===previewing) return; previewing=on;
+    if(on){ _savedHidden=new Set(hiddenSet); partOnly.forEach(function(id){ hiddenSet.add(id); }); }
+    else { if(_savedHidden) hiddenSet=_savedHidden; _savedHidden=null; }
+    applyHidden(); buildPhases();
+    if(isHidden(current)){ var v=nextVisible(current,1); if(v<0)v=nextVisible(current,-1); if(v>=0) current=v; }
+    showCurrent();
+    var pb=document.getElementById('preview-btn'); if(pb) pb.textContent = on ? '✕ Exit preview' : '👁 Preview as participant';
+    var bn=document.getElementById('preview-banner'); if(bn) bn.style.display = on ? 'block':'none';
+  }
+
+  function doPublish(){
+    if(!(SRV && SRV.publishUrl)) return;
+    if(previewing) setPreview(false);
+    if(!confirm('Publish the current participant view?\n\nParticipants on the standard portal will see exactly the slides that are shown and not marked instructor-only.')) return;
+    var btn=document.getElementById('publish-btn');
+    if(btn){ btn.disabled=true; btn.textContent='Publishing…'; }
+    fetch(SRV.publishUrl,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({order:order,instructorHidden:Array.from(hiddenSet),participantHidden:Array.from(partOnly)})})
+      .then(function(r){return r.json();})
+      .then(function(j){ if(btn){ btn.disabled=false; btn.textContent='⬆ Publish to participants'; }
+        setPublishedInfo((j&&j.ok) ? ('Published '+j.count+' slides · '+fmtWhen(j.published&&j.published.at)) : 'Publish failed'); })
+      .catch(function(){ if(btn){ btn.disabled=false; btn.textContent='⬆ Publish to participants'; } setPublishedInfo('Publish failed'); });
+  }
+
+  function exportArrangement(){
+    var data=JSON.stringify({order:order,hidden:Array.from(hiddenSet),participantHidden:Array.from(partOnly)},null,2);
+    var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+    a.download='deck-arrangement.json'; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1000);
+  }
+  function importArrangement(file){
+    var rd=new FileReader();
+    rd.onload=function(){ try{
+      var d=JSON.parse(rd.result);
+      var no=Array.isArray(d.order)?d.order.filter(function(id){return byId[id];}):null;
+      if(no&&no.length){ var rest=defaultOrder.filter(function(id){return no.indexOf(id)<0;}); order=no.concat(rest); }
+      hiddenSet=new Set((d.hidden||[]).filter(function(id){return byId[id];}));
+      partOnly=new Set((d.participantHidden||[]).filter(function(id){return byId[id];}));
+      saveOrder(); saveHidden(); savePartOnly(); applyOrder(); applyHidden(); buildPhases();
+      if(isHidden(current)){ var v=nextVisible(current,1); if(v<0)v=nextVisible(current,-1); if(v>=0) current=v; }
+      showCurrent();
+      alert('Arrangement imported ('+(order.length-hiddenSet.size)+' shown).');
+    }catch(e){ alert('Could not read that arrangement file.'); } };
+    rd.readAsText(file);
+  }
+  function injectStyle(css){ var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st); }
+
+  (function setupMode(){
+    injectStyle(
+      '.pvb{background:none;border:1px solid rgba(99,102,241,.3);color:var(--t2);border-radius:6px;cursor:pointer;font-size:.9rem;line-height:1;padding:.2rem .4rem;margin-left:.4rem}'+
+      '.pvb.on{border-color:var(--amber)}'+
+      '.mgr-row.instonly .mt{color:var(--t3)}'+
+      '.mk-inst{background:rgba(234,179,8,.16);color:var(--amber)}'+
+      '#deck-ctl{position:fixed;top:.5rem;right:.8rem;z-index:150;display:flex;flex-direction:column;align-items:flex-end;gap:.35rem}'+
+      '#deck-ctl button,#deck-ctl a{cursor:pointer;border-radius:8px;font-weight:600;font-size:.74rem;padding:.3rem .7rem;font-family:var(--sans)}'+
+      '#publish-btn{background:linear-gradient(135deg,var(--indigo),var(--sky));color:#fff;border:none;cursor:pointer;border-radius:8px;font-weight:700;font-size:.74rem;padding:.35rem .8rem;font-family:var(--sans)}'+
+      '#nonuser-btn{background:rgba(25,35,65,.78);border:1px solid rgba(99,102,241,.3);color:var(--t2)}'+
+      '#nonuser-btn.on{border-color:var(--amber);color:var(--amber);background:rgba(234,179,8,.14)}'+
+      '#preview-btn,#dl-btn{background:rgba(25,35,65,.78);border:1px solid rgba(99,102,241,.3);color:var(--t2);text-decoration:none}'+
+      '#deck-ctl .info{color:var(--t3);font-size:.68rem;max-width:16rem;text-align:right}'+
+      '#saved-toast{font-size:.68rem;opacity:0;transition:opacity .2s}#saved-toast.show{opacity:1}'+
+      '#preview-banner{position:fixed;top:0;left:0;right:0;z-index:149;display:none;text-align:center;background:var(--amber);color:#111;font-weight:700;font-size:.8rem;padding:.25rem}'+
+      '#np-overlay{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:#05060f;color:var(--t2);text-align:center;padding:2rem;font-family:var(--sans)}'
+    );
+
+    if(MODE==='published'){
+      var mb=document.getElementById('mgr-btn'); if(mb) mb.style.display='none';
+      var tw=document.getElementById('timer-widget'); if(tw) tw.remove();
+      if(!(SRV && SRV.offline)){
+        var ctlp=document.createElement('div'); ctlp.id='deck-ctl';
+        ctlp.innerHTML='<a id="dl-btn" href="/deck?download=1" download>⬇ Download slides (HTML)</a>';
+        document.body.appendChild(ctlp);
+      }
+      var pub=pubList();
+      if(!(pub && pub.length)){
+        var ov=document.createElement('div'); ov.id='np-overlay';
+        ov.innerHTML='<div><h2 style="color:var(--t1)">Not published yet</h2><p>The facilitator hasn’t published the slides for this session yet. Please check back shortly.</p></div>';
+        document.body.appendChild(ov);
+      }
+      return;
+    }
+
+    /* instructor: served portal gets the per-slide Non-user toggle + preview.
+       Publishing lives in the slide manager (one button, all at once). */
+    if(SRV){
+      var ctl=document.createElement('div'); ctl.id='deck-ctl';
+      ctl.innerHTML=
+        '<button id="nonuser-btn" title="Mark the slide you are on as Non-user: you still see it, users never will (until you hide it, it stays in your view)">🚫 Mark as Non-user</button>'+
+        '<button id="preview-btn">👁 Preview as participant</button>'+
+        '<span class="info" id="published-info"></span>'+
+        '<span id="saved-toast"></span>';
+      document.body.appendChild(ctl);
+      var bn=document.createElement('div'); bn.id='preview-banner';
+      bn.textContent='Participant preview — this is what standard users see. Click the button again to exit.';
+      document.body.appendChild(bn);
+      savedToast=document.getElementById('saved-toast');
+      publishedInfo=document.getElementById('published-info');
+      document.getElementById('nonuser-btn').addEventListener('click', function(){
+        var id = slides[current] && slides[current].id; if(!id) return;
+        toggleParticipant(id); updateNonUserBtn();
+        if(mgr.classList.contains('open')) renderList();
+      });
+      document.getElementById('preview-btn').addEventListener('click', function(){ setPreview(!previewing); });
+      var pubAt = SRVCFG && SRVCFG.published && SRVCFG.published.at;
+      setPublishedInfo(pubAt ? ('Last published: '+fmtWhen(pubAt)) : 'Not published yet');
+      updateNonUserBtn();
+    }
+
+    /* export / import arrangement (available everywhere — carries settings
+       between a plain-file deck and the server portal) */
+    var bar=document.querySelector('#slide-mgr .mgr-bar');
+    if(bar){
+      if(SRV){
+        var pub=document.createElement('button'); pub.id='publish-btn'; pub.textContent='⬆ Publish to users';
+        pub.addEventListener('click', doPublish);
+        bar.appendChild(pub);
+      }
+      var exp=document.createElement('button'); exp.className='mgr-preset'; exp.textContent='Export settings';
+      exp.addEventListener('click', exportArrangement);
+      var imp=document.createElement('button'); imp.className='mgr-preset'; imp.textContent='Import settings';
+      var fi=document.createElement('input'); fi.type='file'; fi.accept='application/json,.json'; fi.style.display='none';
+      imp.addEventListener('click', function(){ fi.click(); });
+      fi.addEventListener('change', function(){ if(fi.files && fi.files[0]) importArrangement(fi.files[0]); fi.value=''; });
+      bar.appendChild(exp); bar.appendChild(imp); bar.appendChild(fi);
+    }
+
+    /* Import bridge: server has no saved arrangement yet, but this browser holds
+       a custom one (or we have a non-empty set) -> seed the server once. */
+    if(SRV && SRV.saveUrl && !(SRVCFG && validFull(SRVCFG.order))){
+      var hasLocal=false; try{ hasLocal = validFull(JSON.parse(localStorage.getItem(ORDER_KEY)||'null')); }catch(e){}
+      if(hasLocal || hiddenSet.size || partOnly.size) syncServer();
+    }
+  })();
 
   init();
 })();

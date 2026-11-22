@@ -1,25 +1,4 @@
--- Add username column to ctf_flags table if it doesn't exist
--- This script is for databases that already have the ctf_flags table without the username column
-
--- Check if column exists before adding it
-SET @col_exists = (
-    SELECT COUNT(*)
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_NAME = 'ctf_flags'
-    AND TABLE_SCHEMA = DATABASE()
-    AND COLUMN_NAME = 'username'
-);
-
-SET @sql = IF(@col_exists = 0,
-    'ALTER TABLE ctf_flags ADD COLUMN username VARCHAR(50) NOT NULL DEFAULT "" AFTER user_id',
-    'SELECT "Column username already exists"'
-);
-
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- Populate username from users table (safe to run multiple times)
-UPDATE ctf_flags cf
-SET cf.username = (SELECT u.customer_id FROM users u WHERE u.id = cf.user_id)
-WHERE cf.username = '';
+-- migration-add-username-to-ctf-flags — superseded.
+-- The complete current dataset now lives in 01-schema.sql (structure) and
+-- 02-seed-data.sql (all rows, a full snapshot of the live database).
+-- Kept as a no-op so the load order in start-app.sh stays byte-for-byte unchanged.

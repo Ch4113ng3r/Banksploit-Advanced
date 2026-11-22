@@ -163,6 +163,12 @@ if ($path === '/logout') {
 // All other routes require auth
 SuperAdminAuth::requireAuth();
 
+// Full-page workshop deck (served raw, not inside the panel chrome)
+if ($path === '/deck') {
+    require __DIR__ . '/pages/deck.php';
+    exit;
+}
+
 // API routes (return JSON)
 $apiFile = match ($path) {
     '/api/users'            => 'api-users.php',
@@ -170,6 +176,8 @@ $apiFile = match ($path) {
     '/api/flag-reset'       => 'api-flag-reset.php',
     '/api/leaderboard'      => 'api-leaderboard.php',
     '/api/leaderboard-hide' => 'api-leaderboard-hide.php',
+    '/api/deck-save'        => 'api-deck-save.php',
+    '/api/deck-publish'     => 'api-deck-publish.php',
     default                 => null,
 };
 
